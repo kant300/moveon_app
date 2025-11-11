@@ -1,0 +1,68 @@
+// lib/member/Login.dart
+
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+
+final dio = Dio();
+
+class Login extends StatefulWidget{
+  LoginState createState()=> LoginState();
+}
+class LoginState extends State<Login> {
+
+  dynamic test = {};
+
+
+  // 로그인
+  TextEditingController midCont = TextEditingController(); // 아이디
+  TextEditingController mpwdCont = TextEditingController(); // 비밀번호
+
+  void login() async{
+    try {
+      final obj = {
+        "mid": midCont.text,
+        "mpwd": mpwdCont.text,
+      };
+      final response = await dio.post(
+        "http://localhost:8080/api/member/login", data: obj,
+        options: Options(headers: {"Content-Type": "application/json"}),
+      );
+      final data = await response.data;
+      print(data);
+      print(obj);
+      if (data != null) {
+        setState(() {
+          test = data['member'];
+        });
+          print("성공");
+      Navigator.pop(context, {
+        'mname': data['member']['mname'], // 이름 전달
+      });
+    }
+    }catch(e) { print(e) ; }
+  }
+  
+  
+  
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Scaffold(
+      appBar: AppBar( title: Text("로그인"),),
+      body: Column(
+        children: [
+          TextField( controller: midCont  ),
+          TextField( controller: mpwdCont  ),
+          Text("로그인"),
+          OutlinedButton(onPressed: login, child: Text("로그인") ),
+          OutlinedButton(onPressed: (){Navigator.pushNamed(context, "/signup"); },
+            child: Text("회원가입 페이지로 이동"),),
+          
+
+
+        ],
+      ),
+    );
+  }
+
+}

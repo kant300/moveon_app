@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:moveon_app/member/Login.dart';
+import 'package:moveon_app/member/Mypage.dart';
+import 'package:moveon_app/member/Signup.dart';
 
 void main() {
   runApp(App());
@@ -11,6 +14,10 @@ class App extends StatelessWidget {
       initialRoute: "/",
       routes: {
         "/" : (context) => Main(),
+        "/login" : (context) => Login() ,
+        "/signup" : (context) => Signup() ,
+        "/mypage" : (context) => Mypage() ,
+
       },
     );
   }
@@ -29,7 +36,9 @@ class MainState extends State<Main> {
     Center(child: Text("Community")),
     Center(child: Text("MyPage")),
   ];
-  
+
+  dynamic username;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,7 +51,20 @@ class MainState extends State<Main> {
           ),
           actions: [
             IconButton(onPressed: () {}, icon: Icon(Icons.notifications_on)),
-            IconButton(onPressed: () {}, icon: Icon(Icons.login))
+            IconButton(onPressed: () async{
+              if(username == null){
+              final result = await Navigator.pushNamed(context, "/login");
+              if ( result != null && result is Map && result['mname'] != null) {
+                setState(() {
+                  username = result['mname'];
+                });
+              }
+              } else {
+                Navigator.pushNamed(context, "/mypage");
+              }
+              }, icon: username == null ? Icon(Icons.login) : CircleAvatar( child: Text(username![0],
+    ),)
+    ),
           ],
 
           bottom: PreferredSize(
