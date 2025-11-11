@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:moveon_app/Menu.dart';
 import 'package:moveon_app/NotFound.dart';
+import 'package:moveon_app/living/TrashInfo.dart';
 
 void main() {
   runApp(App());
@@ -13,7 +14,9 @@ class App extends StatelessWidget {
       initialRoute: "/",
       routes: {
         "/" : (context) => Main(),
-        "/menu" : (context) => Menu()
+        "/menu" : (context) => Menu(),
+
+        "/living/trashInfo" : (context) => TrashInfo(),
       },
       onUnknownRoute: (settings) => MaterialPageRoute(
           builder: (context) => NotFound()
