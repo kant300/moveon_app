@@ -13,7 +13,6 @@ class FindidState extends State<Findid>{
   TextEditingController memailCont = TextEditingController();
   TextEditingController mphoneCont = TextEditingController();
 
-  dynamic midlist = '';
   void findid() async{
     try{
       final obj = {
@@ -24,9 +23,7 @@ class FindidState extends State<Findid>{
       final data = await response.data;
       print(data);
       if(data != null && data['mid'] != null){
-        setState(() {
-          midlist = "회원님의 아이디는 ${data['mid']} 입니다.";
-        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("회원님의 아이디는 : ${data['mid']} ")) , );
       }
 
 
