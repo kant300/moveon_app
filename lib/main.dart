@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:moveon_app/Menu.dart';
+import 'package:moveon_app/NotFound.dart';
+import 'package:moveon_app/living/TrashInfo.dart';
 import 'package:moveon_app/member/Login.dart';
 import 'package:moveon_app/member/Mypage.dart';
 import 'package:moveon_app/member/Signup.dart';
@@ -39,7 +42,7 @@ class Main extends StatefulWidget {
 class MainState extends State<Main> {
   int currentPage = 0;
   dynamic pages = [
-    Menu(),
+    Center(child: Text("Menu")),
     Center(child: Text("Location")),
     Center(child: Text("Home")),
     Center(child: Text("Community")),
