@@ -10,40 +10,64 @@ class Findpwd extends StatefulWidget {
 
 class FindpwdState extends State<Findpwd>{
 
+  TextEditingController midCont = TextEditingController();
   TextEditingController memailCont = TextEditingController();
-  TextEditingController mphoneCont = TextEditingController();
+  TextEditingController mcodeCont = TextEditingController();
 
+  bool mcode = false;
   dynamic midlist = '';
-  void findid() async{
+  void requestPwdAuth() async{
     try{
       final obj = {
+        "mid" : midCont.text ,
         "memail" : memailCont.text ,
-        "mphone" : mphoneCont.text ,
       };
-      final response = await dio.get("http://localhost:8080/api/member/findid" , queryParameters: obj);
+      final response = await dio.post("http://localhost:8080/api/member/requestPwdAuth" , data: obj);
       final data = await response.data;
       print(data);
-      if(data != null && data['mid'] != null){
+      if(data['success'] == true ){
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content : Text(data['message'])),// 메세지 전송 문구 출력
+        );
         setState(() {
-          midlist = "회원님의 아이디는 ${data['mid']} 입니다.";
+          mcode = true; // 기본적 false 숨기기 / true 면 화면상 보이기
         });
+
       }
 
 
-    }catch(e) { print('아이디찾기 에러 $e'); }
+    }catch(e) { print('비밀번호 찾기 에러 $e'); }
+  }
+
+  void mcodecheck() async{
+    try{
+      final obj = {
+        "mid" : midCont.text ,
+        "verifyCode" : mcodeCont.text ,
+      };
+      final response = await dio.post("http://localhost:8080/api/member/verifyPwdCode" , data: obj );
+      final data = await response.data;
+      if(data['success'] == true){
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'])),
+        );
+      }
+    }catch(e){ print("인증 실패 $e");}
   }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-      appBar: AppBar( title: Text("아이디찾기"),),
+      appBar: AppBar( title: Text("비밀번호찾기"),),
       body: Column( children: [
-        Text("아이디찾기페이지"),
+        TextField( controller: midCont , decoration: InputDecoration(labelText: "아이디"), ),
         TextField( controller: memailCont , decoration: InputDecoration(labelText: "이메일"), ),
-        TextField( controller: mphoneCont , decoration: InputDecoration(labelText: "폰"), ),
-        OutlinedButton(onPressed: findid, child: Text("아이디찾기") ),
+        OutlinedButton(onPressed: requestPwdAuth, child: Text("인증번호 발급"), ),
 
+        if(mcode)...[ // ... 조건이 참일때
+          TextField( controller: mcodeCont, decoration: InputDecoration(labelText: "인증번호 입력"), ),
+          ElevatedButton(onPressed: mcodecheck , child: Text("인증확인"), ),
+          ]
       ],),
     );
   }
