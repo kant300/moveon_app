@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:moveon_app/member/Login.dart';
 import 'package:moveon_app/member/Mypage.dart';
 import 'package:moveon_app/member/Signup.dart';
+import 'package:moveon_app/Menu.dart';
+import 'package:moveon_app/NotFound.dart';
+import 'package:moveon_app/living/TrashInfo.dart';
 
 void main() {
   runApp(App());
@@ -18,7 +21,13 @@ class App extends StatelessWidget {
         "/signup" : (context) => Signup() ,
         "/mypage" : (context) => Mypage() ,
 
+        "/menu" : (context) => Menu(),
+
+        "/living/trashInfo" : (context) => TrashInfo(),
       },
+      onUnknownRoute: (settings) => MaterialPageRoute(
+          builder: (context) => NotFound()
+      ),
     );
   }
 }
@@ -30,7 +39,7 @@ class Main extends StatefulWidget {
 class MainState extends State<Main> {
   int currentPage = 0;
   dynamic pages = [
-    Center(child: Text("Menu")),
+    Menu(),
     Center(child: Text("Location")),
     Center(child: Text("Home")),
     Center(child: Text("Community")),
@@ -103,7 +112,7 @@ class MainState extends State<Main> {
                 label: "전체메뉴"
             ),
             BottomNavigationBarItem(
-                icon: Icon(Icons.location_searching),
+                icon: Icon(Icons.my_location),
                 label: "내위치"
             ),
             BottomNavigationBarItem(
