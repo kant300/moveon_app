@@ -65,10 +65,15 @@ class LoginState extends State<Login> {
         children: [
           TextField( controller: midCont  ),
           TextField( controller: mpwdCont  ),
-          Text("로그인"),
+
+
+          TextButton(onPressed: (){ Navigator.pushNamed(context, "/findid"); } , child: Text("아이디찾기"), ),
+          TextButton(onPressed: (){ Navigator.pushNamed(context, "/findpwd"); } , child: Text("비밀번호찾기"), ),
+
           OutlinedButton(onPressed: login, child: Text("로그인") ),
-          OutlinedButton(onPressed: (){Navigator.pushNamed(context, "/signup"); },
+          TextButton(onPressed: (){Navigator.pushNamed(context, "/signup"); },
             child: Text("회원가입 페이지로 이동"),),
+
           
 
 
