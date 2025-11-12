@@ -2,6 +2,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final dio = Dio();
 
@@ -34,12 +35,23 @@ class LoginState extends State<Login> {
         setState(() {
           test = data['member'];
         });
-          print("성공");
-      Navigator.pop(context, {
-        'mname': data['member']['mname'], // 이름 전달
-      });
+
+      final localsave = await SharedPreferences.getInstance();
+      if(data['token'] != null ){
+        await localsave.setString('logintoken', data['token'] );
+        print(localsave);
+        print("토큰 저장 : ${data['token']}");
+      }
+      await localsave.setString('mname', data['member']['mname']);
+
+      print("로그인 성공");
+
+        Navigator.pop(context, {
+          'mname': data['member']['mname'], // 이름 전달
+        });
+
     }
-    }catch(e) { print(e) ; }
+    }catch(e) { print("로그인 실패 $e") ; }
   }
   
   

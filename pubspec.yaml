@@ -31,6 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^5.9.0
+  shared_preferences: ^2.2.3
+# JWT 토큰 (로컬저장소)에 저장
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
