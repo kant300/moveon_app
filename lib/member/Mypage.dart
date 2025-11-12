@@ -28,7 +28,7 @@ class MypageState extends State<Mypage> {
       print(data);
 
       if (data['Logout'] == '로그아웃성공 ') {
-        print("로그아웃 토큰 $token",);
+        print("로그아웃 토큰 :  $token");
       }
 
         // 로그인한 토큰 / 사용자 정보 삭제
@@ -40,10 +40,21 @@ class MypageState extends State<Mypage> {
       print(e);
     }
   }
-
   // 회원탈퇴
   void signout() async{
     try{
+      final localsave = await SharedPreferences.getInstance();
+      final token = localsave.getString('logintoken');
+      final response = await dio.delete("http://localhost:8080/api/member/signout" ,
+       options: Options(headers: {"Authorization": "Bearer $token",}),
+      );
+      final data = await response.data;
+      if(data == true){
+        print("회원탈퇴 : $token");
+        await localsave.clear();
+        print("정보 삭제");
+        Navigator.pushReplacementNamed(context, "/login");
+      }
 
     }catch(e) { print("로그아웃 실패 $e"); }
   }
@@ -54,8 +65,8 @@ class MypageState extends State<Mypage> {
     return Scaffold(
       appBar: AppBar( title: Text("마이페이지? 설정 "),),
       body: Column( children: [
-        TextButton(onPressed: logout , child: Text("로그아웃"), ),
-        TextButton(onPressed: signout , child: Text("회원탈퇴"), )
+        OutlinedButton(onPressed: logout , child: Text("로그아웃"), ),
+        OutlinedButton(onPressed: signout , child: Text("회원탈퇴"), )
       ],),
     );
   }

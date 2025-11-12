@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:moveon_app/Menu.dart';
 import 'package:moveon_app/NotFound.dart';
 import 'package:moveon_app/living/TrashInfo.dart';
+import 'package:moveon_app/member/Findid.dart';
 import 'package:moveon_app/member/Login.dart';
 import 'package:moveon_app/member/Mypage.dart';
 import 'package:moveon_app/member/Signup.dart';
@@ -23,6 +24,7 @@ class App extends StatelessWidget {
         "/login" : (context) => Login() ,
         "/signup" : (context) => Signup() ,
         "/mypage" : (context) => Mypage() ,
+        "/findid" : (context) => Findid() ,
 
         "/menu" : (context) => Menu(),
 
