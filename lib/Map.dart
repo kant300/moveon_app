@@ -68,7 +68,11 @@ class KakaoMapState extends State<KakaoMap> {
     
         for (var i = 0; i < markerList.length; i++) {
           (function(m) { // 클로저로 i값 고정
-            var markerPosition = new kakao.maps.LatLng(m["위도"], m["경도"]);
+            if (category == "localParking") { // 공영주차장은 데이터 형식이 다름
+              var markerPosition = new kakao.maps.LatLng(m["lat"], m["long"]);
+            } else {
+              var markerPosition = new kakao.maps.LatLng(m["위도"], m["경도"]);
+            }
             var marker = new kakao.maps.Marker({ position: markerPosition });
             marker.setMap(map);
             window.markers.push(marker);
@@ -77,29 +81,51 @@ class KakaoMapState extends State<KakaoMap> {
             kakao.maps.event.addListener(marker, 'click', function() {
               // category 에 따라 infoWindow 데이터 삽입
               if (category == "clothingBin") { // 의류수거함
-                infowindow.setContent('<div style="padding:5px;">' +
+                infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
                   m["도로명 주소"] +
                 '</div>');
               } else if (category == "government") { // 관공서
-                infowindow.setContent('<div style="padding:5px;">' + 
+                infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' + 
                   '<div>' + m["시설명"] + '</div>' +
                   '<div>' + m["주소"] + '</div>' +
                   '<div>' + m["전화번호"] + '</div>' +
                 '</div>');
               } else if (category == "night") { // 심야약국/병원
-                
+                infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' + 
+                  '<div>' + m["시설명"] + '</div>' +
+                  '<div>' + m["주소"] + '</div>' +
+                  '<div>' + m["전화번호"] + '</div>' +
+                '</div>');
               } else if (category == "shelter") { // 대피소
-                
+                infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
+                  m["시설명"] +
+                '</div>');
               } else if (category == "restroom") { // 공중화장실
-                
+                infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' + 
+                  '<div>' + m["화장실명"] + '</div>' +
+                  '<div>' + m["소재지도로명주소"] + '</div>' +
+                  '<div>관리기관: ' + m["관리기관명"] + ' ' + m["전화번호"] + '</div>' +
+                  '<div>개방시간: ' + m["개방시간상세"] + '</div>' +
+                '</div>');
               } else if (category == "subway") { // 지하철 TODO
                 
               } else if (category == "wheelchairCharger") { // 전동휠체어
-                
+                infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' + 
+                  '<div>' + m["시설명"] + '</div>' +
+                  '<div>' + m["소재지도로명주소"] + '</div>' +
+                  '<div>평일: ' + m["평일운영시작시각"] + "~" + m["평일운영종료시각"] + '</div>' +
+                  '<div>' + m["관리기관명"] + '</div>' +
+                '</div>');
               } else if (category == "localParking") { // 공영주차장
-                
+                infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
+                  m["name"] +
+                '</div>');
               } else if (category == "gas") {
-                
+                infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' + 
+                  '<div>' + m["업소명"] + '</div>' +
+                  '<div>' + m["소재지"] + '</div>' +
+                  '<div>' + m["전화번호"] + '</div>' +
+                '</div>');
               }
               infowindow.open(map, marker);
             });
