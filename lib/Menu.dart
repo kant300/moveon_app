@@ -89,6 +89,9 @@ class MenuState extends State<Menu> {
               _buildButton(Icons.local_parking, "공용주차장 위치 정보", () {
                 Navigator.pushNamed(context, "/transport/localParking");
               }),
+              _buildButton(Icons.local_gas_station, "주유소 위치 정보", () {
+                Navigator.pushNamed(context, "/transport/gas");
+              }),
               SizedBox(height: 50),
 
               Text("커뮤니티",

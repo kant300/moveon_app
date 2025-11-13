@@ -4,6 +4,7 @@ import 'package:moveon_app/NotFound.dart';
 import 'package:moveon_app/living/TrashInfo.dart';
 import 'package:moveon_app/member/Findid.dart';
 import 'package:moveon_app/member/Findpwd.dart';
+import 'package:moveon_app/Map.dart';
 import 'package:moveon_app/member/Login.dart';
 import 'package:moveon_app/Setting.dart';
 import 'package:moveon_app/member/Signup.dart';
@@ -20,6 +21,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false, // debug 배너 숨기기
       initialRoute: "/",
       routes: {
         "/" : (context) => Main(),
@@ -30,6 +32,7 @@ class App extends StatelessWidget {
         "/findpwd" : (context) => Findpwd() ,
 
         "/menu" : (context) => Menu(),
+        "/map" : (context) => KakaoMap(),
 
         "/living/trashInfo" : (context) => TrashInfo(),
       },
@@ -47,8 +50,8 @@ class Main extends StatefulWidget {
 class MainState extends State<Main> {
   int currentPage = 0;
   dynamic pages = [
-    Center(child: Text("Menu")),
-    Center(child: Text("Location")),
+    Menu(),
+    KakaoMap(),
     Center(child: Text("Home")),
     Center(child: Text("Community")),
     Center(child: Text("MyPage")),
