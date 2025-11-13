@@ -5,6 +5,7 @@ import 'package:moveon_app/member/Signup.dart';
 import 'package:moveon_app/Menu.dart';
 import 'package:moveon_app/NotFound.dart';
 import 'package:moveon_app/living/TrashInfo.dart';
+import 'package:moveon_app/screens/onboarding/onboarding_address.dart';
 
 void main() {
   runApp(App());
@@ -14,8 +15,9 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: "/",
+      initialRoute: "/onboarding", // 시작 화면 지정
       routes: {
+        "/onboarding" : (context) => OnboardingScreen0(),
         "/" : (context) => Main(),
         "/login" : (context) => Login() ,
         "/signup" : (context) => Signup() ,

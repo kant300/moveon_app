@@ -32,6 +32,7 @@ dependencies:
     sdk: flutter
   url_launcher: ^6.1.12 # 최신 버전으로 사용 권장
   dio: ^5.9.0
+  shared_preferences: ^2.2.2 # 최신 버전 사용 권장
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
