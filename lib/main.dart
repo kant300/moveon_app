@@ -5,11 +5,12 @@ import 'package:moveon_app/living/TrashInfo.dart';
 import 'package:moveon_app/member/Findid.dart';
 import 'package:moveon_app/member/Findpwd.dart';
 import 'package:moveon_app/member/Login.dart';
-import 'package:moveon_app/member/Mypage.dart';
+import 'package:moveon_app/Setting.dart';
 import 'package:moveon_app/member/Signup.dart';
 import 'package:moveon_app/Menu.dart';
 import 'package:moveon_app/NotFound.dart';
 import 'package:moveon_app/living/TrashInfo.dart';
+import 'package:moveon_app/member/Updatepwd.dart';
 
 void main() {
   runApp(App());
@@ -24,7 +25,7 @@ class App extends StatelessWidget {
         "/" : (context) => Main(),
         "/login" : (context) => Login() ,
         "/signup" : (context) => Signup() ,
-        "/mypage" : (context) => Mypage() ,
+        "/setting" : (context) => Setting() ,
         "/findid" : (context) => Findid() ,
         "/findpwd" : (context) => Findpwd() ,
 

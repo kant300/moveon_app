@@ -2,6 +2,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:moveon_app/member/Updatepwd.dart';
 
 final dio= Dio();
 class Findpwd extends StatefulWidget {
@@ -25,16 +26,21 @@ class FindpwdState extends State<Findpwd>{
       final response = await dio.post("http://localhost:8080/api/member/requestPwdAuth" , data: obj);
       final data = await response.data;
       print(data);
-      if(data['success'] == true ){
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content : Text(data['message'])),// 메세지 전송 문구 출력
+      showDialog(context: context, builder: (context) {
+        return AlertDialog(
+          content: Text(data["message"]),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), child: Text("확인"),
+            ),
+          ],
         );
+      });
+      if(data['success'] == true ){
         setState(() {
-          mcode = true; // 기본적 false 숨기기 / true 면 화면상 보이기
+          mcode = true;
         });
-
-      }
-
+      };
 
     }catch(e) { print('비밀번호 찾기 에러 $e'); }
   }
@@ -47,11 +53,27 @@ class FindpwdState extends State<Findpwd>{
       };
       final response = await dio.post("http://localhost:8080/api/member/verifyPwdCode" , data: obj );
       final data = await response.data;
-      if(data['success'] == true){
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'])),
+      print(data);
+
+      // 팝업창
+      showDialog(context: context, builder: (context) {
+        return AlertDialog(
+          content: Text(data['message']),
+          actions: [
+            TextButton(onPressed: () {
+              Navigator.pop(context);
+
+              if (data['success'] == true) { // 비밀번호 찾을때 받은 mid 정보 Updatepwd에 넘기기  왜? 누구 꺼인지 알아야 하니까
+                Navigator.push(context, MaterialPageRoute(builder: (_) => Updatepwd( mid : midCont.text),),);
+              }
+            },
+              child: Text("확인"),
+            ),
+          
+          ],
         );
-      }
-    }catch(e){ print("인증 실패 $e");}
+      });
+    }catch(e){ print(e);}
   }
 
   @override
@@ -66,8 +88,9 @@ class FindpwdState extends State<Findpwd>{
 
         if(mcode)...[ // ... 조건이 참일때
           TextField( controller: mcodeCont, decoration: InputDecoration(labelText: "인증번호 입력"), ),
-          ElevatedButton(onPressed: mcodecheck , child: Text("인증확인"), ),
+          ElevatedButton(onPressed: mcodecheck  , child: Text("인증확인"), ),
           ]
+
       ],),
     );
   }
