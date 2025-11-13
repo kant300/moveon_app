@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moveon_app/Map.dart';
 import 'package:moveon_app/member/Login.dart';
 import 'package:moveon_app/member/Mypage.dart';
 import 'package:moveon_app/member/Signup.dart';
@@ -14,6 +15,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false, // debug 배너 숨기기
       initialRoute: "/",
       routes: {
         "/" : (context) => Main(),
@@ -22,6 +24,7 @@ class App extends StatelessWidget {
         "/mypage" : (context) => Mypage() ,
 
         "/menu" : (context) => Menu(),
+        "/map" : (context) => KakaoMap(),
 
         "/living/trashInfo" : (context) => TrashInfo(),
       },
@@ -40,7 +43,7 @@ class MainState extends State<Main> {
   int currentPage = 0;
   dynamic pages = [
     Menu(),
-    Center(child: Text("Location")),
+    KakaoMap(),
     Center(child: Text("Home")),
     Center(child: Text("Community")),
     Center(child: Text("MyPage")),
