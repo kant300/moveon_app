@@ -1,4 +1,4 @@
-// lib/member/Mypage.dart
+// lib/member/Setting.dart
 
 
 import 'package:dio/dio.dart';
@@ -7,11 +7,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final dio=Dio();
 
-class Mypage extends StatefulWidget{
-  MypageState createState() => MypageState();
+class Setting extends StatefulWidget{
+  SettingState createState() => SettingState();
 }
 
-class MypageState extends State<Mypage> {
+class SettingState extends State<Setting> {
 
   // 로그아웃
   void logout() async {
