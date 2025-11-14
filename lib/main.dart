@@ -12,6 +12,8 @@ import 'package:moveon_app/member/Signup.dart';
 import 'package:moveon_app/Menu.dart';
 import 'package:moveon_app/NotFound.dart';
 import 'package:moveon_app/living/TrashInfo.dart';
+//import 'package:moveon_app/screens/onboarding/onboardingAddress.dart';
+import 'package:moveon_app/screens/onboarding/OnboardingStart.dart';
 import 'package:moveon_app/member/Updatepwd.dart';
 
 void main() {
