@@ -127,17 +127,3 @@
 // }
 
 
-Color _getCategoryColor(String id) {
-  switch (id) {
-    case 'safety':
-      return Colors.red.shade600; // 안전: 빨강
-    case 'transport':
-      return Colors.blue.shade600; // 교통: 파랑
-    case 'life':
-      return Colors.green.shade700; // 생활: 청록
-    case 'community':
-      return Colors.yellow.shade700; // 커뮤니티: 주황/노랑 계열
-    default:
-      return Colors.grey.shade500;
-  }
-}

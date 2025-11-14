@@ -101,11 +101,11 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _colorBar(const Color(0xFF3DE0D2)),   // 1단계 (완료)
+                _colorBar(const Color(0xFF3DE0D2)),   // 진한 청록 1단계 (완료)
                 const SizedBox(width: 24),
-                _colorBar(const Color(0xFF3DE0D2)),   // 2단계 (현재)
+                _colorBar(const Color(0xFF3DE0D2)),   // 연한 민트 2단계 (현재)
                 const SizedBox(width: 24),
-                _colorBar(const Color(0xFFC5F6F6)),   // 3단계 (미완료)
+                _colorBar(const Color(0xFFC5F6F6)),   // 더 연한 민트 3단계 (미완료)
               ],
             ),
             const SizedBox(height: 32),
