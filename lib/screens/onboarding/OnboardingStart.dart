@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
-import 'onboarding_address.dart'; // 다음 페이지 (OnboardingAddressScreen이 정의되어 있다고 가정)
+import 'package:moveon_app/screens/onboarding/OnboardingAddress.dart';
 
-class OnboardingIntroScreen extends StatelessWidget {
-  const OnboardingIntroScreen({super.key});
+
+// 온보딩 첫 화면 위젯 (앱 시작 시 가장 먼저 보이는 화면)
+class OnboardingStart extends StatelessWidget{
+  const OnboardingStart( {super.key});
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryColor = Color(0xFF33C9C9); // 청록색 계열
-
+    const Color primaryColor = Color(0xFF33C9C9); //  메인 테마색상 (민트/청록색)
     return Scaffold(
       body: Container(
-        color: primaryColor,
-        child: SafeArea(
+        color: primaryColor, // 전체 배경색 설정
+        child: SafeArea( // 노치/상단바 영역 침범 방지
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween, // 상단-하단 간격을 최대화
             children: [
               // 상단 로고 및 문구
               Expanded(
-                child: Center(
+                child: Center( // 중앙정렬
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center, // 세로 중앙 배치
                     children: const [
-                      Text(
+                      Text( // 앱 로고 텍스트
                         'mOveOn',
                         style: TextStyle(
-                          fontSize: 48,
+                          fontSize: 50,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -42,7 +43,7 @@ class OnboardingIntroScreen extends StatelessWidget {
                 ),
               ),
 
-              // 하단 버튼 영역
+              //하단 버튼 영역
               Padding(
                 padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 40.0),
                 // 💡 Center 대신 Row를 사용하고, MainAxisAlignment.center로 중앙 정렬합니다.
@@ -52,27 +53,27 @@ class OnboardingIntroScreen extends StatelessWidget {
                   children: [
                     // 🔹 ConstrainedBox를 사용하여 버튼의 최대 너비를 300으로 제한합니다.
                     ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 100), // 최대 너비 300 제한
+                      constraints: const BoxConstraints(maxWidth: 300), // 최대 너비 300 제한
                       child: SizedBox(
                         height: 56, // 🔹 버튼 세로 고정
                         // ConstrainedBox와 Row 안에 있는 경우, 이 버튼은 Row의 제약 조건을 받습니다.
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: primaryColor,
+                            backgroundColor: Colors.yellow, // 버튼 배경색 흰색
+                            foregroundColor: primaryColor, // 텍스트/아이콘색
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(12), // 모서리 둥글게
                             ),
                             elevation: 0, // 그림자 제거
                             // Row 내부에서 ConstrainedBox의 너비(300)를 꽉 채우도록 설정
-                            minimumSize: const Size(300, 56),
+                            minimumSize: const Size(200, 56),
                           ),
                           onPressed: () {
-                            // 클래스 이름을 OnboardingAddressScreen으로 통일했습니다.
+                            // "다음" 버튼 클릭 시 다음 페이지로 이동
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const OnboardingAddressScreen(),
+                                builder: (context) => OnboardingAddress(), // 주소 입력 페이지로 이동
                               ),
                             );
                           },
