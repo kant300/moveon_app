@@ -153,7 +153,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                     alignment: Alignment.center,
                     child: Text(
                       "선택된 항목 : $_selectedCount개",
-                      style: const TextStyle(fontSize: 20, color: Colors.grey),
+                      style: const TextStyle(fontSize: 20, color: Colors.black),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -327,7 +327,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                   Text(
                     "필수 선택항목",
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: isSelected ? selectedTextColor : Colors.red.shade600,
                     ),
