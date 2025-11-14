@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:moveon_app/screens/onboarding/OnboardingCategory.dart';
+import 'package:moveon_app/screens/onboarding/OnboardingComplete.dart';
 
-class OnboardingAddress extends StatefulWidget {
-  const OnboardingAddress({super.key});
+// 1. 위젯클래스
+class OnboardingCategory extends StatefulWidget {
+  const OnboardingCategory({super.key});
 
+  // 2. 상태클래스
   @override
-  OnboardingAddressState createState() => OnboardingAddressState();
+ State<OnboardingCategory> createState() => OnboardingCategoryState();
 }
 
-class OnboardingAddressState extends State<OnboardingAddress> {
+class OnboardingCategoryState extends State<OnboardingCategory> {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("주소 확인"),
+        title: const Text("카테고리 선택"),
       ),
       body: Center(
         child: ElevatedButton(
@@ -22,7 +24,7 @@ class OnboardingAddressState extends State<OnboardingAddress> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => OnboardingCategory(), // 카테고리선택 페이지로 이동
+                builder: (context) => OnboardingComplete(), // 설정완료 페이지로 이동
               ),
             );
           },

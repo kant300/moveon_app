@@ -12,7 +12,9 @@ import 'package:moveon_app/member/Signup.dart';
 import 'package:moveon_app/Menu.dart';
 import 'package:moveon_app/NotFound.dart';
 import 'package:moveon_app/living/TrashInfo.dart';
-//import 'package:moveon_app/screens/onboarding/onboardingAddress.dart';
+import 'package:moveon_app/screens/onboarding/OnboardingAddress.dart';
+import 'package:moveon_app/screens/onboarding/OnboardingCategory.dart';
+import 'package:moveon_app/screens/onboarding/OnboardingComplete.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingStart.dart';
 import 'package:moveon_app/member/Updatepwd.dart';
 
@@ -25,9 +27,13 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false, // debug 배너 숨기기
-      initialRoute: "/",
+      initialRoute: "/onboarding",
       routes: {
-        "/" : (context) => Main(),
+        "/onboarding" : (context) => OnboardingStart(),
+        "/onboardingStart" : (context) => OnboardingAddress(),
+        "/onboardingAddress" : (context) => OnboardingCategory(),
+        "/onboardingCategory" : (context) => OnboardingComplete(),
+        "/onboardingComplete" : (context) => Main(),
         "/login" : (context) => Login() ,
         "/signup" : (context) => Signup() ,
         "/setting" : (context) => Setting() ,
