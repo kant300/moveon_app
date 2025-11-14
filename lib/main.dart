@@ -83,7 +83,7 @@ class MainState extends State<Main> {
                 });
               }
               } else {
-                Navigator.pushNamed(context, "/mypage");
+                Navigator.pushNamed(context, "/setting");
               }
               }, icon: username == null ? Icon(Icons.login) : CircleAvatar( child: Text(username![0],
     ),)
