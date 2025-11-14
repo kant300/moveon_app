@@ -5,13 +5,9 @@ import 'package:moveon_app/living/TrashInfo.dart';
 import 'package:moveon_app/member/Findid.dart';
 import 'package:moveon_app/member/Findpwd.dart';
 import 'package:moveon_app/Map.dart';
-import 'package:moveon_app/Map.dart';
 import 'package:moveon_app/member/Login.dart';
 import 'package:moveon_app/Setting.dart';
 import 'package:moveon_app/member/Signup.dart';
-import 'package:moveon_app/Menu.dart';
-import 'package:moveon_app/NotFound.dart';
-import 'package:moveon_app/living/TrashInfo.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingAddress.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingCategory.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingComplete.dart';
@@ -27,13 +23,15 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false, // debug 배너 숨기기
-      initialRoute: "/onboarding",
+      initialRoute: "/",
       routes: {
         "/onboarding" : (context) => OnboardingStart(),
-        "/onboardingStart" : (context) => OnboardingAddress(),
-        "/onboardingAddress" : (context) => OnboardingCategory(),
-        "/onboardingCategory" : (context) => OnboardingComplete(),
-        "/onboardingComplete" : (context) => Main(),
+        "/onboardingStart" : (context) => OnboardingStart(),
+        "/onboardingAddress" : (context) => OnboardingAddress(),
+        "/onboardingCategory" : (context) => OnboardingCategory(),
+        "/onboardingComplete" : (context) => OnboardingComplete(),
+
+        "/" : (context) => Main(),
         "/login" : (context) => Login() ,
         "/signup" : (context) => Signup() ,
         "/setting" : (context) => Setting() ,
@@ -89,7 +87,7 @@ class MainState extends State<Main> {
                 });
               }
               } else {
-                Navigator.pushNamed(context, "/mypage");
+                Navigator.pushNamed(context, "/setting");
               }
               }, icon: username == null ? Icon(Icons.login) : CircleAvatar( child: Text(username![0],
     ),)
