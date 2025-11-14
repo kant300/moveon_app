@@ -75,8 +75,12 @@ class KakaoMapState extends State<KakaoMap> {
             } else {
               var markerPosition = new kakao.maps.LatLng(m["위도"], m["경도"]);
             }
-            var marker = new kakao.maps.Marker({ position: markerPosition });
-            markers.push(marker);
+            
+            // 마커 이미지의 이미지 주소입니다
+            var imageSrc = '/icons/marker.png';
+            // 마커 이미지의 이미지 크기 입니다
+            var imageSize = new kakao.maps.Size(25, 34);
+            // var imageOption = {offset: new kakao.maps.Point(32, 9)}; // 마커이미지의 옵션입니다. 마커의 좌표와 일치시킬 이미지 안에서의 좌표를 설정합니다.
             
             // ✅ 마커 클릭 시 인포윈도우 열기
             kakao.maps.event.addListener(marker, 'click', function() {
@@ -114,6 +118,7 @@ class KakaoMapState extends State<KakaoMap> {
                   '<div>' + m["호기"] + '호 ' + m["장비"] + '</div>' +
                   '<div>' + m["상태"] + '</div>' +
                 '</div>');
+                imageSrc = obj.status=="수리중"?'/icons/marker_red.png':'/icons/marker.png';
               } else if (category == "subwaySchedule") { // 지하철/배차
                 window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
                   '<div><strong>' + m["역사명"] + '역 배차 정보</strong></div>' +
@@ -132,6 +137,7 @@ class KakaoMapState extends State<KakaoMap> {
                       )
                   ) +
                 '</div>');
+                imageSrc = '/icons/marker_station.png';
               } else if (category == "wheelchairCharger") { // 전동휠체어
                 window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' + 
                   '<div>' + m["시설명"] + '</div>' +
@@ -150,6 +156,16 @@ class KakaoMapState extends State<KakaoMap> {
                   '<div>' + m["전화번호"] + '</div>' +
                 '</div>');
               }
+              // 마커 이미지를 생성합니다    
+              var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize); 
+              
+              // 마커 생성
+              var marker = new kakao.maps.Marker({
+                position: markerPosition,
+                image: markerImage
+              });
+              
+              markers.push(marker);
               window.infowindow.open(map, marker);
             });
           })(markerList[i]);
