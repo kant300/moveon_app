@@ -5,13 +5,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-void main() {
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: KakaoMap(),
-  ));
-}
-
 class KakaoMap extends StatefulWidget {
   const KakaoMap({super.key});
 
@@ -306,8 +299,10 @@ class KakaoMapState extends State<KakaoMap> {
             data[i]["time_first_2"] = formatArrival(nextTimes[0]);
             data[i]["time_second_2"] = formatArrival(nextTimes[1]);
           } else {
-            data[i]["time1"] = 0;
-            data[i]["time2"] = 0;
+            data[i]["time_first_1"] = 0;
+            data[i]["time_second_1"] = 0;
+            data[i]["time_first_2"] = 0;
+            data[i]["time_second_2"] = 0;
           }
         }
       }
@@ -316,7 +311,8 @@ class KakaoMapState extends State<KakaoMap> {
       if (category == "clothingBin") {
         data = data["data"];
       }
-      print( data );
+      // 최종 데이터 확인
+      // print( data );
 
       //final data = response.data;
       final jsData = jsonEncode(data);
@@ -331,7 +327,7 @@ class KakaoMapState extends State<KakaoMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('동인천역 주변 지도')),
+      appBar: AppBar(title: const Center(child: Text('통합 지도'),)),
       body: Stack(
         children: [
           WebViewWidget(controller: _controller),
@@ -364,50 +360,60 @@ class KakaoMapState extends State<KakaoMap> {
             child: Column(
               children: [
                 FloatingActionButton.small(
+                  heroTag: "clothingBin",
                   onPressed: () async => { await _fetchAndShowMarkers("clothingBin") },
                   child: Text("의류수거함"),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
+                  heroTag: "government",
                   onPressed: () async => { await _fetchAndShowMarkers("government") },
                   child: Text("관공서"),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
+                  heroTag: "night",
                   onPressed: () async => { await _fetchAndShowMarkers("night") },
                   child: Text("약국/병원"),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
+                  heroTag: "shelter",
                   onPressed: () async => { await _fetchAndShowMarkers("shelter") },
                   child: Text("대피소"),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
+                  heroTag: "restroom",
                   onPressed: () async => { await _fetchAndShowMarkers("restroom") },
                   child: Text("공중화장실"),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
+                  heroTag: "subwayLift",
                   onPressed: () async => { await _fetchAndShowMarkers("subwayLift") },
                   child: Text("지하철/승강기"),
                 ),
                 FloatingActionButton.small(
+                  heroTag: "subwaySchedule",
                   onPressed: () async => { await _fetchAndShowMarkers("subwaySchedule") },
                   child: Text("지하철/배차"),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
+                  heroTag: "wheelchairCharger",
                   onPressed: () async => { await _fetchAndShowMarkers("wheelchairCharger") },
                   child: Text("전동휠체어"),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
+                  heroTag: "localParking",
                   onPressed: () async => { await _fetchAndShowMarkers("localParking") },
                   child: Text("공영주차장"),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
+                  heroTag: "gas",
                   onPressed: () async => { await _fetchAndShowMarkers("gas") },
                   child: Text("주유소"),
                 ),
