@@ -16,7 +16,7 @@ class OnboardingCategory extends StatefulWidget {
 
   // 2. 상태클래스
   @override
- State<OnboardingCategory> createState() => OnboardingCategoryState();
+  State<OnboardingCategory> createState() => OnboardingCategoryState();
 }
 
 class OnboardingCategoryState extends State<OnboardingCategory> {
@@ -56,17 +56,13 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
   Color _getCategoryColor(String id) {
     switch (id) {
       case 'safety':
-      // 옵션 1: 강렬한 레드
-        return const Color(0xFFDC3545);
+        return Colors.red.shade600; // 안전: 빨강
       case 'transport':
-      // 옵션 1: 선명한 블루
-        return const Color(0xFF007BFF);
+        return Colors.blue.shade600; // 교통: 파랑
       case 'life':
-      // 옵션 1: 활기찬 그린
-        return const Color(0xFF28A745);
+        return const Color(0xFF3DE0D2); // 생활: 청록
       case 'community':
-      // 옵션 1: 밝은 앰버 옐로우
-        return const Color(0xFFFFC107);
+        return Colors.orange.shade700; // 커뮤니티: 주황/노랑 계열
       default:
         return Colors.grey.shade500;
     }
@@ -75,17 +71,6 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
   // 5. Build 메서드
   @override
   Widget build(BuildContext context) {
-    // 화면 너비를 가져와 카드 크기를 계산합니다.
-    final double screenWidth = MediaQuery.of(context).size.width;
-    // 전체 패딩 24 * 2 = 48
-    // 카드 사이 여백 20
-    // 카드 두 개가 차지하는 너비 = (screenWidth - 48 - 20) / 2
-    final double calculatedCardWidth = (screenWidth - (24 * 2) - 20) / 2;
-
-    // 🌟 카드 높이 조정: cardHorizontalSpace를 기준으로 약간 더 높게 설정 🌟
-    // 예시: 가로 길이의 1.2배 정도로 설정하여 세로로 살짝 길게 만듭니다.
-    final double calculatedCardHeight = calculatedCardWidth * 1.2;
-
     return Scaffold(
       appBar: AppBar(
         // AppBar의 기본 그림자 제거 (이미지와 일치시키기 위해)
@@ -129,35 +114,37 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
             const SizedBox(height: 40),
 
             // --- 3. Category Cards (2x2 Layout) ---
-            Column(
+            Expanded(
+              child: Column(
                 children: [
                   // 1행: 안전, 교통
-                  Row(
-                      children: [// 🌟 계산된 지역 변수를 인수로 전달 🌟
-                        _buildCategoryCard(_categories[0], calculatedCardWidth, calculatedCardHeight),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        _buildCategoryCard(_categories[0]), // 안전
                         const SizedBox(width: 20),
-                        _buildCategoryCard(_categories[1], calculatedCardWidth, calculatedCardHeight),
+                        _buildCategoryCard(_categories[1]), // 교통
                       ],
+                    ),
                   ),
-
                   const SizedBox(height: 20),
                   // 2행: 생활, 커뮤니티
-                  Row(
+                  Expanded(
+                    child: Row(
                       children: [
-                        _buildCategoryCard(_categories[2], calculatedCardWidth, calculatedCardHeight),
+                        _buildCategoryCard(_categories[2]), // 생활
                         const SizedBox(width: 20),
-                        _buildCategoryCard(_categories[3], calculatedCardWidth, calculatedCardHeight),
+                        _buildCategoryCard(_categories[3]), // 커뮤니티
                       ],
+                    ),
                   ),
-
                 ],
+              ),
             ),
-            // 🌟 Spacer를 사용하여 아래쪽 요소들을 하단으로 밀어냅니다. 🌟
-            const Spacer(),
 
             // --- 4. Bottom Selection Count and Buttons ---
             Padding(
-              padding: const EdgeInsets.only(bottom: 50, top: 20),
+              padding: const EdgeInsets.only(bottom: 24, top: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -183,9 +170,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                             minimumSize: const Size(double.infinity, 50),
                             side: const BorderSide(color: Colors.grey),
                           ),
-                          child: const Text("이전", style: TextStyle(
-                              color: Colors.grey, fontSize: 20, ),
-                          ),
+                          child: const Text("이전", style: TextStyle(color: Colors.grey)),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -194,22 +179,22 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                         child: ElevatedButton(
                           onPressed: _selectedCount > 0
                               ? () {
-                                  // "다음" 버튼 클릭 시 다음 페이지로 이동
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const OnboardingComplete(), // 설정완료 페이지로 이동
-                                    ),
-                                  );
-                              }
-                          : null, // 선택된 항목이 없으면 버튼 비활성화
+                            // "다음" 버튼 클릭 시 다음 페이지로 이동
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const OnboardingComplete(), // 설정완료 페이지로 이동
+                              ),
+                            );
+                          }
+                              : null, // 선택된 항목이 없으면 버튼 비활성화
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size(double.infinity, 50),
                             backgroundColor: _selectedCount > 0 ? const Color(0xFF3DE0D2) : Colors.grey.shade300,
                             foregroundColor: Colors.white,
                             elevation: 0,
                           ),
-                          child: const Text("다음", style: TextStyle(fontSize: 20 ),),
+                          child: const Text("다음"),
                         ),
                       ),
                     ],
@@ -241,121 +226,119 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
   }
 
   // Category Card 위젯
-  Widget _buildCategoryCard(CategoryItem item, double cardWidth, double cardHeight) {
+  Widget _buildCategoryCard(CategoryItem item) {
     final bool isSelected = _categorySelections[item.id] ?? false;
 
 
 
-  // 선택 여부에 따른 배경색 및 글자색 설정
-  final Color selectedBgColor = _getCategoryColor(item.id);
-  final Color selectedTextColor = Colors.white;
-  final Color unselectedBgColor = Colors.white;
-  final Color unselectedTextColor = Colors.black;
+    // 선택 여부에 따른 배경색 및 글자색 설정
+    final Color selectedBgColor = _getCategoryColor(item.id);
+    final Color selectedTextColor = Colors.white;
+    final Color unselectedBgColor = Colors.white;
+    final Color unselectedTextColor = Colors.black;
 
-  final Color backgroundColor = isSelected ? selectedBgColor : unselectedBgColor;
-  final Color titleColor = isSelected ? selectedTextColor : unselectedTextColor;
-  final Color subtitleColor = isSelected ? selectedTextColor.withOpacity(0.7) : Colors.grey.shade600;
+    final Color backgroundColor = isSelected ? selectedBgColor : unselectedBgColor;
+    final Color titleColor = isSelected ? selectedTextColor : unselectedTextColor;
+    final Color subtitleColor = isSelected ? selectedTextColor.withOpacity(0.7) : Colors.grey.shade600;
 
-  return SizedBox(
-    width: cardWidth,
-    height: cardHeight, // 🌟 인수로 받은 cardHeight 적용 🌟
-    child: InkWell(
-      onTap: () => _toggleSelection(item.id),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? selectedBgColor : Colors.grey.shade300,
-            width: 2,
+    return Expanded(
+      child: InkWell(
+        onTap: () => _toggleSelection(item.id),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected ? selectedBgColor : Colors.grey.shade300,
+              width: 2,
+            ),
+            boxShadow: isSelected ? [
+              BoxShadow(
+                color: selectedBgColor.withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
+            ] : null,
           ),
-          boxShadow: isSelected ? [
-            BoxShadow(
-              color: selectedBgColor.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            )
-          ] : null,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // 아이콘 및 체크마크
-            Stack(
-              children: [
-                // 아이콘 (임시 아이콘 사용)
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: isSelected ? Colors.white.withOpacity(0.2) : Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    _getIcon(item.id), // 카테고리별 아이콘 가져오기
-                    color: isSelected ? Colors.white : Colors.black,
-                    size: 28,
-                  ),
-                ),
-                // 선택/필수 체크마크
-                if (isSelected)
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: isSelected ? Colors.white : selectedBgColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.check, // 필수는 닫기 대신 체크로 변경 (이미지 반영)
-                        color: item.isRequired ? Colors.red.shade600 : selectedBgColor,
-                        size: 16,
-                      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // 아이콘 및 체크마크
+              Stack(
+                children: [
+                  // 아이콘 (임시 아이콘 사용)
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.white.withOpacity(0.2) : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      _getIcon(item.id), // 카테고리별 아이콘 가져오기
+                      color: isSelected ? Colors.white : Colors.black,
+                      size: 28,
                     ),
                   ),
-              ],
-            ),
+                  // 선택/필수 체크마크
+                  if (isSelected)
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.white : selectedBgColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          item.isRequired ? Icons.close : Icons.check, // 필수는 닫기 대신 체크로 변경 (이미지 반영)
+                          color: item.isRequired ? Colors.red.shade600 : selectedBgColor,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
 
-            // 제목 및 부제목
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: titleColor,
-                  ),
-                ),
-                Text(
-                  item.subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: subtitleColor,
-                  ),
-                ),
-                if (item.isRequired)
+              // 제목 및 부제목
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    "필수 선택항목",
+                    item.title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: titleColor,
+                    ),
+                  ),
+                  Text(
+                    item.subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? selectedTextColor : Colors.red.shade600,
+                      color: subtitleColor,
                     ),
                   ),
-              ],
-            ),
-          ],
+                  if (item.isRequired)
+                    Text(
+                      "필수 선택항목",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? selectedTextColor : Colors.red.shade600,
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
   }
 
   // 카테고리 ID에 따른 적절한 아이콘을 반환하는 헬퍼 함수
