@@ -5,6 +5,7 @@ import 'package:moveon_app/living/TrashInfo.dart';
 import 'package:moveon_app/member/Findid.dart';
 import 'package:moveon_app/member/Findpwd.dart';
 import 'package:moveon_app/Map.dart';
+import 'package:moveon_app/Map.dart';
 import 'package:moveon_app/member/Login.dart';
 import 'package:moveon_app/Setting.dart';
 import 'package:moveon_app/member/Signup.dart';
