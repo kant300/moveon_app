@@ -8,7 +8,9 @@ import 'package:moveon_app/Map.dart';
 import 'package:moveon_app/member/Login.dart';
 import 'package:moveon_app/Setting.dart';
 import 'package:moveon_app/member/Signup.dart';
-//import 'package:moveon_app/screens/onboarding/onboardingAddress.dart';
+import 'package:moveon_app/screens/onboarding/OnboardingAddress.dart';
+import 'package:moveon_app/screens/onboarding/OnboardingCategory.dart';
+import 'package:moveon_app/screens/onboarding/OnboardingComplete.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingStart.dart';
 import 'package:moveon_app/member/Updatepwd.dart';
 
@@ -23,6 +25,12 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false, // debug 배너 숨기기
       initialRoute: "/",
       routes: {
+        "/onboarding" : (context) => OnboardingStart(),
+        "/onboardingStart" : (context) => OnboardingStart(),
+        "/onboardingAddress" : (context) => OnboardingAddress(),
+        "/onboardingCategory" : (context) => OnboardingCategory(),
+        "/onboardingComplete" : (context) => OnboardingComplete(),
+
         "/" : (context) => Main(),
         "/login" : (context) => Login() ,
         "/signup" : (context) => Signup() ,
