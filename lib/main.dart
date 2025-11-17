@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moveon_app/Checklist.dart';
 import 'package:moveon_app/Home.dart';
 import 'package:moveon_app/Menu.dart';
 import 'package:moveon_app/NotFound.dart';
@@ -42,6 +43,8 @@ class App extends StatelessWidget {
         "/menu" : (context) => Menu(),
         "/map" : (context) => KakaoMap(),
         "/home" : (context) => Home(),
+
+        "/checklist" : (context) => Checklist(),
 
         "/living/trashInfo" : (context) => TrashInfo(),
       },

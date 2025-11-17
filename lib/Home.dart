@@ -132,10 +132,12 @@ class HomeState extends State<Home> {
                       ),
                       margin: EdgeInsets.all(10),
                       height: 60,
-                      child: Center(child: Text(
-                        "경찰서\n도보$policeStation분",
-                        textAlign: TextAlign.center,
-                      )),
+                      child: Center(
+                        child: Text(
+                          "경찰서\n도보$policeStation분",
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ),
                   ),
                   Expanded(
@@ -146,10 +148,12 @@ class HomeState extends State<Home> {
                       ),
                       margin: EdgeInsets.all(10),
                       height: 60,
-                      child: Center(child: Text(
-                        "소방서\n도보$fireDepartment분",
-                        textAlign: TextAlign.center,
-                      )),
+                      child: Center(
+                        child: Text(
+                          "소방서\n도보$fireDepartment분",
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ),
                   ),
                   Expanded(
@@ -160,13 +164,32 @@ class HomeState extends State<Home> {
                       ),
                       margin: EdgeInsets.all(10),
                       height: 60,
-                      child: Center(child: Text(
-                        "주민센터\n도보$serviceCenter분",
-                        textAlign: TextAlign.center,
-                      )),
+                      child: Center(
+                        child: Text(
+                          "주민센터\n도보$serviceCenter분",
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ),
                   ),
                 ],
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              margin: EdgeInsets.all(10),
+              width: 350,
+              height: 60,
+              child: Center(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/checklist");
+                  },
+                  child: Text("정착지수 페이지로"),
+                ),
               ),
             ),
           ],
