@@ -37,7 +37,9 @@ class HomeState extends State<Home> {
     }
 
     // 현재 위치 구하기
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
     setState(() {
       latitude = position.latitude;
       longitude = position.longitude;
@@ -66,24 +68,29 @@ class HomeState extends State<Home> {
       // 현재 위치 데이터가 있는지 확인
       if (latitude != 0.0 && longitude != 0.0) {
         // 분류 코드로 통신하여 데이터 가져오기
-        final response = await Dio().get("http://192.168.40.28:8080/living/data?code=$code");
+        final response = await Dio().get(
+          "http://192.168.40.28:8080/living/data?code=$code",
+        );
         final data = response.data;
-         print(data);
+        // print(data);
 
         // 현재 위치 기준으로 가장 가까운 거리 데이터 찾기 (미터 단위)
         double minDistance = double.infinity;
         dynamic nearest = {};
         for (var point in data) {
           double dist = Geolocator.distanceBetween(
-              latitude, longitude, double.parse(point['위도']!), double.parse(point['경도']!)
+            latitude,
+            longitude,
+            double.parse(point['위도']!),
+            double.parse(point['경도']!),
           );
           if (dist < minDistance) {
             minDistance = dist;
             nearest = point;
           }
         }
-         print("minDistance: $minDistance");
-         print("nearest: $nearest");
+        // print("minDistance: $minDistance");
+        // print("nearest: $nearest");
 
         // 이동 시간을 구해서 반환하기 (도보 기준)
         double walkingSpeed = 1.4; // m/s
@@ -112,27 +119,59 @@ class HomeState extends State<Home> {
         child: Column(
           children: [
             Text("가장 가까운 공공시설 거리"),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(40),
+            Padding(
+              padding: EdgeInsetsGeometry.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      margin: EdgeInsets.all(10),
+                      height: 60,
+                      child: Center(child: Text(
+                        "경찰서\n도보$policeStation분",
+                        textAlign: TextAlign.center,
+                      )),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      margin: EdgeInsets.all(10),
+                      height: 60,
+                      child: Center(child: Text(
+                        "소방서\n도보$fireDepartment분",
+                        textAlign: TextAlign.center,
+                      )),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      margin: EdgeInsets.all(10),
+                      height: 60,
+                      child: Center(child: Text(
+                        "주민센터\n도보$serviceCenter분",
+                        textAlign: TextAlign.center,
+                      )),
+                    ),
+                  ),
+                ],
               ),
-              child: Text("경찰서 : 도보$policeStation분"),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(40),
-              ),
-              child: Text("소방서 : 도보$fireDepartment분"),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(40),
-              ),
-              child: Text("주민센터 : 도보$serviceCenter분"),
             ),
           ],
         ),
-      )
+      ),
     );
   }
 }
