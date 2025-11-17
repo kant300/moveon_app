@@ -2,7 +2,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:moveon_app/member/Updatepwd.dart';
+import 'package:moveon_app/member/RequestPwdAuth.dart';
 
 final dio= Dio();
 class Findpwd extends StatefulWidget {
@@ -64,7 +64,7 @@ class FindpwdState extends State<Findpwd>{
               Navigator.pop(context);
 
               if (data['success'] == true) { // 비밀번호 찾을때 받은 mid 정보 Updatepwd에 넘기기  왜? 누구 꺼인지 알아야 하니까
-                Navigator.push(context, MaterialPageRoute(builder: (_) => Updatepwd( mid : midCont.text),),);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => RequestPwdAuth( mid : midCont.text),),);
               }
             },
               child: Text("확인"),

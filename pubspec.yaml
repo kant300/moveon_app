@@ -34,6 +34,7 @@ dependencies:
   dio: ^5.9.0
   webview_flutter: ^4.2.2
   geolocator: ^12.0.0
+  geocoding: ^3.0.0
   permission_handler: ^11.0.1
   shared_preferences: ^2.2.3
 # JWT 토큰 (로컬저장소)에 저장

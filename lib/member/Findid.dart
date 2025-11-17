@@ -19,7 +19,7 @@ class FindidState extends State<Findid>{
         "memail" : memailCont.text ,
         "mphone" : mphoneCont.text ,
       };
-      final response = await dio.get("http://localhost:8080/api/member/findid" , queryParameters: obj);
+      final response = await dio.get("http://10.164.103.46:8080/api/member/findid" , queryParameters: obj);
       final data = await response.data;
       print(data);
       if(data != null && data['mid'] != null){

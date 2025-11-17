@@ -25,7 +25,7 @@ class LoginState extends State<Login> {
         "mpwd": mpwdCont.text,
       };
       final response = await dio.post(
-        "http://localhost:8080/api/member/login", data: obj,
+        "http://10.164.103.46:8080/api/member/login", data: obj,
         options: Options(headers: {"Content-Type": "application/json"}),
       );
       final data = await response.data;

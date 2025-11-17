@@ -18,7 +18,7 @@ class SettingState extends State<Setting> {
     final loginho = await SharedPreferences.getInstance();
     final token = await loginho.getString("logintoken");
     try{
-      final response = await dio.get("http://localhost:8080/api/member/info" ,
+      final response = await dio.get("http://10.164.103.46:8080/api/member/info" ,
       options: Options(headers: { "Authorization" : "Bearer $token" ,}),
       );
       final data = await response.data;
@@ -86,8 +86,8 @@ class SettingState extends State<Setting> {
         OutlinedButton(onPressed: logout , child: Text("로그아웃"), ),
         OutlinedButton(onPressed: signout , child: Text("회원탈퇴"), ),
         Text(" 계정 관리"),
-        TextButton(onPressed: (){}, child: Text("프로필 수정"), ),
-        TextButton(onPressed: passwordupdate , child: Text("비밀번호 변경"), ),
+        TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/profile");},  child: Text("프로필 수정"), ),
+        TextButton(onPressed: () { Navigator.pushReplacementNamed(context, "/updatepwd");} , child: Text("비밀번호 변경"), ),
         TextButton(onPressed: (){}, child: Text("개인정보 관리"), ),
       ],),
     );

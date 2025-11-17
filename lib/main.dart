@@ -7,12 +7,13 @@ import 'package:moveon_app/member/Findpwd.dart';
 import 'package:moveon_app/Map.dart';
 import 'package:moveon_app/member/Login.dart';
 import 'package:moveon_app/Setting.dart';
+import 'package:moveon_app/member/Profile.dart';
 import 'package:moveon_app/member/Signup.dart';
+import 'package:moveon_app/member/Updatepwd.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingAddress.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingCategory.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingComplete.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingStart.dart';
-import 'package:moveon_app/member/Updatepwd.dart';
 
 void main() {
   runApp(App());
@@ -23,7 +24,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false, // debug 배너 숨기기
-      initialRoute: "/",
+      initialRoute: "/onboarding",
       routes: {
         "/onboarding" : (context) => OnboardingStart(),
         "/onboardingStart" : (context) => OnboardingStart(),
@@ -31,12 +32,15 @@ class App extends StatelessWidget {
         "/onboardingCategory" : (context) => OnboardingCategory(),
         "/onboardingComplete" : (context) => OnboardingComplete(),
 
+
         "/" : (context) => Main(),
         "/login" : (context) => Login() ,
         "/signup" : (context) => Signup() ,
         "/setting" : (context) => Setting() ,
         "/findid" : (context) => Findid() ,
         "/findpwd" : (context) => Findpwd() ,
+        "/updatepwd" : (context) => Updatepwd() ,
+        "/profile" : (context) => Profile() ,
 
         "/menu" : (context) => Menu(),
         "/map" : (context) => KakaoMap(),
