@@ -13,6 +13,19 @@ class Setting extends StatefulWidget{
 
 class SettingState extends State<Setting> {
 
+  // 로그인 정보 넘겨주기
+  void loginsave() async{
+    final loginho = await SharedPreferences.getInstance();
+    final token = await loginho.getString("logintoken");
+    try{
+      final response = await dio.get("http://localhost:8080/api/member/info" ,
+      options: Options(headers: { "Authorization" : "Bearer $token" ,}),
+      );
+      final data = await response.data;
+      print(data);
+    }catch(e) { print(e); }
+  }
+
   // 로그아웃
   void logout() async {
     try {
@@ -58,15 +71,24 @@ class SettingState extends State<Setting> {
 
     }catch(e) { print("로그아웃 실패 $e"); }
   }
+
+  void passwordupdate() async{
+    try{
+    }catch(e) { print(e); }
+  }
   
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-      appBar: AppBar( title: Text("마이페이지? 설정 "),),
+      appBar: AppBar( title: Text(" 설정 "),),
       body: Column( children: [
         OutlinedButton(onPressed: logout , child: Text("로그아웃"), ),
-        OutlinedButton(onPressed: signout , child: Text("회원탈퇴"), )
+        OutlinedButton(onPressed: signout , child: Text("회원탈퇴"), ),
+        Text(" 계정 관리"),
+        TextButton(onPressed: (){}, child: Text("프로필 수정"), ),
+        TextButton(onPressed: passwordupdate , child: Text("비밀번호 변경"), ),
+        TextButton(onPressed: (){}, child: Text("개인정보 관리"), ),
       ],),
     );
   }
