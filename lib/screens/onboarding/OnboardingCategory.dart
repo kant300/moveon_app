@@ -152,6 +152,18 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
 
                 ],
             ),
+            const SizedBox(height: 20),
+            Text(
+              "선택한 카테고리의 주요 서비스가 즐겨찾기에 자동 추가됩니다.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey, // 흰색에 투명도 적용
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 24), // 다음 요소와의 간격 조정
+
             // 🌟 Spacer를 사용하여 아래쪽 요소들을 하단으로 밀어냅니다. 🌟
             const Spacer(),
 
@@ -182,6 +194,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                           style: OutlinedButton.styleFrom(
                             minimumSize: const Size(double.infinity, 50),
                             side: const BorderSide(color: Colors.grey),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           child: const Text("이전", style: TextStyle(
                               color: Colors.grey, fontSize: 20, ),
@@ -208,6 +221,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                             backgroundColor: _selectedCount > 0 ? const Color(0xFF3DE0D2) : Colors.grey.shade300,
                             foregroundColor: Colors.white,
                             elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           child: const Text("다음", style: TextStyle(fontSize: 20 ),),
                         ),
