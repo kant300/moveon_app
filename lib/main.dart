@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moveon_app/Home.dart';
 import 'package:moveon_app/Menu.dart';
 import 'package:moveon_app/NotFound.dart';
 import 'package:moveon_app/living/TrashInfo.dart';
@@ -40,6 +41,7 @@ class App extends StatelessWidget {
 
         "/menu" : (context) => Menu(),
         "/map" : (context) => KakaoMap(),
+        "/home" : (context) => Home(),
 
         "/living/trashInfo" : (context) => TrashInfo(),
       },
@@ -59,7 +61,7 @@ class MainState extends State<Main> {
   dynamic pages = [
     Menu(),
     KakaoMap(),
-    Center(child: Text("Home")),
+    Home(),
     Center(child: Text("Community")),
     Center(child: Text("MyPage")),
   ];

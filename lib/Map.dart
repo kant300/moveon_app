@@ -261,7 +261,6 @@ class KakaoMapState extends State<KakaoMap> {
       }
       final response = await Dio().get(url);
       data = response.data;
-      print(data);
 
       // 지하철/배차는 배차 시각 정보를 추가해야 함
       if (category == "subwaySchedule") {
