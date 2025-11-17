@@ -36,6 +36,7 @@ class App extends StatelessWidget {
 
 
         "/" : (context) => Main(),
+        //"/totalMenu" : (context) => Total(),
         "/login" : (context) => Login() ,
         "/signup" : (context) => Signup() ,
         "/setting" : (context) => Setting() ,

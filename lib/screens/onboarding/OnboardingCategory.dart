@@ -56,13 +56,17 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
   Color _getCategoryColor(String id) {
     switch (id) {
       case 'safety':
-        return Colors.red.shade600; // 안전: 빨강
+      // 옵션 1: 강렬한 레드
+        return const Color(0xFFDC3545);
       case 'transport':
-        return Colors.blue.shade600; // 교통: 파랑
+      // 옵션 1: 선명한 블루
+        return const Color(0xFF007BFF);
       case 'life':
-        return const Color(0xFF3DE0D2); // 생활: 청록
+      // 옵션 1: 활기찬 그린
+        return const Color(0xFF28A745);
       case 'community':
-        return Colors.orange.shade700; // 커뮤니티: 주황/노랑 계열
+      // 옵션 1: 밝은 앰버 옐로우
+        return const Color(0xFFFFC107);
       default:
         return Colors.grey.shade500;
     }
@@ -71,6 +75,17 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
   // 5. Build 메서드
   @override
   Widget build(BuildContext context) {
+    // 화면 너비를 가져와 카드 크기를 계산합니다.
+    final double screenWidth = MediaQuery.of(context).size.width;
+    // 전체 패딩 24 * 2 = 48
+    // 카드 사이 여백 20
+    // 카드 두 개가 차지하는 너비 = (screenWidth - 48 - 20) / 2
+    final double calculatedCardWidth = (screenWidth - (24 * 2) - 20) / 2;
+
+    // 🌟 카드 높이 조정: cardHorizontalSpace를 기준으로 약간 더 높게 설정 🌟
+    // 예시: 가로 길이의 1.2배 정도로 설정하여 세로로 살짝 길게 만듭니다.
+    final double calculatedCardHeight = calculatedCardWidth * 1.2;
+
     return Scaffold(
       appBar: AppBar(
         // AppBar의 기본 그림자 제거 (이미지와 일치시키기 위해)
@@ -86,11 +101,11 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _colorBar(const Color(0xFF3DE0D2)),   // 1단계 (완료)
+                _colorBar(const Color(0xFF3DE0D2)),   // 진한 청록 1단계 (완료)
                 const SizedBox(width: 24),
-                _colorBar(const Color(0xFF3DE0D2)),   // 2단계 (현재)
+                _colorBar(const Color(0xFF3DE0D2)),   // 연한 민트 2단계 (현재)
                 const SizedBox(width: 24),
-                _colorBar(const Color(0xFFC5F6F6)),   // 3단계 (미완료)
+                _colorBar(const Color(0xFFC5F6F6)),   // 더 연한 민트 3단계 (미완료)
               ],
             ),
             const SizedBox(height: 32),
@@ -114,37 +129,47 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
             const SizedBox(height: 40),
 
             // --- 3. Category Cards (2x2 Layout) ---
-            Expanded(
-              child: Column(
+            Column(
                 children: [
                   // 1행: 안전, 교통
-                  Expanded(
-                    child: Row(
-                      children: [
-                        _buildCategoryCard(_categories[0]), // 안전
+                  Row(
+                      children: [// 🌟 계산된 지역 변수를 인수로 전달 🌟
+                        _buildCategoryCard(_categories[0], calculatedCardWidth, calculatedCardHeight),
                         const SizedBox(width: 20),
-                        _buildCategoryCard(_categories[1]), // 교통
+                        _buildCategoryCard(_categories[1], calculatedCardWidth, calculatedCardHeight),
                       ],
-                    ),
                   ),
+
                   const SizedBox(height: 20),
                   // 2행: 생활, 커뮤니티
-                  Expanded(
-                    child: Row(
+                  Row(
                       children: [
-                        _buildCategoryCard(_categories[2]), // 생활
+                        _buildCategoryCard(_categories[2], calculatedCardWidth, calculatedCardHeight),
                         const SizedBox(width: 20),
-                        _buildCategoryCard(_categories[3]), // 커뮤니티
+                        _buildCategoryCard(_categories[3], calculatedCardWidth, calculatedCardHeight),
                       ],
-                    ),
                   ),
+
                 ],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              "선택한 카테고리의 주요 서비스가 즐겨찾기에 자동 추가됩니다.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey, // 흰색에 투명도 적용
+                fontWeight: FontWeight.w500,
               ),
             ),
+            const SizedBox(height: 24), // 다음 요소와의 간격 조정
+
+            // 🌟 Spacer를 사용하여 아래쪽 요소들을 하단으로 밀어냅니다. 🌟
+            const Spacer(),
 
             // --- 4. Bottom Selection Count and Buttons ---
             Padding(
-              padding: const EdgeInsets.only(bottom: 24, top: 16),
+              padding: const EdgeInsets.only(bottom: 50, top: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -153,7 +178,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                     alignment: Alignment.center,
                     child: Text(
                       "선택된 항목 : $_selectedCount개",
-                      style: const TextStyle(fontSize: 20, color: Colors.grey),
+                      style: const TextStyle(fontSize: 20, color: Colors.black),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -169,8 +194,11 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                           style: OutlinedButton.styleFrom(
                             minimumSize: const Size(double.infinity, 50),
                             side: const BorderSide(color: Colors.grey),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: const Text("이전", style: TextStyle(color: Colors.grey)),
+                          child: const Text("이전", style: TextStyle(
+                              color: Colors.grey, fontSize: 20, ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -193,8 +221,9 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                             backgroundColor: _selectedCount > 0 ? const Color(0xFF3DE0D2) : Colors.grey.shade300,
                             foregroundColor: Colors.white,
                             elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: const Text("다음"),
+                          child: const Text("다음", style: TextStyle(fontSize: 20 ),),
                         ),
                       ),
                     ],
@@ -226,7 +255,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
   }
 
   // Category Card 위젯
-  Widget _buildCategoryCard(CategoryItem item) {
+  Widget _buildCategoryCard(CategoryItem item, double cardWidth, double cardHeight) {
     final bool isSelected = _categorySelections[item.id] ?? false;
 
 
@@ -241,7 +270,9 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
   final Color titleColor = isSelected ? selectedTextColor : unselectedTextColor;
   final Color subtitleColor = isSelected ? selectedTextColor.withOpacity(0.7) : Colors.grey.shade600;
 
-  return Expanded(
+  return SizedBox(
+    width: cardWidth,
+    height: cardHeight, // 🌟 인수로 받은 cardHeight 적용 🌟
     child: InkWell(
       onTap: () => _toggleSelection(item.id),
       borderRadius: BorderRadius.circular(16),
@@ -295,7 +326,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        item.isRequired ? Icons.close : Icons.check, // 필수는 닫기 대신 체크로 변경 (이미지 반영)
+                        Icons.check, // 필수는 닫기 대신 체크로 변경 (이미지 반영)
                         color: item.isRequired ? Colors.red.shade600 : selectedBgColor,
                         size: 16,
                       ),
@@ -327,7 +358,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                   Text(
                     "필수 선택항목",
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: isSelected ? selectedTextColor : Colors.red.shade600,
                     ),

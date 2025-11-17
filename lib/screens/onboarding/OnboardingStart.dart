@@ -122,8 +122,7 @@ class StateOnboardingStart extends State<OnboardingStart>{
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.yellow, // 버튼 배경색 흰색
                             foregroundColor: primaryColor, // 텍스트/아이콘색
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12), // 모서리 둥글게
+                            shape: RoundedRectangleBorder( borderRadius: BorderRadius.circular(12), // 모서리 둥글게
                             ),
                             elevation: 0, // 그림자 제거
                             // Row 내부에서 ConstrainedBox의 너비(300)를 꽉 채우도록 설정
