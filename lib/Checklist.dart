@@ -99,7 +99,7 @@ class ChecklistCard extends StatelessWidget {
     return Container(
       width: 330,
       height: 100,
-      margin: EdgeInsets.symmetric(vertical: 15),
+      margin: EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
