@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 class Checklist extends StatefulWidget {
+  @override
   ChecklistState createState() => ChecklistState();
 }
 
 class ChecklistState extends State<Checklist> {
   bool isChecked_1_1 = false;
+  bool isChecked_1_2 = false;
 
   @override
   Widget build(BuildContext context) {
@@ -29,24 +31,14 @@ class ChecklistState extends State<Checklist> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        "1. 정착 3일차",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 24),
-                      ),
+                      Text("1. 정착 3일차", style: TextStyle(fontSize: 24)),
                       SizedBox(height: 8),
                       Text(
-                        isChecked_1_1 == true
-                            ? "■"
-                            : "□"
-                                  "□",
-                        style: TextStyle(fontSize: 28),
-                      ),
+                          (isChecked_1_1 ? "■" : "□") +
+                          (isChecked_1_2 ? "■" : "□"),
+                          style: TextStyle(fontSize: 28)),
                       SizedBox(height: 12),
-                      Text(
-                        "정착할 때 필요한 과정들을 정리해놨어요",
-                        style: TextStyle(fontSize: 16),
-                      ),
+                      Text("정착할 때 필요한 과정들을 정리해놨어요", style: TextStyle(fontSize: 16)),
                     ],
                   ),
                 ),
@@ -59,90 +51,84 @@ class ChecklistState extends State<Checklist> {
               width: double.infinity,
               color: Color(0xFFADE7FF),
               child: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.all(5),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 330,
-                        height: 130,
-                        margin: EdgeInsets.symmetric(vertical: 15),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(left: 12),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("주민센터 전입신고"),
-                                  Checkbox(
-                                    value: isChecked_1_1,
-                                    onChanged: (bool? value) {
-                                      setState(() {
-                                        isChecked_1_1 = value!;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(left: 12),
-                              child: Text(
-                                "신분증을 꼭 지참해주세요",
-                                style: TextStyle(fontSize: 13),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              child: Text("전입신고 페이지로 이동하기 >"),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        width: 330,
-                        height: 130,
-                        margin: EdgeInsets.symmetric(vertical: 15),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(left: 12),
-                              child: Text("쓰레기 배출방법 확인"),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(left: 12),
-                              child: Text(
-                                "분리수거 요일이 언제인지 확인해보세요",
-                                style: TextStyle(fontSize: 13),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              child: Text("쓰레기 배출정보 페이지로 이동하기 >"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                padding: EdgeInsets.all(5),
+                child: Column(
+                  children: [
+                    ChecklistCard(
+                      title: "주민센터 전입신고",
+                      subtitle: "신분증을 꼭 지참해주세요",
+                      buttonText: "전입신고 페이지로 이동하기 >",
+                      checkboxValue: isChecked_1_1,
+                      onCheckboxChanged: (value) => setState(() => isChecked_1_1 = value),
+                    ),
+                    ChecklistCard(
+                      title: "쓰레기 배출방법 확인",
+                      subtitle: "분리수거 요일이 언제인지 확인해보세요",
+                      buttonText: "쓰레기 배출정보 페이지로 이동하기 >",
+                      checkboxValue: isChecked_1_2,
+                      onCheckboxChanged: (value) => setState(() => isChecked_1_2 = value),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ChecklistCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String buttonText;
+  final bool? checkboxValue;
+  final ValueChanged<bool>? onCheckboxChanged;
+
+  const ChecklistCard({
+    required this.title,
+    required this.subtitle,
+    required this.buttonText,
+    this.checkboxValue,
+    this.onCheckboxChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 330,
+      height: 100,
+      margin: EdgeInsets.symmetric(vertical: 15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(left: 12, right: 12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(title),
+                if (checkboxValue != null && onCheckboxChanged != null)
+                  Checkbox(
+                    value: checkboxValue,
+                    onChanged: (val) {
+                      if (val != null) onCheckboxChanged?.call(val);
+                    },
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+              ],
+            ),
+            Text(subtitle, style: TextStyle(fontSize: 13)),
+            TextButton(onPressed: () {}, child: Text(buttonText)),
+          ],
+        ),
       ),
     );
   }
