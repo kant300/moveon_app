@@ -6,13 +6,22 @@ class Checklist extends StatefulWidget {
 }
 
 class ChecklistState extends State<Checklist> {
-  // 체크리스트의 체크박스 상태, 화면 상태
+  // 체크리스트의 체크박스, 화면 상태
   List<List<bool>> isChecked = [
     [false, false, false, false, false, false, false],
     [false, false, false, false, false],
     [false, false, false, false, false],
   ];
   int checklistType = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is List<List<bool>>) {
+      isChecked = args;
+    }
+  }
 
   // 화면 상태 변경 (체크리스트 개수 변동 시 clamp 의 값 수정)
   void updateChecklistType(int type) {
@@ -31,7 +40,13 @@ class ChecklistState extends State<Checklist> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: BackButton(), title: Text("정착 Check-list")),
+      appBar: AppBar(
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context, isChecked);
+            },
+            icon: Icon(Icons.arrow_back)),
+        title: Text("정착 Check-list")),
       body: Column(
         children: [
           Expanded(

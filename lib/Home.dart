@@ -12,6 +12,11 @@ class HomeState extends State<Home> {
   int serviceCenter = 0;
   int policeStation = 0;
   int fireDepartment = 0;
+  List<List<bool>> checklistStatus = [
+    [false, false, false, false, false, false, false],
+    [false, false, false, false, false],
+    [false, false, false, false, false],
+  ];
 
   // geolocator 로 현재 위치 구하기
   void getCurrentLatLng() async {
@@ -182,13 +187,34 @@ class HomeState extends State<Home> {
               ),
               margin: EdgeInsets.all(10),
               width: 350,
-              height: 60,
+              height: 150,
               child: Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/checklist");
-                  },
-                  child: Text("정착지수 페이지로"),
+                child: Column(
+                  children: [
+                    Text("정착 Check-list 진행사항",
+                      style: TextStyle(fontSize: 16),),
+                    Text(
+                      ("3일차: ${checklistStatus[0].map((e) => e ? "■" : "□").join()}"),
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    Text(
+                      ("3주차: ${checklistStatus[1].map((e) => e ? "■" : "□").join()}"),
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    Text(
+                      ("3개월차: ${checklistStatus[2].map((e) => e ? "■" : "□").join()}"),
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        dynamic result = await Navigator.pushNamed(context, "/checklist", arguments: checklistStatus);
+                        setState(() {
+                          checklistStatus = result;
+                        });
+                      },
+                      child: Text("정착지수 페이지로"),
+                    ),
+                  ],
                 ),
               ),
             ),
