@@ -52,7 +52,7 @@ class App extends StatelessWidget {
         "/mypage" : (context) => MyPage(),
 
         "/checklist" : (context) => Checklist(),
-        "/checklistPersonal" : (context) => Checklist(), // TODO
+        "/checklistPersonal" : (context) => ChecklistPersonal(),
 
         "/living/trashInfo" : (context) => TrashInfo(),
       },

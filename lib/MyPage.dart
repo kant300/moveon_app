@@ -33,7 +33,7 @@ class MyPageState extends State<MyPage> {
                       onPressed: () async {
                         dynamic result = await Navigator.pushNamed(
                           context,
-                          "/checklist", // TODO
+                          "/checklistPersonal",
                           arguments: checklistStatus,
                         );
                         setState(() {

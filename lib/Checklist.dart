@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// 정착 체크리스트
 class Checklist extends StatefulWidget {
   @override
   ChecklistState createState() => ChecklistState();
@@ -250,6 +251,20 @@ class ChecklistContent extends StatelessWidget {
           onCheckboxChanged: (value) => onCheckChanged(index, value),
         );
       }),
+    );
+  }
+}
+
+// 개인 체크리스트
+class ChecklistPersonal extends StatefulWidget {
+  ChecklistPersonalState createState() => ChecklistPersonalState();
+}
+
+class ChecklistPersonalState extends State<ChecklistPersonal> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Text("test"),
     );
   }
 }
