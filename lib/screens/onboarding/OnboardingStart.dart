@@ -95,56 +95,17 @@ class StateOnboardingStart extends State<OnboardingStart>{
                       TextField( controller: midCont  ),
                       TextField( controller: mpwdCont  ),
 
-                      TextButton(onPressed: (){ Navigator.pushNamedAndRemoveUntil(context, "/", (route) => (false) );} , child: Text("로그인"),),
+                      OutlinedButton(onPressed: login, child: Text("로그인") ),
                       TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findid"); } , child: Text("아이디찾기"), ),
                       TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findpwd"); } , child: Text("비밀번호찾기"), ),
                       TextButton(onPressed: (){Navigator.pushReplacementNamed(context, "/signup"); }, child: Text("회원가입 페이지로 이동"),),
+                      TextButton(onPressed: (){Navigator.push(context, MaterialPageRoute(builder: (context) =>  OnboardingAddress(),
+                      ),
+                      );
+                        }, child: Text("Guest"),),
+
                     ],
                   ),
-                ),
-              ),
-
-              //하단 버튼 영역
-              Padding(
-                padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 40.0),
-                // 💡 Center 대신 Row를 사용하고, MainAxisAlignment.center로 중앙 정렬합니다.
-                // Row는 자식에게 필요한 만큼만 너비를 할당하므로, ConstrainedBox의 제약이 명확하게 적용됩니다.
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // 🔹 ConstrainedBox를 사용하여 버튼의 최대 너비를 300으로 제한합니다.
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 300), // 최대 너비 300 제한
-                      child: SizedBox(
-                        height: 56, // 🔹 버튼 세로 고정
-                        // ConstrainedBox와 Row 안에 있는 경우, 이 버튼은 Row의 제약 조건을 받습니다.
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.yellow, // 버튼 배경색 흰색
-                            foregroundColor: primaryColor, // 텍스트/아이콘색
-                            shape: RoundedRectangleBorder( borderRadius: BorderRadius.circular(12), // 모서리 둥글게
-                            ),
-                            elevation: 0, // 그림자 제거
-                            // Row 내부에서 ConstrainedBox의 너비(300)를 꽉 채우도록 설정
-                            minimumSize: const Size(200, 56),
-                          ),
-                          onPressed: () {
-                            // "다음" 버튼 클릭 시 다음 페이지로 이동
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => OnboardingAddress(), // 주소 입력 페이지로 이동
-                              ),
-                            );
-                          },
-                          child: const Text(
-                              '다음',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ],
