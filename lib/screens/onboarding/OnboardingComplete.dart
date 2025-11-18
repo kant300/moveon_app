@@ -204,7 +204,7 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
                       },
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 50),
-                        backgroundColor: _textColor, // 흰색 배경
+                        backgroundColor: Colors.yellow, // 흰색 배경
                         foregroundColor: _mainTealColor, // 청록색 텍스트
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
