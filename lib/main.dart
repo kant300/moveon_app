@@ -16,6 +16,7 @@ import 'package:moveon_app/screens/onboarding/OnboardingAddress.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingCategory.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingComplete.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingStart.dart';
+import 'package:moveon_app/safety/ambulance/Ambulance.dart';
 
 void main() {
   runApp(App());
@@ -35,8 +36,7 @@ class App extends StatelessWidget {
         "/onboardingComplete" : (context) => OnboardingComplete(),
 
 
-        "/" : (context) => Main(),
-        //"/totalMenu" : (context) => Total(),
+        "/" : (context) => Home(),
         "/login" : (context) => Login() ,
         "/signup" : (context) => Signup() ,
         "/setting" : (context) => Setting() ,
@@ -46,6 +46,8 @@ class App extends StatelessWidget {
         "/profile" : (context) => Profile() ,
 
         "/menu" : (context) => Menu(),
+
+        "/safety/ambulance" : (context) => Ambulance(),
         "/map" : (context) => KakaoMap(),
         "/home" : (context) => Home(),
 
