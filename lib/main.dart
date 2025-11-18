@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:moveon_app/Checklist.dart';
 import 'package:moveon_app/Home.dart';
 import 'package:moveon_app/Menu.dart';
+import 'package:moveon_app/MyPage.dart';
 import 'package:moveon_app/NotFound.dart';
 import 'package:moveon_app/living/TrashInfo.dart';
 import 'package:moveon_app/member/Findid.dart';
@@ -50,8 +51,10 @@ class App extends StatelessWidget {
         "/safety/ambulance" : (context) => Ambulance(),
         "/map" : (context) => KakaoMap(),
         "/home" : (context) => Home(),
+        "/mypage" : (context) => MyPage(),
 
         "/checklist" : (context) => Checklist(),
+        "/checklistPersonal" : (context) => ChecklistPersonal(),
 
         "/living/trashInfo" : (context) => TrashInfo(),
       },
@@ -73,7 +76,7 @@ class MainState extends State<Main> {
     KakaoMap(),
     Home(),
     Center(child: Text("Community")),
-    Center(child: Text("MyPage")),
+    MyPage()
   ];
 
   dynamic username;

@@ -1,18 +1,53 @@
 import 'package:flutter/material.dart';
 
+// 정착 체크리스트
 class Checklist extends StatefulWidget {
   @override
   ChecklistState createState() => ChecklistState();
 }
 
 class ChecklistState extends State<Checklist> {
-  bool isChecked_1_1 = false;
-  bool isChecked_1_2 = false;
+  // 체크리스트의 체크박스, 화면 상태
+  List<List<bool>> isChecked = [
+    [false, false, false, false, false, false, false],
+    [false, false, false, false, false],
+    [false, false, false, false, false],
+  ];
+  int checklistType = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is List<List<bool>>) {
+      isChecked = args;
+    }
+  }
+
+  // 화면 상태 변경 (체크리스트 개수 변동 시 clamp 의 값 수정)
+  void updateChecklistType(int type) {
+    setState(() {
+      checklistType = type.clamp(0, 2);
+    });
+  }
+
+  // 체크박스 상태 변경
+  void updateCheckValue(int group, int index, bool value) {
+    setState(() {
+      isChecked[group][index] = value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: BackButton(), title: Text("정착 Check-list")),
+      appBar: AppBar(
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context, isChecked);
+            },
+            icon: Icon(Icons.arrow_back)),
+        title: Text("정착 Check-list")),
       body: Column(
         children: [
           Expanded(
@@ -28,18 +63,10 @@ class ChecklistState extends State<Checklist> {
                     color: Color(0xFFC8EFFF),
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("1. 정착 3일차", style: TextStyle(fontSize: 24)),
-                      SizedBox(height: 8),
-                      Text(
-                          (isChecked_1_1 ? "■" : "□") +
-                          (isChecked_1_2 ? "■" : "□"),
-                          style: TextStyle(fontSize: 28)),
-                      SizedBox(height: 12),
-                      Text("정착할 때 필요한 과정들을 정리해놨어요", style: TextStyle(fontSize: 16)),
-                    ],
+                  child: ChecklistTitle(
+                    checklistType: checklistType,
+                    checkValues: isChecked[checklistType],
+                    onTypeChanged: updateChecklistType,
                   ),
                 ),
               ),
@@ -52,29 +79,192 @@ class ChecklistState extends State<Checklist> {
               color: Color(0xFFADE7FF),
               child: SingleChildScrollView(
                 padding: EdgeInsets.all(5),
-                child: Column(
-                  children: [
-                    ChecklistCard(
-                      title: "주민센터 전입신고",
-                      subtitle: "신분증을 꼭 지참해주세요",
-                      buttonText: "전입신고 페이지로 이동하기 >",
-                      checkboxValue: isChecked_1_1,
-                      onCheckboxChanged: (value) => setState(() => isChecked_1_1 = value),
-                    ),
-                    ChecklistCard(
-                      title: "쓰레기 배출방법 확인",
-                      subtitle: "분리수거 요일이 언제인지 확인해보세요",
-                      buttonText: "쓰레기 배출정보 페이지로 이동하기 >",
-                      checkboxValue: isChecked_1_2,
-                      onCheckboxChanged: (value) => setState(() => isChecked_1_2 = value),
-                    ),
-                  ],
+                child: ChecklistContent(
+                  checklistType: checklistType,
+                  checkValues: isChecked[checklistType],
+                  onCheckChanged: (index, value) =>
+                      updateCheckValue(checklistType, index, value),
                 ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class ChecklistTitle extends StatelessWidget {
+  final int checklistType;
+  final List<bool> checkValues;
+  final ValueChanged<int> onTypeChanged;
+
+  const ChecklistTitle({
+    required this.checklistType,
+    required this.checkValues,
+    required this.onTypeChanged,
+  });
+
+  static const titles = ["정착 3일차", "정착 3주차", "정착 3개월차"];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "${checklistType + 1}. ${titles[checklistType]}",
+              style: TextStyle(fontSize: 24),
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: Icon(Icons.arrow_back_ios),
+              onPressed: checklistType > 0
+                  ? () => onTypeChanged(checklistType - 1)
+                  : null,
+            ),
+            Text(
+              checkValues.map((e) => e ? "■" : "□").join(),
+              style: TextStyle(fontSize: 28),
+            ),
+            IconButton(
+              icon: Icon(Icons.arrow_forward_ios),
+              onPressed: checklistType < 2
+                  ? () => onTypeChanged(checklistType + 1)
+                  : null,
+            ),
+          ],
+        ),
+        SizedBox(height: 12),
+        Text("정착할 때 필요한 과정들을 정리해놨어요", style: TextStyle(fontSize: 16)),
+      ],
+    );
+  }
+}
+
+class ChecklistContent extends StatelessWidget {
+  final int checklistType;
+  final List<bool> checkValues;
+  final Function(int index, bool value) onCheckChanged;
+
+  const ChecklistContent({
+    required this.checklistType,
+    required this.checkValues,
+    required this.onCheckChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final titles = checklistType == 0
+        ? [
+            "주민센터 전입신고",
+            "쓰레기 배출방법 확인",
+            "근처 편의점 찾기",
+            "가까운 병원 위치 파악하기",
+            "대중교통 노선 확인",
+            "주변 반찬 가게 찾기",
+            "야채 가게, 정육점 찾기",
+          ]
+        : checklistType == 1
+        ? [
+            "지역 커뮤니티 가입",
+            "주민센터 프로그램 확인",
+            "도서관 이용 등록",
+            "공원 산책 루트 파악",
+            "지역 SNS 팔로우",
+          ]
+        : checklistType == 2
+        ? ["지역 이벤트 참여하기", "봉사활동 참여하기", "소모임 가입하기", "단골가게 만들기", "동네 친구 사귀기"]
+        : [];
+
+    final subtitles = checklistType == 0
+        ? [
+            "신분증을 꼭 지참해주세요",
+            "분리수거 요일이 언제인지 확인해보세요",
+            "근처에 있는 편의점의 위치를 확인해보세요",
+            "근처에 있는 응급실이나 약국의 위치도 확인해보세요",
+            "주변에 있는 대중교통의 노선표를 확인해보세요",
+            "맛있는 반찬을 파는 가게들의 위치를 살펴보세요",
+            "식재료들을 구할 수 있는 가게들의 위치입니다",
+          ]
+        : checklistType == 1
+        ? [
+            "동네 소식을 확인할 수 있어요",
+            "취미로 즐길 수 있는 문화 활동들을 확인해보세요",
+            "동네 맛집들을 살펴보고 방문해보세요",
+            "머리 손질이 필요할 때 방문해보세요",
+            "이웃 분들과 인사하며 관계를 키워보세요",
+          ]
+        : checklistType == 2
+        ? [
+            "커뮤니티 페이지로 이동하기 >",
+            "문화 프로그램 확인하러 가기 >",
+            "맛집 위치 확인하러 가기 >",
+            "미용실 위치 확인하러 가기 >",
+            "커뮤니티로 이동하기 >",
+          ]
+        : [];
+
+    final buttonTexts = checklistType == 0
+        ? [
+            "전입신고 페이지로 이동하기 >",
+            "쓰레기 배출정보 페이지로 이동하기 >",
+            "편의점 위치 확인하러 가기 >",
+            "병원 위치 파악하러 가기 >",
+            "노선표 확인하러 가기 >",
+            "반찬 가게 위치 찾기 >",
+            "야채 가게, 정육점 위치 찾기 >",
+          ]
+        : checklistType == 1
+        ? [
+            "커뮤니티 페이지로 이동하기 >",
+            "문화 프로그램 확인하러 가기 >",
+            "맛집 위치 확인하러 가기 >",
+            "미용실 위치 확인하러 가기 >",
+            "커뮤니티로 이동하기 >",
+          ]
+        : checklistType == 2
+        ? [
+            "축제행사 페이지로 가기 >",
+            "봉사활동 정보 확인하러 가기 >",
+            "소모임 커뮤니티로 이동하기 >",
+            "가게 찾으러 가기 >",
+            "커뮤니티로 친구 사귀러 가기 >",
+          ]
+        : [];
+
+    return Column(
+      children: List.generate(checkValues.length, (index) {
+        return ChecklistCard(
+          title: titles[index],
+          subtitle: subtitles[index],
+          buttonText: buttonTexts[index],
+          checkboxValue: checkValues[index],
+          onCheckboxChanged: (value) => onCheckChanged(index, value),
+        );
+      }),
+    );
+  }
+}
+
+// 개인 체크리스트
+class ChecklistPersonal extends StatefulWidget {
+  ChecklistPersonalState createState() => ChecklistPersonalState();
+}
+
+class ChecklistPersonalState extends State<ChecklistPersonal> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Text("test"),
     );
   }
 }
