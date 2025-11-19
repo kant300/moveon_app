@@ -43,11 +43,13 @@ class ChecklistState extends State<Checklist> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context, isChecked);
-            },
-            icon: Icon(Icons.arrow_back)),
-        title: Text("정착 Check-list")),
+          onPressed: () {
+            Navigator.pop(context, isChecked);
+          },
+          icon: Icon(Icons.arrow_back),
+        ),
+        title: Text("정착 Check-list"),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -94,6 +96,7 @@ class ChecklistState extends State<Checklist> {
   }
 }
 
+// 정착 체크리스트의 상단 내용
 class ChecklistTitle extends StatelessWidget {
   final int checklistType;
   final List<bool> checkValues;
@@ -150,6 +153,7 @@ class ChecklistTitle extends StatelessWidget {
   }
 }
 
+// 정착 체크리스트의 하단 내용
 class ChecklistContent extends StatelessWidget {
   final int checklistType;
   final List<bool> checkValues;
@@ -260,28 +264,195 @@ class ChecklistPersonal extends StatefulWidget {
   ChecklistPersonalState createState() => ChecklistPersonalState();
 }
 
+// 개인 체크리스트의 데이터 모델
+class ChecklistItem {
+  String title;
+  String subtitle;
+  bool isChecked;
+
+  ChecklistItem({
+    required this.title,
+    required this.subtitle,
+    this.isChecked = false,
+  });
+}
+
 class ChecklistPersonalState extends State<ChecklistPersonal> {
+  // 체크리스트의 체크박스, 화면 상태
+  List<bool> isChecked = [false];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is List<bool>) {
+      isChecked = args;
+    }
+  }
+
+  // 체크박스 상태 변경
+  void updateCheckValue(int index, bool value) {
+    setState(() {
+      isChecked[index] = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Text("test"),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context, isChecked);
+          },
+          icon: Icon(Icons.arrow_back),
+        ),
+        title: Text("개인 Check-list"),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            flex: 1,
+            child: Container(
+              width: double.infinity,
+              color: Color(0xFFEAEAEA),
+              child: Center(
+                child: Container(
+                  width: 350,
+                  height: 240,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFC8EFFF),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("개인 Check-list", style: TextStyle(fontSize: 24)),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            isChecked.isNotEmpty
+                                ? isChecked.map((e) => e ? "■" : "□").join()
+                                : "목록 없음",
+                            style: TextStyle(fontSize: 28),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        "직접 목록을 추가하고 관리할 수 있습니다",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Container(
+              width: double.infinity,
+              color: Color(0xFFADE7FF),
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(5),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            if (isChecked.length < 10) {
+                              setState(() {
+                                isChecked.add(false);
+                              });
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("최대 10개까지만 추가할 수 있습니다.")),
+                              );
+                            }
+                          },
+                          child: Text("+ 새로 추가하기"),
+                        ),
+                      ],
+                    ),
+                    ...List.generate(isChecked.length, (index) {
+                      return ChecklistCard(
+                        title: "제목",
+                        subtitle: "내용",
+                        onEdit: () {
+                          print("수정: $index");
+                        },
+                        onDelete: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("삭제 확인"),
+                                content: Text("정말로 삭제하시겠습니까?"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text("취소"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        isChecked.removeAt(index);
+                                      });
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text("삭제"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        checkboxValue: isChecked[index],
+                        onCheckboxChanged: (value) =>
+                            updateCheckValue(index, value),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
+// 체크리스트 내용 카드
 class ChecklistCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final String buttonText;
+  final String? buttonText;
   final bool? checkboxValue;
   final ValueChanged<bool>? onCheckboxChanged;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const ChecklistCard({
     required this.title,
     required this.subtitle,
-    required this.buttonText,
-    this.checkboxValue,
-    this.onCheckboxChanged,
+    this.buttonText,
+    required this.checkboxValue,
+    required this.onCheckboxChanged,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -316,7 +487,14 @@ class ChecklistCard extends StatelessWidget {
               ],
             ),
             Text(subtitle, style: TextStyle(fontSize: 13)),
-            TextButton(onPressed: () {}, child: Text(buttonText)),
+            buttonText != null
+                ? TextButton(onPressed: () {}, child: Text(buttonText!))
+                : Row(
+                    children: [
+                      TextButton(onPressed: onEdit, child: Text("수정")),
+                      TextButton(onPressed: onDelete, child: Text("삭제")),
+                    ],
+                  ),
           ],
         ),
       ),
