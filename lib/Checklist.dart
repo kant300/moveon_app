@@ -53,12 +53,14 @@ class ChecklistState extends State<Checklist> {
       body: Column(
         children: [
           Expanded(
+            // 상단 영역
             flex: 1,
             child: Container(
               width: double.infinity,
               color: Color(0xFFEAEAEA),
               child: Center(
                 child: Container(
+                  // 상단 컨테이너
                   width: 350,
                   height: 240,
                   decoration: BoxDecoration(
@@ -66,6 +68,7 @@ class ChecklistState extends State<Checklist> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: ChecklistTitle(
+                    // 상단 컨테이너 내용
                     checklistType: checklistType,
                     checkValues: isChecked[checklistType],
                     onTypeChanged: updateChecklistType,
@@ -75,6 +78,7 @@ class ChecklistState extends State<Checklist> {
             ),
           ),
           Expanded(
+            // 하단 영역
             flex: 2,
             child: Container(
               width: double.infinity,
@@ -82,6 +86,7 @@ class ChecklistState extends State<Checklist> {
               child: SingleChildScrollView(
                 padding: EdgeInsets.all(5),
                 child: ChecklistContent(
+                  // 하단 컨테이너 내용
                   checklistType: checklistType,
                   checkValues: isChecked[checklistType],
                   onCheckChanged: (index, value) =>
@@ -115,7 +120,7 @@ class ChecklistTitle extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Row(
+        Row( // 상단 타이틀
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
@@ -129,16 +134,19 @@ class ChecklistTitle extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
+              // back 버튼
               icon: Icon(Icons.arrow_back_ios),
               onPressed: checklistType > 0
                   ? () => onTypeChanged(checklistType - 1)
                   : null,
             ),
             Text(
+              // 상단 진행사항 표시
               checkValues.map((e) => e ? "■" : "□").join(),
               style: TextStyle(fontSize: 28),
             ),
             IconButton(
+              // forward 버튼
               icon: Icon(Icons.arrow_forward_ios),
               onPressed: checklistType < 2
                   ? () => onTypeChanged(checklistType + 1)
@@ -248,6 +256,7 @@ class ChecklistContent extends StatelessWidget {
     return Column(
       children: List.generate(checkValues.length, (index) {
         return ChecklistCard(
+          // 체크리스트 카드 위젯
           title: titles[index],
           subtitle: subtitles[index],
           buttonText: buttonTexts[index],
@@ -312,12 +321,14 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
       body: Column(
         children: [
           Expanded(
+            // 상단 영역
             flex: 1,
             child: Container(
               width: double.infinity,
               color: Color(0xFFEAEAEA),
               child: Center(
                 child: Container(
+                  // 상단 컨테이너
                   width: 350,
                   height: 240,
                   decoration: BoxDecoration(
@@ -325,6 +336,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Column(
+                    // 상단 컨테이너 내용
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Row(
@@ -357,6 +369,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
             ),
           ),
           Expanded(
+            // 하단 영역
             flex: 2,
             child: Container(
               width: double.infinity,
@@ -369,6 +382,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
+                          // 최대 10개까지만 생성 가능
                           onPressed: () {
                             if (isChecked.length < 10) {
                               setState(() {
@@ -379,7 +393,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                                 SnackBar(content: Text("최대 10개까지만 추가할 수 있습니다.")),
                               );
                             }
-                          },
+                          }, // 새로 추가하기 버튼
                           child: Text("+ 새로 추가하기"),
                         ),
                       ],
@@ -458,6 +472,7 @@ class ChecklistCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      // 카드 컨테이너
       width: 330,
       height: 100,
       margin: EdgeInsets.symmetric(vertical: 10),
@@ -472,6 +487,7 @@ class ChecklistCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              // 상단 타이틀, 체크박스
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(title),
@@ -486,8 +502,9 @@ class ChecklistCard extends StatelessWidget {
                   ),
               ],
             ),
-            Text(subtitle, style: TextStyle(fontSize: 13)),
-            buttonText != null
+            Text(subtitle, style: TextStyle(fontSize: 13)), // 중단 텍스트
+            buttonText !=
+                    null // 하단 이동 버튼, 또는 수정, 삭제 버튼
                 ? TextButton(onPressed: () {}, child: Text(buttonText!))
                 : Row(
                     children: [
