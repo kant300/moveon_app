@@ -1,10 +1,13 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingCategory.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-final dio=Dio();
+final dio = Dio();
 
 class OnboardingAddress extends StatefulWidget {
   const OnboardingAddress({super.key});
@@ -14,44 +17,69 @@ class OnboardingAddress extends StatefulWidget {
 }
 
 class OnboardingAddressState extends State<OnboardingAddress> {
+  late WebViewController MapController;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    MapController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..addJavaScriptChannel(
+        'MapClick',
+        onMessageReceived: (msg) async {
+          final gpsmap = jsonDecode(msg.message);
+          double lat = gpsmap['lat'];
+          double lon = gpsmap['lon'];
+          print("좌포 전달 ${msg.message}");
+          String address = await getKakaomap(lon, lat);
+
+          setState(() {
+            addressCont.text =
+                address; // lon , lat / 윋 ㅗ경도 주소 address 로 받아서  input text에 넣어줌
+          });
+        },
+      );
+  }
 
   TextEditingController addressCont = TextEditingController();
 
   bool showMap = false;
-  double? lat ; // WebView 사용
-  double? lon ; // WebView 사용
+  double? lat; // WebView 사용
+  double? lon; // WebView 사용
   // KaKao api
-  Future<String> getKakaomap(double lon , double lat) async{
-    dynamic addressKey = "0b209f5c7458468469df5492074343bf"; // api kakao rest key
+  Future<String> getKakaomap(double lon, double lat) async {
+    dynamic addressKey =
+        "0b209f5c7458468469df5492074343bf"; // api kakao rest key
     // KaKao 좌표로 주소 변환 Rest Key
-    final response = await dio.get("https://dapi.kakao.com/v2/local/geo/coord2address.json" ,
-      queryParameters: {
-        "x" : lon.toString(),
-        "y" : lat.toString(),
-      },
-      options: Options(headers: {"Authorization" : "KakaoAK $addressKey"},
-      ),
+    final response = await dio.get(
+      "https://dapi.kakao.com/v2/local/geo/coord2address.json",
+      queryParameters: {"x": lon.toString(), "y": lat.toString()},
+      options: Options(headers: {"Authorization": "KakaoAK $addressKey"}),
     );
     final doc = response.data['documents'] as List;
-    if(doc.isEmpty) return "불가";
-    final add = doc[0]["address"] as Map<String , dynamic> ;
+    if (doc.isEmpty) return "불가";
+    final add = doc[0]["address"] as Map<String, dynamic>;
     return "${add['region_1depth_name']} " // 시
         "${add['region_2depth_name']} " // 구
         "${add['region_3depth_name']} " // 동
-        "${add['main_address_no']}" ; // 상세 주소
+        "${add['main_address_no']}"; // 상세 주소
   } // get kakao map end
 
   // 내위치
-  Future<bool> addressprint() async{
-    bool EnableStart = await Geolocator.isLocationServiceEnabled(); // 스마트폰 gps 기능 확인 여부
-    if(!EnableStart) {
+  Future<bool> addressprint() async {
+    bool EnableStart =
+        await Geolocator.isLocationServiceEnabled(); // 스마트폰 gps 기능 확인 여부
+    if (!EnableStart) {
       print("GPS 기능 안켜져있음");
       return Future.value(false); // 안켜져있으면 실패
-    };
+    }
+    ;
     // 권한 여부 확인
     LocationPermission locationPermission = await Geolocator.checkPermission();
 
-    if(locationPermission == LocationPermission.denied) {
+    if (locationPermission == LocationPermission.denied) {
       // 권한 요청 확인후 맞으면 팝업창 띄워줌 [ 허용 / 거부 ]
       locationPermission = await Geolocator.requestPermission();
       // 거부 누르면 false 로 반환
@@ -59,7 +87,7 @@ class OnboardingAddressState extends State<OnboardingAddress> {
         return Future.value(false);
       }
     } // 강력 팝업 : 거부 여러번 실행시 발동 { 다시는 묻지않기 }
-    if(locationPermission == LocationPermission.deniedForever){
+    if (locationPermission == LocationPermission.deniedForever) {
       return Future.value(false);
     }
     Position position = await Geolocator.getCurrentPosition();
@@ -73,36 +101,94 @@ class OnboardingAddressState extends State<OnboardingAddress> {
       lon = x;
       lat = y;
       showMap = true;
+      MapController.loadHtmlString(kakaoMap(lon!, lat!));
     });
     // 허용시 true
     return Future.value(true);
   }
 
+  String kakaoMap(double lon, double lat) {
+    return '''
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Kakao Map</title>
+</head>
+<body>
+
+<div id="map" style="width:100%;height:350px;"></div>
+
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=caa87b2038ca1bb96deba339a07a78d5"></script>
+<script>
+
+// 지도를 표시할 div
+var mapContainer = document.getElementById('map'),
+    mapOption = {
+        center: new kakao.maps.LatLng(${lat}, ${lon}), // GPS 위치로 지도 중심 이동
+        level: 3
+    };
+
+var map = new kakao.maps.Map(mapContainer, mapOption);
+
+// GPS 위치에 마커 표시
+var marker = new kakao.maps.Marker({
+    position: new kakao.maps.LatLng(${lat}, ${lon})
+});
+marker.setMap(map);
+
+// 지도 클릭하면 마커 이동 + Flutter로 클릭 좌표 전달
+kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+
+    var latlng = mouseEvent.latLng;
+    marker.setPosition(latlng);
+
+    MapClick.postMessage(JSON.stringify({
+        lat : latlng.getLat(),
+        lon : latlng.getLng()
+    }));
+});
+
+</script>
+</body>
+</html>
+''';
+  }
+
+  Future<void> guest() async {
+    final localsave = await SharedPreferences.getInstance();
+    final token = localsave.getString("guestToken");
+    try {
+      final addressadd = addressCont.text.split(" ");
+      final obj = {
+        "gaddress1": addressadd[0],
+        "gaddress2": addressadd[1],
+        "gaddress3": addressadd[2],
+      };
+      final response = await dio.post(
+        "http://10.164.103.46:8080/api/guest/detail",
+        data: obj,
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+      final data = await response.data;
+      print(data);
+    } catch (e) {
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("주소 확인"),
-      ),
+      appBar: AppBar(title: const Text("주소 확인")),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-
-          // 🔹 상단 텍스트
-          SizedBox(height: 20),
-          Text("어디로 이사 오셨나요?", style: TextStyle(fontSize: 18)),
-          Text("새로운 동네 정보를 알려 드릴게요", style: TextStyle(fontSize: 14)),
-          SizedBox(height: 16),
-
-          // 🔹 내 위치 버튼 (상단 유지)
-          ElevatedButton(
-            onPressed: addressprint,
-            child: Text("내 위치 조회"),
-          ),
-
-          SizedBox(height: 16),
-
           // 🔹 상단 컬러바
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -114,34 +200,57 @@ class OnboardingAddressState extends State<OnboardingAddress> {
               _colorBar(const Color(0xFFC5F6F6)),
             ],
           ),
+          // 🔹 상단 텍스트
+          SizedBox(height: 20),
+          Text("어디로 이사 오셨나요?", style: TextStyle(fontSize: 18)),
+          Text("새로운 동네 정보를 알려 드릴게요", style: TextStyle(fontSize: 14)),
+          SizedBox(height: 16),
 
-          SizedBox(height: 10),
-
-          // 🔹 지도 영역 (아래로 내림)
           Expanded(
-            child: showMap && lat != null && lon != null
-                ? WebViewWidget(
-              controller: WebViewController()
-                ..setJavaScriptMode(JavaScriptMode.unrestricted)
-                ..loadRequest(
-                  Uri.parse(
-                    "https://map.kakao.com/link/map/MyLocation,$lat,$lon",
-                  ),
-                ),
-            )
-                : Center(child: Text("내위치를 조회하면 지도가 표시됩니다.")),
+            child: showMap && lon != null && lat != null
+                ? WebViewWidget(controller: MapController)
+                : Center(child: Text("내 위치 정보 조회하기")),
           ),
+
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: TextField(
+                  controller: addressCont,
+                  readOnly: true,
+                  decoration: InputDecoration(labelText: "선택한 주소"),
+                ),
+              ),
+            ],
+          ),
+
+
+
+          // 🔹 내 위치 버튼 (상단 유지)
+          ElevatedButton(onPressed: addressprint, child: Text("내 위치 조회")),
+          SizedBox(height: 185),
+
+
 
           // 🔹 하단 - 다음 버튼
           Padding(
             padding: const EdgeInsets.only(bottom: 20.0),
             child: ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
+                if (addressCont.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("주소 입력바람"),
+                      duration: Duration(seconds: 2), // 알림 경과 시간창 2초
+                    ),
+                  );
+                  return;
+                }
+                await guest();
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => OnboardingCategory(),
-                  ),
+                  MaterialPageRoute(builder: (context) => OnboardingCategory()),
                 );
               },
               child: const Text("다음 단계"),
@@ -151,6 +260,7 @@ class OnboardingAddressState extends State<OnboardingAddress> {
       ),
     );
   }
+
   Widget _colorBar(Color color) {
     return Container(
       width: 60,

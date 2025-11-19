@@ -1,10 +1,21 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+final dio=Dio();
 class Menu extends StatefulWidget {
   MenuState createState() => MenuState();
 }
 // MenuState 클래스: 위젯의 상태를 관리
 class MenuState extends State<Menu> {
+
+  String address = "주소 정보 없음";
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    tokencall();
+  }
   // 단일 메뉴 아이템(아이콘과 텍스트)을 구성하는 위젯
   Widget _buildMenuItem(
       IconData icon, // 표시할 아이콘
@@ -17,7 +28,7 @@ class MenuState extends State<Menu> {
       child: Column(
         children:[
           Container(
-            padding: const EdgeInsets.all(10), // 아이콘 주변 여백
+            padding:  EdgeInsets.all(10), // 아이콘 주변 여백
             // 아이콘 배경 (이미지에는 배경색이 있으므로 색상 적용)
             decoration: BoxDecoration(
               // 아이콘별로 색상 다르게 설정 가능 (여기서는 기본 색상으로 통일)
@@ -29,7 +40,7 @@ class MenuState extends State<Menu> {
                   color: Colors.grey.withOpacity(0.1),
                   spreadRadius: 1,
                   blurRadius: 3,
-                  offset: const Offset(0, 1), // 그림자 위치 (살짝 아래)
+                  offset:  Offset(0, 1), // 그림자 위치 (살짝 아래)
                 ),
               ],
             ),
@@ -39,12 +50,12 @@ class MenuState extends State<Menu> {
               color: iconColor, // 아이콘 색상
             ),
           ),
-          const SizedBox(height: 5), // 아이콘과 텍스트 사이 간격
+           SizedBox(height: 5), // 아이콘과 텍스트 사이 간격
           // 메뉴 항목 레이블 텍스트
           Text(
             label,
             textAlign: TextAlign.center, // 텍스트 중앙 정렬
-            style: const TextStyle(
+            style:  TextStyle(
               fontSize: 12, // 텍스트 크기
               color: Colors.black87, // 텍스트 색상
             ),
@@ -69,12 +80,12 @@ class MenuState extends State<Menu> {
 
       // 남은 공간을 채우기 위해 빈 Expanded를 추가하여 항상 4개의 열을 유지합니다.
       while (expandedRowItems.length < crossAxisCount) {
-        expandedRowItems.add(const Expanded(child: SizedBox.shrink()));
+        expandedRowItems.add( Expanded(child: SizedBox.shrink()));
       }
 
       rows.add(
         Padding(
-          padding: const EdgeInsets.only(bottom: 25.0), // 줄 간 간격
+          padding:  EdgeInsets.only(bottom: 25.0), // 줄 간 간격
           child: Row(
             // 메인 축 정렬을 start로 하여 불필요한 중앙 정렬을 막습니다.
             // 아이템들은 Expanded 덕분에 이미 균등한 공간을 차지합니다.
@@ -88,6 +99,40 @@ class MenuState extends State<Menu> {
     return Column(children: rows);
   }
 
+  void tokencall() async{
+      final localsave = await SharedPreferences.getInstance();
+
+      final logintoken = localsave.getString("logintoken");
+      final guesttoken = localsave.getString("guestToken");
+
+      String? token;
+      try {
+        if (logintoken != null) {
+          token = logintoken;
+          final response = await dio.get("http://10.164.103.46:8080/api/member/info" ,
+              options: Options(headers: { "Authorization" : "Bearer $logintoken" }),
+          );
+          final data = await response.data;
+          setState(() {
+            address = "${data['gaddress1']} ${data['gaddress2']} ${data['gaddress3']}";
+          });
+          print("회원 $token");
+        } else if (guesttoken != null) {
+          token = guesttoken;
+          final response = await dio.get("http://10.164.103.46:8080/api/guest/address" ,
+              options: Options(headers: { "Authorization" : "Bearer $guesttoken" }),
+          );
+          final data = await response.data;
+          setState(() {
+            address = "${data['gaddress1']} ${data['gaddress2']} ${data['gaddress3']}";
+          });
+          print("게스트 $token");
+          print(address);
+        } else {
+          print("토큰 X");
+        }
+      }catch(e) {print(e); }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,24 +150,26 @@ class MenuState extends State<Menu> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // 현재 위치 정보 (더미 텍스트)
-                    const Column(
+                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text("현재 위치",
                             style: TextStyle(fontSize: 10, color: Colors.grey)),
-                        Text("인천 부평구 부평동", style: TextStyle(
+                        Text(
+                            address,
+                        style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     // 즐겨찾기 별 아이콘
                     IconButton(
                       onPressed: () {},
-                      icon: const Icon(
+                      icon:  Icon(
                           Icons.star, color: Colors.amber, size: 28),
                     ),
                   ],
                 ),
-                const SizedBox(height: 25), // 섹션 시작 전 간격
+                 SizedBox(height: 25), // 섹션 시작 전 간격
 
                 // 1. 생활 섹션
                 Text(
@@ -240,7 +287,7 @@ class MenuState extends State<Menu> {
                   // 아이콘 변경
                 ], crossAxisCount: 3),
 
-                const SizedBox(height: 20),
+                 SizedBox(height: 20),
               ],
             ),
           ),

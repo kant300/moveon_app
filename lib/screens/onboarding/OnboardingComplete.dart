@@ -1,13 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:moveon_app/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-
+final dio=Dio();
 // 1. 위젯클래스
 class OnboardingComplete extends StatefulWidget{
   // 이전 단계에서 설정된 주소를 받을 수 있도록 인수를 추가했습니다.
   // 이 예시에서는 임시로 하드코딩된 값을 사용합니다.
-  final String selectedAddress;
-  const OnboardingComplete( {super.key, this.selectedAddress ="인천시 연수구 동춘동" });
 
 
 @override
@@ -15,6 +15,9 @@ class OnboardingComplete extends StatefulWidget{
 }
 // 2. 상태클래스(SingleTickerProviderStateMixin 추가)
 class OnboardingCompleteState extends State<OnboardingComplete>with SingleTickerProviderStateMixin{
+
+
+  String address = "";
 
   // 앱의 메인 청록색 정의
   final Color _mainTealColor = const Color(0xFF3DE0D2);
@@ -59,6 +62,7 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
   @override
   void initState() {
     super.initState();
+    guesttoken(); // 불러오기 정보
     // 🌟 애니메이션 컨트롤러 초기화 🌟
     _animationController = AnimationController(
         vsync: this,
@@ -71,6 +75,23 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
   void dispose() {
     _animationController.dispose(); // 컨트롤러 해제
     super.dispose();
+  }
+
+
+  void guesttoken() async{
+      final localsave = await SharedPreferences.getInstance();
+      final token = localsave.getString("guestToken");
+    try{
+      final response = await dio.get("http://10.164.103.46:8080/api/guest/address",
+      options: Options(headers: {"Authorization" : "Bearer $token"},) );
+      final data = await response.data;
+      print(data);
+
+      setState(() {
+        address = "${data['gaddress1']} ${data['gaddress2']} ${data['gaddress3']}";
+      });
+
+    }catch(e) { print(e); }
   }
 
   @override
@@ -142,7 +163,7 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        widget.selectedAddress, // OnboardingAddress에서 가져온 주소
+                        address,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

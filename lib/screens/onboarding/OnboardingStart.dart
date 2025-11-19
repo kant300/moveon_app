@@ -58,6 +58,21 @@ class StateOnboardingStart extends State<OnboardingStart>{
       }
     }catch(e) { print("로그인 실패 $e") ; }
   }
+  
+  void guest() async{
+    try{
+      final response = await dio.post("http://10.164.103.46:8080/api/guest/save");
+      final data = await response.data;
+      final token = data["token"];
+
+      final localsave = await SharedPreferences.getInstance();
+        await localsave.setString('guestToken', token );
+        print(localsave);
+        print("토큰 확인 : ${data['token'] }");
+        Navigator.push(context, MaterialPageRoute(builder: (_) => OnboardingAddress() ),
+        );
+      }catch(e) { print(e); }
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -95,15 +110,11 @@ class StateOnboardingStart extends State<OnboardingStart>{
                       TextField( controller: midCont  ),
                       TextField( controller: mpwdCont  ),
 
-                      OutlinedButton(onPressed: login, child: Text("로그인") ),
+                      OutlinedButton(onPressed: () async { await login(); Navigator.pushReplacementNamed(context, "/main") }, child: Text("로그인") ),
                       TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findid"); } , child: Text("아이디찾기"), ),
                       TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findpwd"); } , child: Text("비밀번호찾기"), ),
                       TextButton(onPressed: (){Navigator.pushReplacementNamed(context, "/signup"); }, child: Text("회원가입 페이지로 이동"),),
-                      TextButton(onPressed: (){Navigator.push(context, MaterialPageRoute(builder: (context) =>  OnboardingAddress(),
-                      ),
-                      );
-                        }, child: Text("Guest"),),
-
+                      TextButton(onPressed: guest , child: Text("Guest"),),
                     ],
                   ),
                 ),
