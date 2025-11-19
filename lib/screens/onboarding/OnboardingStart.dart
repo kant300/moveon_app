@@ -23,7 +23,7 @@ class StateOnboardingStart extends State<OnboardingStart>{
   TextEditingController midCont = TextEditingController(); // 아이디
   TextEditingController mpwdCont = TextEditingController(); // 비밀번호
 
-  void login() async{
+  Future<void> login() async{
     try {
       final obj = {
         "mid": midCont.text,
@@ -110,7 +110,7 @@ class StateOnboardingStart extends State<OnboardingStart>{
                       TextField( controller: midCont  ),
                       TextField( controller: mpwdCont  ),
 
-                      OutlinedButton(onPressed: () async { await login(); Navigator.pushReplacementNamed(context, "/main") }, child: Text("로그인") ),
+                      OutlinedButton(onPressed: () async { await login(); Navigator.pushReplacementNamed(context, "/main"); }, child: Text("로그인") ),
                       TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findid"); } , child: Text("아이디찾기"), ),
                       TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findpwd"); } , child: Text("비밀번호찾기"), ),
                       TextButton(onPressed: (){Navigator.pushReplacementNamed(context, "/signup"); }, child: Text("회원가입 페이지로 이동"),),
