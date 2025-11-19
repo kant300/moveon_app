@@ -5,7 +5,7 @@ class MyPage extends StatefulWidget {
 }
 
 class MyPageState extends State<MyPage> {
-  List<bool> checklistStatus = [];
+  List<bool> checklistStatus = [false];
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,8 @@ class MyPageState extends State<MyPage> {
                   children: [
                     Text("개인 Check-list 진행사항", style: TextStyle(fontSize: 16)),
                     Text(
-                      ("진행사항: ${checklistStatus.map((e) => e ? "■" : "□").join()}"),
+                      ("진행사항: ${checklistStatus.isNotEmpty ?
+                      checklistStatus.map((e) => e ? "■" : "□").join() : "없음"}"),
                       style: TextStyle(fontSize: 13),
                     ),
                     TextButton(
