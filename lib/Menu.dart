@@ -206,7 +206,7 @@ class MenuState extends State<Menu> {
                 _buildIconGrid([
                   // 안전 메뉴 아이템 목록
                   _buildMenuItem(Icons.crisis_alert, "성범죄자", () =>
-                      Navigator.pushNamed(context, "/safety/sexOffender") ,Colors.red),
+                      Navigator.pushNamed(context, "/safety/sexCrime") ,Colors.red),
                   // 텍스트 축약
                   _buildMenuItem(Icons.emergency, "민간구급차", () =>
                       Navigator.pushNamed(context, "/safety/ambulance"), Colors.red),
