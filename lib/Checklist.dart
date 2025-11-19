@@ -273,36 +273,25 @@ class ChecklistPersonal extends StatefulWidget {
   ChecklistPersonalState createState() => ChecklistPersonalState();
 }
 
-// 개인 체크리스트의 데이터 모델
-class ChecklistItem {
-  String title;
-  String subtitle;
-  bool isChecked;
-
-  ChecklistItem({
-    required this.title,
-    required this.subtitle,
-    this.isChecked = false,
-  });
-}
-
 class ChecklistPersonalState extends State<ChecklistPersonal> {
   // 체크리스트의 체크박스, 화면 상태
-  List<bool> isChecked = [false];
+  List<Map<String, dynamic>> items = [];
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController subtitleController = TextEditingController();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final args = ModalRoute.of(context)?.settings.arguments;
-    if (args != null && args is List<bool>) {
-      isChecked = args;
+    if (args != null && args is List<Map<String, dynamic>>) {
+      items = List<Map<String, dynamic>>.from(args);
     }
   }
 
   // 체크박스 상태 변경
   void updateCheckValue(int index, bool value) {
     setState(() {
-      isChecked[index] = value;
+      items[index]["isChecked"] = value;
     });
   }
 
@@ -312,7 +301,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            Navigator.pop(context, isChecked);
+            Navigator.pop(context, items.map((e) => e["isChecked"]).toList());
           },
           icon: Icon(Icons.arrow_back),
         ),
@@ -350,8 +339,8 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            isChecked.isNotEmpty
-                                ? isChecked.map((e) => e ? "■" : "□").join()
+                            items.isNotEmpty
+                                ? items.map((e) => e["isChecked"] ? "■" : "□").join()
                                 : "목록 없음",
                             style: TextStyle(fontSize: 28),
                           ),
@@ -384,10 +373,48 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                         TextButton(
                           // 최대 10개까지만 생성 가능
                           onPressed: () {
-                            if (isChecked.length < 10) {
-                              setState(() {
-                                isChecked.add(false);
-                              });
+                            if (items.length < 10) {
+                              String title;
+                              String subtitle;
+
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text("Check-list 등록"),
+                                    content: Column(
+                                      children: [
+                                        TextField(
+                                          decoration: InputDecoration(
+                                            labelText: "제목",
+                                            hintText: "제목을 입력하세요",
+                                          ),
+                                          controller: titleController,
+                                        ),
+                                        TextField(
+                                          decoration: InputDecoration(
+                                            labelText: "내용",
+                                            hintText: "내용을 입력하세요",
+                                          ),
+                                          controller: subtitleController,
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(context, "취소"), child: Text("취소")),
+                                      TextButton(onPressed: () {
+                                        if (titleController.text.isNotEmpty) {
+                                          title = titleController.text.trim();
+                                          subtitle = subtitleController.text.trim();
+
+                                          setState(() {
+                                            items.add({"title": title, "subtitle": subtitle, "isChecked": false});
+                                          });
+                                          Navigator.pop(context, "등록");
+                                        }
+                                      }, child: Text("등록"))
+                                    ],
+                                  ),
+                              );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text("최대 10개까지만 추가할 수 있습니다.")),
@@ -398,7 +425,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                         ),
                       ],
                     ),
-                    ...List.generate(isChecked.length, (index) {
+                    ...List.generate(items.length, (index) {
                       return ChecklistCard(
                         title: "제목",
                         subtitle: "내용",
@@ -422,7 +449,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                                   TextButton(
                                     onPressed: () {
                                       setState(() {
-                                        isChecked.removeAt(index);
+                                        items.removeAt(index);
                                       });
                                       Navigator.of(context).pop();
                                     },
@@ -433,7 +460,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                             },
                           );
                         },
-                        checkboxValue: isChecked[index],
+                        checkboxValue: items[index]["isChecked"],
                         onCheckboxChanged: (value) =>
                             updateCheckValue(index, value),
                       );
