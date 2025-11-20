@@ -16,42 +16,10 @@ class KakaoMapState extends State<KakaoMap> {
   late final WebViewController _controller;
   double? lat;
   double? lng;
-  // ★ 추가: 지역 필터링을 위한 변수
-  String? selectedSido;
-  String? selectedSigungu;
-  String? selectedDong;
-  // ★ 추가: 지역 필터링용 데이터 (실제 데이터에 맞게 조정 필요)
-  // final List<String> sidoList = ['서울', '인천', '경기'];
-  final List<String> sidoList = [ '인천' ];
-
-  final Map<String, List<String>> sigunguMap = {
-    '인천': ['강화군','계양구','남동구','동구', '미추홀구','부평구', '서구','연수구','옹진군','중구'],
-    // '서울': ['강남구', '서초구', '마포구'],
-    // '경기': ['수원시', '성남시', '용인시'],
-  };
-
-  final Map<String, List<String>> dongMap = {
-    '강화군': ['강화읍', '교동면', '길상면', '내가면', '불은면', '삼산면', '서도면', '선원면', '송해면', '양도면', '양사면', '하점면', '하도면'],
-    '계양구': ['갈현동', '계산동', '귤현동', '노오지동', '다남동', '동양동', '둑실동', '목상동', '박촌동', '방축동', '병방동', '상야동', '서운동',
-      '선주지동', '오류동','용종동', '이화동','임학동', '작전동', '장기동', '평동', '하야동', '효성동'],
-    '남동구': ['간석동', '고잔동', '구월동', '남촌동', '논현동', '도림동', '만수동', '서창동', '수산동', '운연동', '장수동'],
-    '동구': ['금곡동', '만석동', '송림동', '송현동', '창영동', '화수동', '화평동'],
-    '미추홀구': ['관교동', '도화동', '문학동', '숭의동', '용현동', '주안동', '학익동'],
-    '부평구': ['갈산동', '구산동', '부개동', '부평동', '산곡동', '삼산동', '십정동', '일신동','청천동'],
-    '서구': ['가정동', '가좌동', '검암동', '경서동', '공촌동', '금곡동', '당하동', '대곡동', '마전동', '백석동', '불로동', '석남동',
-      '시천동', '신현동', '심곡동', '연희동', '오류동', '왕길동', '원당동','원창동', '청라동'],
-    '연수구': ['동춘동', '선학동', '송도동', '연수동', '옥련동', '청학동'],
-    '옹진군': ['대청면', '덕적면', '백령면', '북도면', '연평면', '영흥면', '자월면'],
-    '중구': ['경동', '관동1가', '관동2가', '관동3가', '남북동', '내동', '답동', '덕교동','도원동', '무의동', '북성동1가', '북성동2가', '북성동3가',
-      '사동', '선린동', '선화동', '송월동1가','송월동2가', '송월동3가', '송학동1가', '송학동2가', '송학동3가', '신생동', '신포동',
-      '신흥동1가', '신흥동2가', '신흥동3가','용동', '운남동', '운북동', '운서동', '유동', '율목동', '을왕동', '인현동', '전동', '중산동',
-      '중앙동1가', '중앙동2가', '중앙동3가', '중앙동4가', '항동1가', '항동2가', '항동3가', '항동4가', '항동5가', '항동6가','항동7가',
-      '해안동1가', '해안동2가', '해안동3가', '해안동4가']
-  };
-
+  // ✅ 검색어 입력 컨트롤러 추가
+  final TextEditingController _searchController = TextEditingController();
 
   final String kakaoJsKey = '9eb4f86b6155c2fa2f5dac204d2cdb35';
-  final String serverBaseUrl = 'http://192.168.40.61:8080';
 
   @override
   void initState() {
@@ -72,13 +40,11 @@ class KakaoMapState extends State<KakaoMap> {
   <body style="margin:0;">
     <div id="map" style="width:100%;height:100vh;"></div>
     <script>
-    // ✅ 수정 코드: 지연 시간(500ms)을 주어 라이브러리 로드를 기다림
-    setTimeout(function() {
-    var mapContainer = document.getElementById('map');
-    var mapOption = {
-      center: new kakao.maps.LatLng(37.5665, 126.9780),
-      level: 3
-    };
+      var mapContainer = document.getElementById('map');
+      var mapOption = {
+        center: new kakao.maps.LatLng(37.5665, 126.9780),
+        level: 3
+      };
       var map = new kakao.maps.Map(mapContainer, mapOption);
 
       // 현재 본인 위치
@@ -91,13 +57,13 @@ class KakaoMapState extends State<KakaoMap> {
         if (window.flutterChannel) {
           window.flutterChannel.postMessage("myLocationClick");
         }
-      }, 500); // 0.5초 대기
-      
-      // 마커 클러스터러를 생성합니다 
+      });
+
+      // 마커 클러스터러를 생성합니다
       var clusterer = new kakao.maps.MarkerClusterer({
-          map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체 
-          averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정 
-          minLevel: 4 // 클러스터 할 최소 지도 레벨 
+          map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체
+          averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
+          minLevel: 4 // 클러스터 할 최소 지도 레벨
       });
 
       // ✅ Flutter에서 여러 마커 데이터를 받을 함수
@@ -105,13 +71,13 @@ class KakaoMapState extends State<KakaoMap> {
         // ✅ 기존 마커 제거
         clusterer.clear();
         var markers = [];
-        
+
         // ✅ 기존 인포윈도우 닫기
         if (window.infowindow && window.infowindow.close) {
           window.infowindow.close();
         }
         window.infowindow = new kakao.maps.InfoWindow();
-    
+
         for (var i = 0; i < markerList.length; i++) {
           (function(m) { // 클로저로 i값 고정
             if (category == "localParking") { // 공영주차장은 데이터 형식이 다름
@@ -119,13 +85,13 @@ class KakaoMapState extends State<KakaoMap> {
             } else {
               var markerPosition = new kakao.maps.LatLng(m["위도"], m["경도"]);
             }
-            
+
             // 마커 생성
             var marker = new kakao.maps.Marker({
               position: markerPosition
             });
             markers.push(marker);
-            
+
             // ✅ 마커 클릭 시 인포윈도우 열기
             kakao.maps.event.addListener(marker, 'click', function() {
               // category 에 따라 infoWindow 데이터 삽입
@@ -134,33 +100,30 @@ class KakaoMapState extends State<KakaoMap> {
                   m["도로명 주소"] +
                 '</div>');
               } else if (category == "government") { // 관공서
-                window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' + 
+                window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
                   '<div>' + m["시설명"] + '</div>' +
                   '<div>' + m["주소"] + '</div>' +
                   '<div>' + m["전화번호"] + '</div>' +
                 '</div>');
               } else if (category == "night") { // 심야약국/병원
-                window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' + 
+                window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
                   '<div>' + m["시설명"] + '</div>' +
                   '<div>' + m["주소"] + '</div>' +
                   '<div>' + m["전화번호"] + '</div>' +
                 '</div>');
-              // } else if (category == "sexcrime") { // 성범죄자
-              //   window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
-              //   '</div>');
               } else if (category == "shelter") { // 대피소
                 window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
                   m["시설명"] +
                 '</div>');
               } else if (category == "restroom") { // 공중화장실
-                window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' + 
+                window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
                   '<div>' + m["화장실명"] + '</div>' +
                   '<div>' + m["소재지도로명주소"] + '</div>' +
                   '<div>관리기관: ' + m["관리기관명"] + ' ' + m["전화번호"] + '</div>' +
                   '<div>개방시간: ' + m["개방시간상세"] + '</div>' +
                 '</div>');
               } else if (category == "subwayLift") { // 지하철/승강기
-                window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' + 
+                window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
                   '<div>' + m["역사"] + '역</div>' +
                   '<div>' + m["호기"] + '호 ' + m["장비"] + '</div>' +
                   '<div>' + m["상태"] + '</div>' +
@@ -184,7 +147,7 @@ class KakaoMapState extends State<KakaoMap> {
                   ) +
                 '</div>');
               } else if (category == "wheelchairCharger") { // 전동휠체어
-                window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' + 
+                window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
                   '<div>' + m["시설명"] + '</div>' +
                   '<div>' + m["소재지도로명주소"] + '</div>' +
                   '<div>평일: ' + m["평일운영시작시각"] + "~" + m["평일운영종료시각"] + '</div>' +
@@ -195,13 +158,13 @@ class KakaoMapState extends State<KakaoMap> {
                   m["name"] +
                 '</div>');
               } else if (category == "gas") {
-                window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' + 
+                window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
                   '<div>' + m["업소명"] + '</div>' +
                   '<div>' + m["소재지"] + '</div>' +
                   '<div>' + m["전화번호"] + '</div>' +
                 '</div>');
               }
-              
+
               window.infowindow.open(map, marker);
             });
           })(markerList[i]);
@@ -210,7 +173,44 @@ class KakaoMapState extends State<KakaoMap> {
         clusterer.addMarkers(markers);
       }
       
+      // ============================================
+      // ✅ 주소 검색 관련 JavaScript 추가 (핵심)
+      // ============================================
+      var geocoder = new kakao.maps.services.Geocoder();
+      var serchMarker = null; // 검색 시 생성되는 마커
       
+      // Flutter에서 검색어를 받아 주소 검색을 실행하는 함수
+      window.searchAddress = function(query) {
+        if (searchMarker) {
+          searchMarker.setMap(null); // 기존 검색 마커 제거
+        }
+        
+        geocoder.addressSearch(query, function(result, status) {
+          if (status === kakao.maps.services.Status.OK) {
+            var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+            
+            // 지도 중심 이동 및 레벨 설정
+            map.panTo(coords);
+            map.setLevel(3); // 적절한 줌 레벨로 설정
+            
+            // 검색 마커 생성 및 표시
+            searchMarker = new kakao.maps.Marker({
+              map: map,
+              position: coords
+            });
+            
+            // 검색 결과를 Dart로 전달 (위도, 경도)
+            if (window.flutterChannel) {
+              window.flutterChannel.postMessage("searchDone," + result[0].y + "," + result[0].x);
+            }
+          } else {
+            // 검색 실패 시 Dart로 알림
+            if (window.flutterChannel) {
+              window.flutterChannel.postMessage("searchFailed");
+            }
+            });
+            
+
       // ✅ 지도 확대 / 축소 함수 추가
       function zoomIn() {
         map.setLevel(map.getLevel() - 1); // 레벨 1 감소 = 확대
@@ -218,19 +218,34 @@ class KakaoMapState extends State<KakaoMap> {
       function zoomOut() {
         map.setLevel(map.getLevel() + 1); // 레벨 1 증가 = 축소
       }
-  
+
     </script>
   </body>
 </html>
 ''';
+
+
 
     _controller = WebViewController()
       ..addJavaScriptChannel(
         'flutterChannel',
         onMessageReceived: (msg) {
           if (msg.message == "myLocationClick") {
-            // ★ 수정: 내 위치 마커 클릭 시, 현재 lat/lng로 통계 정보 로드
-            _loadCrimeInfo(lat, lng);   // ← 내위치 마커 클릭 시 서버 호출
+            _loadCrimeInfo();   // ← 내위치 마커 클릭 시 서버 호출
+          }else if (msg.message.startsWith("searchDone,")) {
+            // ✅ 검색 성공 결과 처리: "searchDone,위도,경도"
+            final parts = msg.message.split(',');
+            final lat = double.tryParse(parts[1]);
+            final lng = double.tryParse(parts[2]);
+            if (lat != null && lng != null) {
+              // 검색된 좌표로 현재 Dart 변수를 업데이트하고 (필요하다면) 통계 로드
+              _updateLocationAfterSearch(lat, lng);
+            }
+          }else if (msg.message == "searchFailed") {
+            // ✅ 검색 실패 처리
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('검색 결과를 찾을 수 없습니다.')),
+            );
           }
         },
       )
@@ -247,6 +262,29 @@ class KakaoMapState extends State<KakaoMap> {
     _initLocation();
   }
 
+  // ✅ Dart에서 JS의 searchAddress 함수 호출
+  void _performSearch(String query) {
+    if (query.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('검색어를 입력해 주세요.')),
+      );
+      return;
+    }
+    // JS 함수를 호출하여 주소 검색 실행
+    _controller.runJavaScript("searchAddress('${query.trim()}');");
+  }
+
+  // ✅ 검색 후 Dart 위치 변수 업데이트
+  void _updateLocationAfterSearch(double latitude, double longitude) {
+    // 검색된 좌표로 현재 위치 변수를 업데이트
+    setState(() {
+      lat = latitude;
+      lng = longitude;
+    });
+  }
+
+
+
   // ✅ 위치 권한 요청 및 현재 위치 가져오기
   Future<void> _initLocation() async {
     if (await Permission.location.request().isGranted) {
@@ -255,11 +293,6 @@ class KakaoMapState extends State<KakaoMap> {
       );
       lat = pos.latitude;
       lng = pos.longitude;
-
-      // ★ 초기 시도/시군구 설정
-      // (실제로는 지오코딩 결과를 이용해야 하지만, 예시를 위해 기본값 설정)
-      selectedSido = '인천';
-      selectedSigungu = '부평구';
 
       // 지도 이동
       _moveToMyLocation();
@@ -272,79 +305,25 @@ class KakaoMapState extends State<KakaoMap> {
   }
 
   // 서버 REST 호출해서 성범죄자 통계 가져오기
-  // ★ 수정: 현재 위치 기반 성범죄자 통계 가져오기 (마커 클릭 시)
-  Future<void> _loadCrimeInfo(double? lat, double? lng) async {
+  Future<void> _loadCrimeInfo() async {
     if (lat == null || lng == null) return;
+
     try {
-      // sexcrime/near 엔드포인트는 지오코딩 + 지역 카운트 기능을 모두 수행한다고 가정
       final res = await Dio().get(
-        "$serverBaseUrl/api/sexcrime/near",
-        queryParameters: {"lat": lat, "lng": lng}, // 위도/경도 기반 요청
+        "http://192.168.40.28:8080/crime/near",
+        queryParameters: {"lat": lat, "lng": lng},
       );
 
-      // 임시로 지역 정보를 함께 구성
-      final data = res.data;
-      // 서버가 lat/lng에 해당하는 지역 정보를 반환해야 합니다.
-      _showCrimeModal(data);
+      _showCrimeModal(res.data);
 
     } catch (e) {
-      print("현재 위치 기반 성범죄자 통계 불러오기 오류: $e");
+      print("성범죄자 통계 불러오기 오류: $e");
     }
   }
-
-  // ★ 수정: 시/군/구 필터링 함수는 sido와 sigungu 2개 인자만 받도록 수정
-  Future<void> _filterCrimeInfo(String sido, String sigungu) async {
-    try {
-      // 읍면동 정보는 빈 값으로 서버에 요청 (시군구 단위 카운트)
-      final res = await Dio().get(
-        "$serverBaseUrl/safety/sexcrime/count",
-        queryParameters: {"sido": sido, "sigungu": sigungu, "dong": ""},
-      );
-
-      // 임시로 지역 정보를 함께 구성
-      final data = {
-        "region": {"sido": sido, "sigungu": sigungu, "dong": "없음"}, // 읍면동 없음 표시
-        "counts": res.data
-      };
-
-      _showCrimeModal(data);
-    } catch (e) {
-      print("지역 필터링 통계 불러오기 오류: $e");
-    }
-  }
-
-  // ★ 추가: 지역 필터링 기반 성범죄자 통계 가져오기
-  Future<void> _filterCrimeInfoWithDong(String sido, String sigungu, String dong) async {
-    try {
-      // 읍면동 정보까지 포함하여 서버에 요청
-      // 이 엔드포인트는 서버에서 sido/sigungu/dong을 모두 처리해야 합니다.
-      final res = await Dio().get(
-        "$serverBaseUrl/safety/sexcrime/count",
-        queryParameters: {"sido": sido, "sigungu": sigungu, "dong": dong},
-      );
-
-      // 임시로 지역 정보를 함께 구성 (서버에서 sido/sigungu를 다시 보내주지 않는 경우)
-      final data = {
-        "region": {"sido": sido, "sigungu": sigungu, "dong": "dong"},
-        "counts": res.data
-      };
-
-      _showCrimeModal(data);
-    } catch (e) {
-      print("지역 필터링 통계 불러오기 오류: $e");
-    }
-  }
-
-  // ★ 모달로 표시 (통일된 데이터 구조 사용)
+  // 모달로 표시
   void _showCrimeModal(dynamic data) {
-    // 서버에서 받은 데이터 구조: {"region": {"sido": "...", "sigungu": "...", "dong": "..."}, "counts": {...}}
-    final region = data["region"] as Map<String, dynamic>;
-    final cnt = data["counts"] as Map<String, dynamic>;
-
-    // 모달 타이틀 설정 (지역 기반 필터링인지, 현재 위치 기반인지 구분)
-    String title = (region['dong'] != null && region['dong'].isNotEmpty && region['dong'] != '없음')
-        ? "현재 위치 (${region['dong']}) 성범죄자 등록 현황"
-        : "선택 지역 (${region['sigungu']}) 성범죄자 등록 현황"; // 읍면동이 없거나 '없음'이면 시군구 기준으로 표시
+    final region = data["region"];
+    final cnt = data["counts"];
 
     showModalBottomSheet(
       context: context,
@@ -356,25 +335,20 @@ class KakaoMapState extends State<KakaoMap> {
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [// ✅ 수정: 미리 정의한 title 변수를 사용하여 제목 출력
-              Center(
-                child: Text(title,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-              const Divider(height: 20),
+            children: [
+              Text("현재 위치 성범죄자 등록 현황",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              SizedBox(height: 20),
 
               /// 시/도
-              // ✅ 수정: _buildCountRow 위젯을 사용하여 통일된 방식으로 출력
-              _buildCountRow(region['sido'] as String, cnt['sidoCount']),
+              Text("${region['sido']} : ${cnt['sidoCount']}명"),
               /// 시군구
-              _buildCountRow(region['sigungu'] as String, cnt['sigunguCount']),
-
-              /// 읍면동 (dong이 '없음'이거나 비어있지 않은 경우에만 표시)
-              if (region['dong'] != null && region['dong'].isNotEmpty && region['dong'] != '없음')
-                _buildCountRow(region['dong'] as String, cnt['dongCount']),
+              Text("${region['sigungu']} : ${cnt['sigunguCount']}명"),
+              /// 읍면동
+              Text("${region['dong']} : ${cnt['dongCount']}명"),
 
               SizedBox(height: 20),
-              Text("자료 출처: <공공데이터포털> 여성가족부_성범죄자 공개 및 도로명 주소 정보",
+              Text("자료 출처: 여성가족부 성범죄자 알림e",
                   style: TextStyle(color: Colors.grey, fontSize: 12)),
             ],
           ),
@@ -383,24 +357,8 @@ class KakaoMapState extends State<KakaoMap> {
     );
   }
 
-  // ★ 추가: 카운트 정보 표시 위젯
-  Widget _buildCountRow(String regionName, dynamic count) {
-    if (regionName == null || regionName.isEmpty) return SizedBox.shrink();
 
-    // count가 int가 아닌 경우 0으로 처리 (혹시 모를 에러 방지)
-    final countValue = count is int ? count : 0;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text('• $regionName 등록 인원수:'),
-          Text('${countValue}명', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-        ],
-      ),
-    );
-  }
 
 
   // ✅ Flutter → JS로 지도 중심 이동
@@ -425,34 +383,31 @@ class KakaoMapState extends State<KakaoMap> {
         url = "https://api.odcloud.kr/api/15141554/v1/uddi:574fcc84-bcb8-4f09-9588-9b820731bf19?page=1&perPage=368&serviceKey=lxvZMQzViYP1QmBRI9MrdDw5ZmsblpCAd5iEKcTRES4ZcynJhQxzAuydpechK3TJCn43OJmweWMoYZ10aspdgQ%3D%3D";
         // key: 경도, 관리번호, 도로명 주소, 연번, 위도
       } else if (category == "government") { // 관공서
-        url = "http://192.168.40.61:8080/living/gov";
+        url = "http://192.168.40.28:8080/living/gov";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "night") { // 심야약국/병원
-        url = "http://192.168.40.61:8080/living/medical";
-        // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
-      } else if (category == "sexCrime") { // 성범죄자
-        url = "http://192.168.40.61:8080/safety/api/sexcrime/near";
+        url = "http://192.168.40.28:8080/living/medical";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "shelter") { // 대피소
-        url = "http://192.168.40.61:8080/safety/shelter";
+        url = "http://192.168.40.28:8080/safety/shelter";
         // key: 시설명, 위도, 경도
       } else if (category == "restroom") { // 공중화장실
-        url = "http://192.168.40.61:8080/safety/toilet";
+        url = "http://192.168.40.28:8080/safety/toilet";
         // key: 화장실명, 소재지도로명주소, 관리기관명, 전화번호, 개방시간상세, 위도, 경도
       } else if (category == "subwayLift") { // 지하철/승강기
-        url = "http://192.168.40.61:8080/transport/lift";
+        url = "http://192.168.40.28:8080/transport/lift";
         // key: 역사, 장비, 호기, 위도, 경도, 상태
       } else if (category == "subwaySchedule") { // 지하철/배차
-        url = "http://192.168.40.61:8080/transport/location";
+        url = "http://192.168.40.28:8080/transport/location";
         // key: 역사명, 위도, 경도
       } else if (category == "wheelchairCharger") { // 전동휠체어
-        url = "http://192.168.40.61:8080/api/chargers/all";
+        url = "http://192.168.40.28:8080/api/chargers/all";
         // key: 시설명, 소재지도로명주소, 위도, 경도, 평일운영시작시각, 평일운영종료시각, 관리기관명
       } else if (category == "localParking") { // 공영주차장
-        url = "http://192.168.40.61:8080/transport/parking";
+        url = "http://192.168.40.28:8080/transport/parking";
         // key: name, long, lat (시설명, 경도, 위도)
       } else if (category == "gas") {
-        url = "http://192.168.40.61:8080/transport/gas";
+        url = "http://192.168.40.28:8080/transport/gas";
         // key: 업소명, 소재지, 위도, 경도, 전화번호
       }
       final response = await Dio().get(url);
@@ -487,7 +442,7 @@ class KakaoMapState extends State<KakaoMap> {
           data[i]["prevStation"] = i > 0 ? data[i-1]["역사명"] : "none";
           data[i]["nextStation"] = i < data.length-1 ? data[i+1]["역사명"] : "none";
 
-          final responseTime = await Dio().get("http://192.168.40.61:8080/transport/schedule", queryParameters: {"station_name": stationName});
+          final responseTime = await Dio().get("http://192.168.40.28:8080/transport/schedule", queryParameters: {"station_name": stationName});
           // [LocalTime, LocalTime]
 
           if (responseTime.statusCode == 200 && responseTime.data is List && responseTime.data.length >= 2) {
@@ -528,91 +483,49 @@ class KakaoMapState extends State<KakaoMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Center(child: Text('통합 지도')),
-        // ★ 추가: 상단 지역 필터링 UI
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(56.0),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+      appBar: AppBar(title: const Center(child: Text('통합 지도'),)),
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+
+        // ✅ 1. 주소 검색창 UI 추가
+        Positioned(
+          top: 10,
+          left: 10,
+          right: 10,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8.0),
+              boxShadow: const [
+                BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
+              ],
+            ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 시도 드롭다운
-                DropdownButton<String>(
-                  value: selectedSido,
-                  hint: Text('시/도 선택'),
-                  items: sidoList.map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );;
-                  }).toList(),
-                  onChanged: (String? newValue){
-                    setState(() {
-                      selectedSido = newValue;;
-                      selectedSigungu = null; // 시도가 바뀌면 시군구 초기화
-                    });
-                  },
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: const InputDecoration(
+                      hintText: '장소, 주소 검색',
+                      border: InputBorder.none,
+                    ),
+                    // 엔터키 입력 시 검색 실행
+                    onSubmitted: (value) => _performSearch(value),
+                  ),
                 ),
-                const SizedBox(width: 15),
-
-                // 시군구 드롭다운
-                DropdownButton<String>(
-                  value: selectedSigungu,
-                  hint: Text('시/군/구 선택'),
-                  items: selectedSido != null && sigunguMap.containsKey(selectedSido)
-                      ? sigunguMap[selectedSido]!.map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList()
-                      : [],
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedSigungu = newValue;
-                    });
-                    if (newValue != null && selectedSido != null) {
-                      // ★ 선택한 지역의 통계 데이터 로드 및 모달 표시
-                      _filterCrimeInfo(selectedSido!, newValue);
-                    }
-                  },
-                ),
-
-                const SizedBox(width: 15),
-
-                // ✅ 추가: 동 드롭다운
-                DropdownButton<String>(
-                  value: selectedDong,
-                  hint: Text('읍/면/동 선택'),
-                  items: selectedSigungu != null && dongMap.containsKey(selectedSigungu)
-                      ? dongMap[selectedSigungu]!.map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList()
-                      : [],
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedDong = newValue;
-                    });
-                    if (newValue != null && selectedSigungu != null && selectedSido != null) {
-                      // ✅ 선택한 지역 (시/도 + 시/군/구 + 동)의 통계 데이터 로드 및 모달 표시
-                      _filterCrimeInfoWithDong(selectedSido!, selectedSigungu!, newValue);
-                    }
-                  },
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  color: Theme.of(context).primaryColor,
+                  onPressed: () => _performSearch(_searchController.text),
                 ),
               ],
             ),
           ),
         ),
-      ),
 
 
-      body: Stack(
-        children: [
-          WebViewWidget(controller: _controller),
 
           // 오른쪽 하단 확대/축소 버튼
           Positioned(
@@ -657,12 +570,6 @@ class KakaoMapState extends State<KakaoMap> {
                   heroTag: "night",
                   onPressed: () async => { await _fetchAndShowMarkers("night") },
                   child: Text("약국/병원"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "sexCrime",
-                  onPressed: () async => { await _fetchAndShowMarkers("sexCrime") },
-                  child: Text("성범죄자"),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
