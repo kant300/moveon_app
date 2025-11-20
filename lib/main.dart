@@ -28,7 +28,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false, // debug 배너 숨기기
-      initialRoute: "/onboarding",
+      initialRoute: "/map",
       routes: {
         "/onboarding" : (context) => OnboardingStart(),
         "/onboardingStart" : (context) => OnboardingStart(),

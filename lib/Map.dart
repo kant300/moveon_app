@@ -19,14 +19,36 @@ class KakaoMapState extends State<KakaoMap> {
   // ★ 추가: 지역 필터링을 위한 변수
   String? selectedSido;
   String? selectedSigungu;
+  String? selectedDong;
   // ★ 추가: 지역 필터링용 데이터 (실제 데이터에 맞게 조정 필요)
   // final List<String> sidoList = ['서울', '인천', '경기'];
   final List<String> sidoList = [ '인천' ];
+
   final Map<String, List<String>> sigunguMap = {
     '인천': ['강화군','계양구','남동구','동구', '미추홀구','부평구', '서구','연수구','옹진군','중구'],
     // '서울': ['강남구', '서초구', '마포구'],
     // '경기': ['수원시', '성남시', '용인시'],
   };
+
+  final Map<String, List<String>> dongMap = {
+    '강화군': ['강화읍', '교동면', '길상면', '내가면', '불은면', '삼산면', '서도면', '선원면', '송해면', '양도면', '양사면', '하점면', '하도면'],
+    '계양구': ['갈현동', '계산동', '귤현동', '노오지동', '다남동', '동양동', '둑실동', '목상동', '박촌동', '방축동', '병방동', '상야동', '서운동',
+      '선주지동', '오류동','용종동', '이화동','임학동', '작전동', '장기동', '평동', '하야동', '효성동'],
+    '남동구': ['간석동', '고잔동', '구월동', '남촌동', '논현동', '도림동', '만수동', '서창동', '수산동', '운연동', '장수동'],
+    '동구': ['금곡동', '만석동', '송림동', '송현동', '창영동', '화수동', '화평동'],
+    '미추홀구': ['관교동', '도화동', '문학동', '숭의동', '용현동', '주안동', '학익동'],
+    '부평구': ['갈산동', '구산동', '부개동', '부평동', '산곡동', '삼산동', '십정동', '일신동','청천동'],
+    '서구': ['가정동', '가좌동', '검암동', '경서동', '공촌동', '금곡동', '당하동', '대곡동', '마전동', '백석동', '불로동', '석남동',
+      '시천동', '신현동', '심곡동', '연희동', '오류동', '왕길동', '원당동','원창동', '청라동'],
+    '연수구': ['동춘동', '선학동', '송도동', '연수동', '옥련동', '청학동'],
+    '옹진군': ['대청면', '덕적면', '백령면', '북도면', '연평면', '영흥면', '자월면'],
+    '중구': ['경동', '관동1가', '관동2가', '관동3가', '남북동', '내동', '답동', '덕교동','도원동', '무의동', '북성동1가', '북성동2가', '북성동3가',
+      '사동', '선린동', '선화동', '송월동1가','송월동2가', '송월동3가', '송학동1가', '송학동2가', '송학동3가', '신생동', '신포동',
+      '신흥동1가', '신흥동2가', '신흥동3가','용동', '운남동', '운북동', '운서동', '유동', '율목동', '을왕동', '인현동', '전동', '중산동',
+      '중앙동1가', '중앙동2가', '중앙동3가', '중앙동4가', '항동1가', '항동2가', '항동3가', '항동4가', '항동5가', '항동6가','항동7가',
+      '해안동1가', '해안동2가', '해안동3가', '해안동4가']
+  };
+
 
   final String kakaoJsKey = '9eb4f86b6155c2fa2f5dac204d2cdb35';
   final String serverBaseUrl = 'http://192.168.40.61:8080';
@@ -39,7 +61,7 @@ class KakaoMapState extends State<KakaoMap> {
     /// 1) Kakao Map HTML
     /// ============================
     final html =
-        '''
+    '''
 <!DOCTYPE html>
 <html>
   <head>
@@ -251,35 +273,59 @@ class KakaoMapState extends State<KakaoMap> {
 
   // 서버 REST 호출해서 성범죄자 통계 가져오기
   // ★ 수정: 현재 위치 기반 성범죄자 통계 가져오기 (마커 클릭 시)
-  Future<void> _loadCrimeInfo(double? clickLat, double? clickLng) async {
-    if (clickLat == null || clickLng == null) return;
-
+  Future<void> _loadCrimeInfo(double? lat, double? lng) async {
+    if (lat == null || lng == null) return;
     try {
       // sexcrime/near 엔드포인트는 지오코딩 + 지역 카운트 기능을 모두 수행한다고 가정
       final res = await Dio().get(
-        "http://192.168.40.61:8080/api/sexcrime/near",
-        queryParameters: {"lat": clickLat, "lng": clickLng},
+        "$serverBaseUrl/api/sexcrime/near",
+        queryParameters: {"lat": lat, "lng": lng}, // 위도/경도 기반 요청
       );
 
-      _showCrimeModal(res.data);
+      // 임시로 지역 정보를 함께 구성
+      final data = res.data;
+      // 서버가 lat/lng에 해당하는 지역 정보를 반환해야 합니다.
+      _showCrimeModal(data);
 
     } catch (e) {
-      print("성범죄자 통계 불러오기 오류: $e");
+      print("현재 위치 기반 성범죄자 통계 불러오기 오류: $e");
     }
   }
 
-  // ★ 추가: 지역 필터링 기반 성범죄자 통계 가져오기
+  // ★ 수정: 시/군/구 필터링 함수는 sido와 sigungu 2개 인자만 받도록 수정
   Future<void> _filterCrimeInfo(String sido, String sigungu) async {
     try {
-      // 읍면동 정보가 없는 경우, 서버에서 시군구 단위 카운트를 반환한다고 가정
+      // 읍면동 정보는 빈 값으로 서버에 요청 (시군구 단위 카운트)
       final res = await Dio().get(
         "$serverBaseUrl/safety/sexcrime/count",
         queryParameters: {"sido": sido, "sigungu": sigungu, "dong": ""},
       );
 
+      // 임시로 지역 정보를 함께 구성
+      final data = {
+        "region": {"sido": sido, "sigungu": sigungu, "dong": "없음"}, // 읍면동 없음 표시
+        "counts": res.data
+      };
+
+      _showCrimeModal(data);
+    } catch (e) {
+      print("지역 필터링 통계 불러오기 오류: $e");
+    }
+  }
+
+  // ★ 추가: 지역 필터링 기반 성범죄자 통계 가져오기
+  Future<void> _filterCrimeInfoWithDong(String sido, String sigungu, String dong) async {
+    try {
+      // 읍면동 정보까지 포함하여 서버에 요청
+      // 이 엔드포인트는 서버에서 sido/sigungu/dong을 모두 처리해야 합니다.
+      final res = await Dio().get(
+        "$serverBaseUrl/safety/sexcrime/count",
+        queryParameters: {"sido": sido, "sigungu": sigungu, "dong": dong},
+      );
+
       // 임시로 지역 정보를 함께 구성 (서버에서 sido/sigungu를 다시 보내주지 않는 경우)
       final data = {
-        "region": {"sido": sido, "sigungu": sigungu, "dong": "없음"},
+        "region": {"sido": sido, "sigungu": sigungu, "dong": "dong"},
         "counts": res.data
       };
 
@@ -361,7 +407,7 @@ class KakaoMapState extends State<KakaoMap> {
   void _moveToMyLocation() {
     if (lat != null && lng != null) {
       final js =
-          '''
+      '''
         var moveLatLon = new kakao.maps.LatLng($lat, $lng);
         map.panTo(moveLatLon);
         marker.setPosition(moveLatLon);
@@ -483,60 +529,86 @@ class KakaoMapState extends State<KakaoMap> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Center(child: Text('통합 지도')),
-      // ★ 추가: 상단 지역 필터링 UI
-      bottom: PreferredSize(
+        // ★ 추가: 상단 지역 필터링 UI
+        bottom: PreferredSize(
           preferredSize: const Size.fromHeight(56.0),
           child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // 시도 드롭다운
-                  DropdownButton<String>(
-                      value: selectedSido,
-                      hint: Text('시/도 선택'),
-                      items: sidoList.map((String value) {
-                        return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                        );;
-                      }).toList(),
-                      onChanged: (String? newValue){
-                        setState(() {
-                          selectedSido = newValue;;
-                          selectedSigungu = null; // 시도가 바뀌면 시군구 초기화
-                        });
-                      },
-                  ),
-                  const SizedBox(width: 15),
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 시도 드롭다운
+                DropdownButton<String>(
+                  value: selectedSido,
+                  hint: Text('시/도 선택'),
+                  items: sidoList.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );;
+                  }).toList(),
+                  onChanged: (String? newValue){
+                    setState(() {
+                      selectedSido = newValue;;
+                      selectedSigungu = null; // 시도가 바뀌면 시군구 초기화
+                    });
+                  },
+                ),
+                const SizedBox(width: 15),
 
-                  // 시군구 드롭다운
-                  DropdownButton<String>(
-                    value: selectedSigungu,
-                    hint: Text('시/군/구 선택'),
-                    items: selectedSido != null && sigunguMap.containsKey(selectedSido)
-                        ? sigunguMap[selectedSido]!.map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList()
-                        : [],
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedSigungu = newValue;
-                      });
-                      if (newValue != null && selectedSido != null) {
-                        // ★ 선택한 지역의 통계 데이터 로드 및 모달 표시
-                        _filterCrimeInfo(selectedSido!, newValue);
-                      }
-                    },
-                  ),
-                ],
-              ),
+                // 시군구 드롭다운
+                DropdownButton<String>(
+                  value: selectedSigungu,
+                  hint: Text('시/군/구 선택'),
+                  items: selectedSido != null && sigunguMap.containsKey(selectedSido)
+                      ? sigunguMap[selectedSido]!.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList()
+                      : [],
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedSigungu = newValue;
+                    });
+                    if (newValue != null && selectedSido != null) {
+                      // ★ 선택한 지역의 통계 데이터 로드 및 모달 표시
+                      _filterCrimeInfo(selectedSido!, newValue);
+                    }
+                  },
+                ),
+
+                const SizedBox(width: 15),
+
+                // ✅ 추가: 동 드롭다운
+                DropdownButton<String>(
+                  value: selectedDong,
+                  hint: Text('읍/면/동 선택'),
+                  items: selectedSigungu != null && dongMap.containsKey(selectedSigungu)
+                      ? dongMap[selectedSigungu]!.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList()
+                      : [],
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedDong = newValue;
+                    });
+                    if (newValue != null && selectedSigungu != null && selectedSido != null) {
+                      // ✅ 선택한 지역 (시/도 + 시/군/구 + 동)의 통계 데이터 로드 및 모달 표시
+                      _filterCrimeInfoWithDong(selectedSido!, selectedSigungu!, newValue);
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
+
 
       body: Stack(
         children: [
@@ -585,6 +657,12 @@ class KakaoMapState extends State<KakaoMap> {
                   heroTag: "night",
                   onPressed: () async => { await _fetchAndShowMarkers("night") },
                   child: Text("약국/병원"),
+                ),
+                const SizedBox(height: 10),
+                FloatingActionButton.small(
+                  heroTag: "sexCrime",
+                  onPressed: () async => { await _fetchAndShowMarkers("sexCrime") },
+                  child: Text("성범죄자"),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(
