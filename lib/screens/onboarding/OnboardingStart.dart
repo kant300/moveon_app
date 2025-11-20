@@ -23,6 +23,7 @@ class StateOnboardingStart extends State<OnboardingStart>{
   TextEditingController midCont = TextEditingController(); // 아이디
   TextEditingController mpwdCont = TextEditingController(); // 비밀번호
 
+  // ✅ 수정: 비동기 함수이므로 반환 타입을 Future<void>로 변경했습니다.
   Future<void> login() async{
     try {
       final obj = {
@@ -110,7 +111,17 @@ class StateOnboardingStart extends State<OnboardingStart>{
                       TextField( controller: midCont  ),
                       TextField( controller: mpwdCont  ),
 
-                      OutlinedButton(onPressed: () async { await login(); Navigator.pushReplacementNamed(context, "/main"); }, child: Text("로그인") ),
+                      OutlinedButton(
+                          onPressed: () async {
+                            // 1. login() 함수가 Future<void>를 반환하도록 정의되어야 합니다.
+                            await login();
+                            // 2. 비동기 작업 후, 위젯이 마운트된 상태(mounted)일 때만 화면 이동
+                            if (mounted) {
+                              Navigator.pushReplacementNamed(context, "/main");
+                            }
+                          },
+                          child: Text("로그인")
+                      ),
                       TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findid"); } , child: Text("아이디찾기"), ),
                       TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findpwd"); } , child: Text("비밀번호찾기"), ),
                       TextButton(onPressed: (){Navigator.pushReplacementNamed(context, "/signup"); }, child: Text("회원가입 페이지로 이동"),),

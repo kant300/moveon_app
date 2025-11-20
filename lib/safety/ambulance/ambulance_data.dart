@@ -29,25 +29,24 @@ class AmbulanceDto {
 
   factory AmbulanceDto.fromJson(Map<String, dynamic> json) {
     return AmbulanceDto(
-      // 💡 필드명은 영문으로, JSON 키는 백엔드와 맞춘 한글 키로 유지
-      province: json['시도'] ?? '',
-      region: json['구군'] ?? '',
-      address: json['주소'] ?? '',
-      companyName: json['업체명'] ?? '',
-      special: json['특수'] ?? '',
-      general: json['일반'] ?? '',
-      contact: json['연락처'] ?? '',
-      department: json['담당과'] ?? '',
-      team: json['담당팀'] ?? '',
-      officerContact: json['담당자연락처'] ?? '',
+      province: json['province'] ?? '',
+      region: json['region'] ?? '',
+      address: json['address'] ?? '',
+      companyName: json['companyName'] ?? '',
+      special: json['special'] ?? '',
+      general: json['general'] ?? '',
+      contact: json['contact'] ?? '',
+      department: json['department'] ?? '',
+      team: json['team'] ?? '',
+      officerContact: json['officerContact'] ?? '',
     );
   }
 }
 /// 업체 현황 테이블 헤더
-const List<String> kCompanyHeaders = ['업체명', '주소', '연락처'];
+List<String> kCompanyHeaders = ['업체명', '주소', '연락처'];
 
 /// 이송 처치료 기준 (고정 데이터)
-const Map<String, List<String>> kFeeData = {
+Map<String, List<String>> kFeeData = {
 '기본요금 (이송거리 10km 이내)': ['30,000원', '75,000원'],
 '추가요금 (이송거리 1km 초과)': ['1,000원/1km', '1,300원/1km'],
 '부가요금 (응급구조사 활용 시)': ['15,000원', 'X'],
@@ -55,4 +54,4 @@ const Map<String, List<String>> kFeeData = {
 };
 
 /// 담당과/팀 헤더
-const List<String> kOfficerHeaders = ['담당과', '담당팀', '연락처'];
+List<String> kOfficerHeaders = ['담당과', '담당팀', '연락처'];
