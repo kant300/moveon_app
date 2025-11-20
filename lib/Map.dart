@@ -208,8 +208,9 @@ class KakaoMapState extends State<KakaoMap> {
             if (window.flutterChannel) {
               window.flutterChannel.postMessage("searchFailed");
             }
-            });
-            
+          }
+        });
+      };    
 
       // ✅ 지도 확대 / 축소 함수 추가
       function zoomIn() {
@@ -552,6 +553,9 @@ class KakaoMapState extends State<KakaoMap> {
           Positioned(
             left: 10,
             top: 100,
+
+
+
             child: Column(
               children: [
                 FloatingActionButton.small(
