@@ -25,30 +25,26 @@ class LoginState extends State<Login> {
         "mpwd": mpwdCont.text,
       };
       final response = await dio.post(
-        "http://10.164.103.46:8080/api/member/login", data: obj,
+        "http://10.95.125.46:8080/api/member/login", data: obj,
         options: Options(headers: {"Content-Type": "application/json"}),
       );
       final data = await response.data;
       print(data);
-      print(obj);
-      if (data != null) {
-        setState(() {
-          test = data['member'];
-        });
 
+      if (data['status'] == "Login") {
       final localsave = await SharedPreferences.getInstance();
       if(data['token'] != null ){
         await localsave.setString('logintoken', data['token'] );
         print(localsave);
+        // 게스트 토크 제거
+        await localsave.remove('guestToken');
+        
+        Navigator.pushReplacementNamed(context, "/menu");
         print("토큰 저장 : ${data['token']}");
       }
       await localsave.setString('mname', data['member']['mname']);
 
       print("로그인 성공");
-
-        Navigator.pop(context, {
-          'mname': data['member']['mname'], // 이름 전달
-        });
 
     }
     }catch(e) { print("로그인 실패 $e") ; }

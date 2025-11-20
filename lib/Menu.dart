@@ -9,11 +9,23 @@ class Menu extends StatefulWidget {
 class MenuState extends State<Menu> {
 
   String address = "주소 정보 없음";
+  List<String> wishposi = [];
+
+  String wishlist = '';
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      tokencall();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
     tokencall();
   }
   // 단일 메뉴 아이템(아이콘과 텍스트)을 구성하는 위젯
@@ -100,38 +112,100 @@ class MenuState extends State<Menu> {
   }
 
   void tokencall() async{
+
+      setState(() {
+        address = "주소정보 없음";
+      });
+
       final localsave = await SharedPreferences.getInstance();
 
       final logintoken = localsave.getString("logintoken");
       final guesttoken = localsave.getString("guestToken");
 
+      print(" logintoken = $logintoken");
+      print(" guestToken = $guesttoken");
+
       String? token;
+
       try {
-        if (logintoken != null) {
-          token = logintoken;
-          final response = await dio.get("http://10.164.103.46:8080/api/member/info" ,
-              options: Options(headers: { "Authorization" : "Bearer $logintoken" }),
+        if (guesttoken != null) {
+          print(" 게스트 토큰 감지");
+
+          final response = await dio.get(
+            "http://10.95.125.46:8080/api/guest/address",
+            options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
           );
-          final data = await response.data;
+
+          final data = response.data;
+
+          print(" 게스트 주소 데이터: $data");
+
           setState(() {
+            wishposi = wishlist.split(",");
+            wishlist = data['wishlist'] ?? "";
             address = "${data['gaddress1']} ${data['gaddress2']} ${data['gaddress3']}";
           });
-          print("회원 $token");
-        } else if (guesttoken != null) {
-          token = guesttoken;
-          final response = await dio.get("http://10.164.103.46:8080/api/guest/address" ,
-              options: Options(headers: { "Authorization" : "Bearer $guesttoken" }),
-          );
-          final data = await response.data;
-          setState(() {
-            address = "${data['gaddress1']} ${data['gaddress2']} ${data['gaddress3']}";
-          });
-          print("게스트 $token");
-          print(address);
-        } else {
-          print("토큰 X");
+
+          return; //  회원 체크로 넘어가지 않도록 즉시 종료
         }
-      }catch(e) {print(e); }
+
+        // 2 회원 토큰 처리
+        if (logintoken != null) {
+          print(" 회원 토큰 감지");
+
+          final response = await dio.get(
+            "http://10.95.125.46:8080/api/member/info",
+            options: Options(headers: {"Authorization": "Bearer $logintoken"}),
+          );
+
+          final data = response.data;
+
+          print(" 회원 주소 데이터: $data");
+
+          setState(() {
+            address = "${data['maddress1']} ${data['maddress2']} ${data['maddress3']}";
+          });
+
+          return;
+        }
+
+        // 3️ 둘 다 없음
+        print(" 저장된 토큰 없음");
+
+      } catch (e) {
+        print(" 오류 발생: $e");
+      }
+  }
+
+  void togglewish(String category) async{
+    final localsave = await SharedPreferences.getInstance();
+    final logintoken = localsave.getString("logintoken");
+    final guesttoken = localsave.getString("guestToken");
+
+    String? token = logintoken ?? guesttoken;
+    if(token == null)  return; // 토큰 없으면 종료;
+
+    // 만약에 존재시 삭제
+    if(wishposi.contains(category)) {
+      wishposi.remove(category);
+    }else{
+      wishposi.add(category);
+    }
+      // 문자열로 변경
+    String Scategory = wishposi.join(",");
+    
+    try{
+      final response = await dio.put("http://10.95.125.46:8080/api/member/wishlist" ,
+      data: {"wishlist": Scategory},
+      options: Options(headers: {"Authorization" : "Bearer $token"},
+      ), );
+      
+      print("즐겨찾기 확인 : ${response.data}");
+
+      setState(() {
+        wishlist = Scategory;
+      });
+    }catch(e) { print(e); }
   }
 
   @override

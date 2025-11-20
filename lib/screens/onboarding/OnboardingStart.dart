@@ -30,7 +30,7 @@ class StateOnboardingStart extends State<OnboardingStart>{
         "mpwd": mpwdCont.text,
       };
       final response = await dio.post(
-        "http://10.164.103.46:8080/api/member/login", data: obj,
+        "http://10.95.125.46:8080/api/member/login", data: obj,
         options: Options(headers: {"Content-Type": "application/json"}),
       );
       final data = await response.data;
@@ -61,7 +61,7 @@ class StateOnboardingStart extends State<OnboardingStart>{
   
   void guest() async{
     try{
-      final response = await dio.post("http://10.164.103.46:8080/api/guest/save");
+      final response = await dio.post("http://10.95.125.46:8080/api/guest/save");
       final data = await response.data;
       final token = data["token"];
 
@@ -110,7 +110,7 @@ class StateOnboardingStart extends State<OnboardingStart>{
                       TextField( controller: midCont  ),
                       TextField( controller: mpwdCont  ),
 
-                      OutlinedButton(onPressed: () async { await login(); Navigator.pushReplacementNamed(context, "/main"); }, child: Text("로그인") ),
+                      OutlinedButton(onPressed: () async { await login(); Navigator.pushReplacementNamed(context, "/menu"); }, child: Text("로그인") ),
                       TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findid"); } , child: Text("아이디찾기"), ),
                       TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findpwd"); } , child: Text("비밀번호찾기"), ),
                       TextButton(onPressed: (){Navigator.pushReplacementNamed(context, "/signup"); }, child: Text("회원가입 페이지로 이동"),),

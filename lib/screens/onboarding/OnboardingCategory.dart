@@ -103,7 +103,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
         "wishlist": wishstr,
       };
       final response = await dio.post(
-        "http://10.164.103.46:8080/api/guest/wishlist",
+        "http://10.95.125.46:8080/api/guest/wishlist",
         data: obj,
         options: Options(headers: {"Authorization": "Bearer $token"}),
       );
