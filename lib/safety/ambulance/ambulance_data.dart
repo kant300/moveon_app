@@ -4,7 +4,7 @@
 class AmbulanceDto {
   // 💡 한글 변수명을 영문으로 변경
   final String province;       // 시도
-  final String region;         // 지역
+  final String region;         // 구군
   final String address;        // 주소
   final String companyName;    // 업체명
   final String special;        // 특수
@@ -31,7 +31,7 @@ class AmbulanceDto {
     return AmbulanceDto(
       // 💡 필드명은 영문으로, JSON 키는 백엔드와 맞춘 한글 키로 유지
       province: json['시도'] ?? '',
-      region: json['지역'] ?? '',
+      region: json['구군'] ?? '',
       address: json['주소'] ?? '',
       companyName: json['업체명'] ?? '',
       special: json['특수'] ?? '',

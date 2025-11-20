@@ -43,20 +43,24 @@ class ChecklistState extends State<Checklist> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context, isChecked);
-            },
-            icon: Icon(Icons.arrow_back)),
-        title: Text("정착 Check-list")),
+          onPressed: () {
+            Navigator.pop(context, isChecked);
+          },
+          icon: Icon(Icons.arrow_back),
+        ),
+        title: Text("정착 Check-list"),
+      ),
       body: Column(
         children: [
           Expanded(
+            // 상단 영역
             flex: 1,
             child: Container(
               width: double.infinity,
               color: Color(0xFFEAEAEA),
               child: Center(
                 child: Container(
+                  // 상단 컨테이너
                   width: 350,
                   height: 240,
                   decoration: BoxDecoration(
@@ -64,6 +68,7 @@ class ChecklistState extends State<Checklist> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: ChecklistTitle(
+                    // 상단 컨테이너 내용
                     checklistType: checklistType,
                     checkValues: isChecked[checklistType],
                     onTypeChanged: updateChecklistType,
@@ -73,6 +78,7 @@ class ChecklistState extends State<Checklist> {
             ),
           ),
           Expanded(
+            // 하단 영역
             flex: 2,
             child: Container(
               width: double.infinity,
@@ -80,6 +86,7 @@ class ChecklistState extends State<Checklist> {
               child: SingleChildScrollView(
                 padding: EdgeInsets.all(5),
                 child: ChecklistContent(
+                  // 하단 컨테이너 내용
                   checklistType: checklistType,
                   checkValues: isChecked[checklistType],
                   onCheckChanged: (index, value) =>
@@ -94,6 +101,7 @@ class ChecklistState extends State<Checklist> {
   }
 }
 
+// 정착 체크리스트의 상단 내용
 class ChecklistTitle extends StatelessWidget {
   final int checklistType;
   final List<bool> checkValues;
@@ -112,7 +120,7 @@ class ChecklistTitle extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Row(
+        Row( // 상단 타이틀
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
@@ -126,16 +134,19 @@ class ChecklistTitle extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
+              // back 버튼
               icon: Icon(Icons.arrow_back_ios),
               onPressed: checklistType > 0
                   ? () => onTypeChanged(checklistType - 1)
                   : null,
             ),
             Text(
+              // 상단 진행사항 표시
               checkValues.map((e) => e ? "■" : "□").join(),
               style: TextStyle(fontSize: 28),
             ),
             IconButton(
+              // forward 버튼
               icon: Icon(Icons.arrow_forward_ios),
               onPressed: checklistType < 2
                   ? () => onTypeChanged(checklistType + 1)
@@ -150,6 +161,7 @@ class ChecklistTitle extends StatelessWidget {
   }
 }
 
+// 정착 체크리스트의 하단 내용
 class ChecklistContent extends StatelessWidget {
   final int checklistType;
   final List<bool> checkValues;
@@ -244,6 +256,7 @@ class ChecklistContent extends StatelessWidget {
     return Column(
       children: List.generate(checkValues.length, (index) {
         return ChecklistCard(
+          // 체크리스트 카드 위젯
           title: titles[index],
           subtitle: subtitles[index],
           buttonText: buttonTexts[index],
@@ -261,32 +274,232 @@ class ChecklistPersonal extends StatefulWidget {
 }
 
 class ChecklistPersonalState extends State<ChecklistPersonal> {
+  // 체크리스트의 체크박스, 화면 상태
+  List<Map<String, dynamic>> items = [];
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController subtitleController = TextEditingController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is List<Map<String, dynamic>>) {
+      items = List<Map<String, dynamic>>.from(args);
+    }
+  }
+
+  // 체크박스 상태 변경
+  void updateCheckValue(int index, bool value) {
+    setState(() {
+      items[index]["isChecked"] = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Text("test"),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context, items.map((e) => e["isChecked"]).toList());
+          },
+          icon: Icon(Icons.arrow_back),
+        ),
+        title: Text("개인 Check-list"),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            // 상단 영역
+            flex: 1,
+            child: Container(
+              width: double.infinity,
+              color: Color(0xFFEAEAEA),
+              child: Center(
+                child: Container(
+                  // 상단 컨테이너
+                  width: 350,
+                  height: 240,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFC8EFFF),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    // 상단 컨테이너 내용
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("개인 Check-list", style: TextStyle(fontSize: 24)),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            items.isNotEmpty
+                                ? items.map((e) => e["isChecked"] ? "■" : "□").join()
+                                : "목록 없음",
+                            style: TextStyle(fontSize: 28),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        "직접 목록을 추가하고 관리할 수 있습니다",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            // 하단 영역
+            flex: 2,
+            child: Container(
+              width: double.infinity,
+              color: Color(0xFFADE7FF),
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(5),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          // 최대 10개까지만 생성 가능
+                          onPressed: () {
+                            if (items.length < 10) {
+                              String title;
+                              String subtitle;
+
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text("Check-list 등록"),
+                                    content: Column(
+                                      children: [
+                                        TextField(
+                                          decoration: InputDecoration(
+                                            labelText: "제목",
+                                            hintText: "제목을 입력하세요",
+                                          ),
+                                          controller: titleController,
+                                        ),
+                                        TextField(
+                                          decoration: InputDecoration(
+                                            labelText: "내용",
+                                            hintText: "내용을 입력하세요",
+                                          ),
+                                          controller: subtitleController,
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(context, "취소"), child: Text("취소")),
+                                      TextButton(onPressed: () {
+                                        if (titleController.text.isNotEmpty) {
+                                          title = titleController.text.trim();
+                                          subtitle = subtitleController.text.trim();
+
+                                          setState(() {
+                                            items.add({"title": title, "subtitle": subtitle, "isChecked": false});
+                                          });
+                                          Navigator.pop(context, "등록");
+                                        }
+                                      }, child: Text("등록"))
+                                    ],
+                                  ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("최대 10개까지만 추가할 수 있습니다.")),
+                              );
+                            }
+                          }, // 새로 추가하기 버튼
+                          child: Text("+ 새로 추가하기"),
+                        ),
+                      ],
+                    ),
+                    ...List.generate(items.length, (index) {
+                      return ChecklistCard(
+                        title: "제목",
+                        subtitle: "내용",
+                        onEdit: () {
+                          print("수정: $index");
+                        },
+                        onDelete: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("삭제 확인"),
+                                content: Text("정말로 삭제하시겠습니까?"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text("취소"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        items.removeAt(index);
+                                      });
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text("삭제"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        checkboxValue: items[index]["isChecked"],
+                        onCheckboxChanged: (value) =>
+                            updateCheckValue(index, value),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
+// 체크리스트 내용 카드
 class ChecklistCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final String buttonText;
+  final String? buttonText;
   final bool? checkboxValue;
   final ValueChanged<bool>? onCheckboxChanged;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const ChecklistCard({
     required this.title,
     required this.subtitle,
-    required this.buttonText,
-    this.checkboxValue,
-    this.onCheckboxChanged,
+    this.buttonText,
+    required this.checkboxValue,
+    required this.onCheckboxChanged,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      // 카드 컨테이너
       width: 330,
       height: 100,
       margin: EdgeInsets.symmetric(vertical: 10),
@@ -301,6 +514,7 @@ class ChecklistCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              // 상단 타이틀, 체크박스
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(title),
@@ -315,8 +529,16 @@ class ChecklistCard extends StatelessWidget {
                   ),
               ],
             ),
-            Text(subtitle, style: TextStyle(fontSize: 13)),
-            TextButton(onPressed: () {}, child: Text(buttonText)),
+            Text(subtitle, style: TextStyle(fontSize: 13)), // 중단 텍스트
+            buttonText !=
+                    null // 하단 이동 버튼, 또는 수정, 삭제 버튼
+                ? TextButton(onPressed: () {}, child: Text(buttonText!))
+                : Row(
+                    children: [
+                      TextButton(onPressed: onEdit, child: Text("수정")),
+                      TextButton(onPressed: onDelete, child: Text("삭제")),
+                    ],
+                  ),
           ],
         ),
       ),
