@@ -302,7 +302,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            Navigator.pop(context, items.map((e) => e["isChecked"]).toList());
+            Navigator.pop(context, items);
           },
           icon: Icon(Icons.arrow_back),
         ),
@@ -369,6 +369,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
               child: SingleChildScrollView(
                 padding: EdgeInsets.all(5),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -422,6 +423,8 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                                               "isChecked": false,
                                             });
                                           });
+                                          titleController.clear();
+                                          subtitleController.clear();
                                           Navigator.pop(context, "등록");
                                         }
                                       },
@@ -442,7 +445,6 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                         ),
                       ],
                     ),
-                    if (items.isNotEmpty)
                       ...List.generate(items.length, (index) {
                         return ChecklistCard(
                           title: items[index]["title"],
