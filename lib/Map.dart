@@ -314,7 +314,7 @@ class KakaoMapState extends State<KakaoMap> {
 
     try {
       final res = await Dio().get(
-        "http://192.168.40.28:8080/crime/near",
+        "http://192.168.40.61:8080/api/safety/sexcrime/near",
         queryParameters: {"lat": lat, "lng": lng},
       );
 
@@ -345,11 +345,13 @@ class KakaoMapState extends State<KakaoMap> {
               SizedBox(height: 20),
 
               /// 시/도
-              Text("${region['sido']} : ${cnt['sidoCount']}명"),
+              Text("${region['sido']} : ${cnt['sidoCount']}명", style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
               /// 시군구
-              Text("${region['sigungu']} : ${cnt['sigunguCount']}명"),
+              Text("${region['sigungu']} : ${cnt['sigunguCount']}명", style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
               /// 읍면동
-              Text("${region['dong']} : ${cnt['dongCount']}명"),
+              Text("${region['dong']} : ${cnt['dongCount']}명", style: const TextStyle(fontSize: 16)),
 
               SizedBox(height: 20),
               Text("자료 출처: 여성가족부 성범죄자 알림e",
@@ -387,34 +389,34 @@ class KakaoMapState extends State<KakaoMap> {
         url = "https://api.odcloud.kr/api/15141554/v1/uddi:574fcc84-bcb8-4f09-9588-9b820731bf19?page=1&perPage=368&serviceKey=lxvZMQzViYP1QmBRI9MrdDw5ZmsblpCAd5iEKcTRES4ZcynJhQxzAuydpechK3TJCn43OJmweWMoYZ10aspdgQ%3D%3D";
         // key: 경도, 관리번호, 도로명 주소, 연번, 위도
       } else if (category == "government") { // 관공서
-        url = "http://192.168.40.28:8080/living/gov";
+        url = "http://192.168.40.61:8080/living/gov";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "night") { // 심야약국/병원
-        url = "http://192.168.40.28:8080/living/medical";
+        url = "http://192.168.40.61:8080/living/medical";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "sexCrime") { // 성범죄자
-        url = "http://192.168.40.28:8080/safety/api/sexcrime/near";
+        url = "http://192.168.40.61:8080/safety/api/sexcrime/near";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "shelter") { // 대피소
-        url = "http://192.168.40.28:8080/safety/shelter";
+        url = "http://192.168.40.61:8080/safety/shelter";
         // key: 시설명, 위도, 경도
       } else if (category == "restroom") { // 공중화장실
-        url = "http://192.168.40.28:8080/safety/toilet";
+        url = "http://192.168.40.61:8080/safety/toilet";
         // key: 화장실명, 소재지도로명주소, 관리기관명, 전화번호, 개방시간상세, 위도, 경도
       } else if (category == "subwayLift") { // 지하철/승강기
-        url = "http://192.168.40.28:8080/transport/lift";
+        url = "http://192.168.40.61:8080/transport/lift";
         // key: 역사, 장비, 호기, 위도, 경도, 상태
       } else if (category == "subwaySchedule") { // 지하철/배차
-        url = "http://192.168.40.28:8080/transport/location";
+        url = "http://192.168.40.61:8080/transport/location";
         // key: 역사명, 위도, 경도
       } else if (category == "wheelchairCharger") { // 전동휠체어
-        url = "http://192.168.40.28:8080/api/chargers/all";
+        url = "http://192.168.40.61:8080/api/chargers/all";
         // key: 시설명, 소재지도로명주소, 위도, 경도, 평일운영시작시각, 평일운영종료시각, 관리기관명
       } else if (category == "localParking") { // 공영주차장
-        url = "http://192.168.40.28:8080/transport/parking";
+        url = "http://192.168.40.61:8080/transport/parking";
         // key: name, long, lat (시설명, 경도, 위도)
       } else if (category == "gas") {
-        url = "http://192.168.40.28:8080/transport/gas";
+        url = "http://192.168.40.61:8080/transport/gas";
         // key: 업소명, 소재지, 위도, 경도, 전화번호
       }
       final response = await Dio().get(url);
@@ -449,7 +451,7 @@ class KakaoMapState extends State<KakaoMap> {
           data[i]["prevStation"] = i > 0 ? data[i-1]["역사명"] : "none";
           data[i]["nextStation"] = i < data.length-1 ? data[i+1]["역사명"] : "none";
 
-          final responseTime = await Dio().get("http://192.168.40.28:8080/transport/schedule", queryParameters: {"station_name": stationName});
+          final responseTime = await Dio().get("http://192.168.40.61:8080/transport/schedule", queryParameters: {"station_name": stationName});
           // [LocalTime, LocalTime]
 
           if (responseTime.statusCode == 200 && responseTime.data is List && responseTime.data.length >= 2) {
@@ -580,6 +582,12 @@ class KakaoMapState extends State<KakaoMap> {
                   heroTag: "night",
                   onPressed: () async => { await _fetchAndShowMarkers("night") },
                   child: Text("약국/병원"),
+                ),
+                const SizedBox(height: 10),
+                FloatingActionButton.small(
+                  heroTag: "sexCrime",
+                  onPressed: () async => { await _fetchAndShowMarkers("sexCrime") },
+                  child: Text("성범죄자"),
                 ),
                 const SizedBox(height: 10),
                 FloatingActionButton.small(

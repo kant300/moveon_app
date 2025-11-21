@@ -30,7 +30,6 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false, // debug 배너 숨기기
       initialRoute: "/",
       routes: {
-        "/onboarding" : (context) => OnboardingStart(),
         "/onboardingStart" : (context) => OnboardingStart(),
         "/onboardingAddress" : (context) => OnboardingAddress(),
         "/onboardingCategory" : (context) => OnboardingCategory(),

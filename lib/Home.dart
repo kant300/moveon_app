@@ -1,9 +1,36 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:moveon_app/weather/WeatherWidget.dart';
 
 class Home extends StatefulWidget {
   HomeState createState() => HomeState();
+}
+
+class WeatherWidget extends StatelessWidget {
+  const WeatherWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Card(
+        color: Color(0xFFE0F7FA), // Light Cyan background
+        elevation: 4,
+        child: ListTile(
+          leading: Icon(Icons.wb_sunny, color: Colors.amber, size: 32),
+          title: Text(
+            '현재 날씨 정보',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey),
+          ),
+          subtitle: Text(
+            '22°C, 맑음. 서울',
+            style: TextStyle(color: Colors.blueGrey),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class HomeState extends State<Home> {
@@ -123,7 +150,8 @@ class HomeState extends State<Home> {
       body: Center(
         child: Column(
           children: [
-            Text("가장 가까운 공공시설 거리"),
+            const WeatherWidget(),
+            //Text("가장 가까운 공공시설 거리"),
             Padding(
               padding: EdgeInsetsGeometry.all(10),
               child: Row(
