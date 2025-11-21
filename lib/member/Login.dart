@@ -47,7 +47,7 @@ class LoginState extends State<Login> {
 
           if (wishlist == null || wishlist == "") {
             print("신규 사용자");
-            Navigator.pushReplacementNamed(context, "/OnboardingCategory");
+            Navigator.pushReplacementNamed(context, "/onboardingCategory");
           } else {
             print("그냥 사용자");
             Navigator.pushReplacementNamed(context, "/menu" );
