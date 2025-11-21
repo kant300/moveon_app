@@ -166,8 +166,7 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        address,
+                      Text( address.isEmpty ? "설정된 주소가 없음" : address,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

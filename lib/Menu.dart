@@ -195,7 +195,7 @@ class MenuState extends State<Menu> {
     String Scategory = wishposi.join(",");
     
     try{
-      final response = await dio.put("http://10.95.125.46:8080/api/member/wishlist" ,
+      final response = await dio.put("http://10.95.125.46:8080/api/guest/wishlist" ,
       data: {"wishlist": Scategory},
       options: Options(headers: {"Authorization" : "Bearer $token"},
       ), );

@@ -29,9 +29,8 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false, // debug 배너 숨기기
-      initialRoute: "/",
+      initialRoute: "/onboardingStart",
       routes: {
-        "/onboarding" : (context) => OnboardingStart(),
         "/onboardingStart" : (context) => OnboardingStart(),
         "/onboardingAddress" : (context) => OnboardingAddress(),
         "/onboardingCategory" : (context) => OnboardingCategory(),
@@ -71,7 +70,7 @@ class Main extends StatefulWidget {
 }
 
 class MainState extends State<Main> {
-  int currentPage = 2;
+  int currentPage = 0;
   dynamic pages = [
     Menu(),
     KakaoMap(),

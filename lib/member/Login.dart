@@ -2,6 +2,8 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:moveon_app/Menu.dart';
+import 'package:moveon_app/screens/onboarding/OnboardingCategory.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final dio = Dio();
@@ -18,7 +20,7 @@ class LoginState extends State<Login> {
   TextEditingController midCont = TextEditingController(); // 아이디
   TextEditingController mpwdCont = TextEditingController(); // 비밀번호
 
-  void login() async{
+  void login() async {
     try {
       final obj = {
         "mid": midCont.text,
@@ -32,22 +34,31 @@ class LoginState extends State<Login> {
       print(data);
 
       if (data['status'] == "Login") {
-      final localsave = await SharedPreferences.getInstance();
-      if(data['token'] != null ){
-        await localsave.setString('logintoken', data['token'] );
-        print(localsave);
-        // 게스트 토크 제거
-        await localsave.remove('guestToken');
-        
-        Navigator.pushReplacementNamed(context, "/menu");
-        print("토큰 저장 : ${data['token']}");
+        final localsave = await SharedPreferences.getInstance();
+        if (data['token'] != null) {
+          await localsave.setString('logintoken', data['token']);
+          print(localsave);
+          // 게스트 토크 제거
+          await localsave.remove('guestToken');
+          await localsave.setString('mname', data['member']['mname']);
+
+          final member = data['member'];
+          final wishlist = member['wishlist']; // null 기준 확이용ㅇ 회원 신규잡기
+
+          if (wishlist == null || wishlist == "") {
+            print("신규 사용자");
+            Navigator.pushReplacementNamed(context, "/OnboardingCategory");
+          } else {
+            print("그냥 사용자");
+            Navigator.pushReplacementNamed(context, "/menu" );
+            print("토큰 저장 : ${data['token']}");
+          }
+        }
+        print("로그인 성공");
       }
-      await localsave.setString('mname', data['member']['mname']);
-
-      print("로그인 성공");
-
+    } catch (e) {
+      print("로그인 실패 $e");
     }
-    }catch(e) { print("로그인 실패 $e") ; }
   }
   
   
@@ -63,15 +74,12 @@ class LoginState extends State<Login> {
           TextField( controller: mpwdCont  ),
 
 
-          TextButton(onPressed: (){ Navigator.pushNamed(context, "/findid"); } , child: Text("아이디찾기"), ),
-          TextButton(onPressed: (){ Navigator.pushNamed(context, "/findpwd"); } , child: Text("비밀번호찾기"), ),
+          TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findid"); } , child: Text("아이디찾기"), ),
+          TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findpwd"); } , child: Text("비밀번호찾기"), ),
 
           OutlinedButton(onPressed: login, child: Text("로그인") ),
-          TextButton(onPressed: (){Navigator.pushNamed(context, "/signup"); },
+          TextButton(onPressed: (){Navigator.pushReplacementNamed(context, "/signup"); },
             child: Text("회원가입 페이지로 이동"),),
-
-          
-
 
         ],
       ),
