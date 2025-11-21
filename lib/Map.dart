@@ -111,6 +111,9 @@ class KakaoMapState extends State<KakaoMap> {
                   '<div>' + m["주소"] + '</div>' +
                   '<div>' + m["전화번호"] + '</div>' +
                 '</div>');
+                } else if (category == "sexcrime") { // 성범죄자
+                  window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
+                 '</div>');
               } else if (category == "shelter") { // 대피소
                 window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
                   m["시설명"] +
@@ -388,6 +391,9 @@ class KakaoMapState extends State<KakaoMap> {
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "night") { // 심야약국/병원
         url = "http://192.168.40.28:8080/living/medical";
+        // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
+      } else if (category == "sexCrime") { // 성범죄자
+        url = "http://192.168.40.28:8080/safety/api/sexcrime/near";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "shelter") { // 대피소
         url = "http://192.168.40.28:8080/safety/shelter";
