@@ -166,7 +166,7 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
         "gaddress3": addressadd[2],
       };
       final response = await dio.post(
-        "http://10.164.103.46:8080/api/guest/detail",
+        "http://10.95.125.46:8080/api/guest/detail",
         data: obj,
         options: Options(
           headers: {

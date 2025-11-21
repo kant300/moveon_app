@@ -1,10 +1,13 @@
 // lib/member/Profile.dart
 
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 final dio=Dio();
 
@@ -13,13 +16,37 @@ class Profile extends StatefulWidget {
 }
 
 class StateProfile extends State<Profile> {
+  late WebViewController MapController;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getinfo();
+
+    MapController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..addJavaScriptChannel(
+          'MapClick',
+          onMessageReceived: (msg) async {
+            final gpsmap = jsonDecode(msg.message);
+            double lat = gpsmap['lat'];
+            double lon = gpsmap['lon'];
+            print("좌포 전달 ${msg.message}");
+            String address = await getKakaomap(lon, lat);
+
+            setState(() {
+              addressCont.text =
+                  address; // lon , lat / 윋 ㅗ경도 주소 address 로 받아서  input text에 넣어줌
+            });
+          },
+      );
   }
+
+  bool showMap = false;
+  double? lat; // WebView 사용
+  double? lon; // WebView 사용
+
   dynamic memberdate = {};
   void getinfo() async{ // 정보 호출
       final localsave = await SharedPreferences.getInstance();
@@ -45,6 +72,92 @@ class StateProfile extends State<Profile> {
   TextEditingController addressCont = TextEditingController();
   TextEditingController memailCont = TextEditingController();
 
+  String kakaoMap(double lon, double lat) {
+    return '''
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Kakao Map</title>
+</head>
+<body>
+
+<div id="map" style="width:100%;height:350px;"></div>
+
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=caa87b2038ca1bb96deba339a07a78d5"></script>
+<script>
+
+// 지도를 표시할 div
+var mapContainer = document.getElementById('map'),
+    mapOption = {
+        center: new kakao.maps.LatLng(${lat}, ${lon}), // GPS 위치로 지도 중심 이동
+        level: 3
+    };
+
+var map = new kakao.maps.Map(mapContainer, mapOption);
+
+// GPS 위치에 마커 표시
+var marker = new kakao.maps.Marker({
+    position: new kakao.maps.LatLng(${lat}, ${lon})
+});
+marker.setMap(map);
+
+// 지도 클릭하면 마커 이동 + Flutter로 클릭 좌표 전달
+kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+
+    var latlng = mouseEvent.latLng;
+    marker.setPosition(latlng);
+
+    MapClick.postMessage(JSON.stringify({
+        lat : latlng.getLat(),
+        lon : latlng.getLng()
+    }));
+});
+
+</script>
+</body>
+</html>
+''';
+  }
+
+  // 내위치
+  Future<bool> addressprint() async {
+    bool EnableStart =
+    await Geolocator.isLocationServiceEnabled(); // 스마트폰 gps 기능 확인 여부
+    if (!EnableStart) {
+      print("GPS 기능 안켜져있음");
+      return Future.value(false); // 안켜져있으면 실패
+    }
+    // 권한 여부 확인
+    LocationPermission locationPermission = await Geolocator.checkPermission();
+
+    if (locationPermission == LocationPermission.denied) {
+      // 권한 요청 확인후 맞으면 팝업창 띄워줌 [ 허용 / 거부 ]
+      locationPermission = await Geolocator.requestPermission();
+      // 거부 누르면 false 로 반환
+      if (locationPermission == LocationPermission.denied) {
+        return Future.value(false);
+      }
+    } // 강력 팝업 : 거부 여러번 실행시 발동 { 다시는 묻지않기 }
+    if (locationPermission == LocationPermission.deniedForever) {
+      return Future.value(false);
+    }
+    Position position = await Geolocator.getCurrentPosition();
+    dynamic x = position.longitude; // 경도
+    dynamic y = position.latitude; // 위도
+
+    String address = await getKakaomap(x, y);
+
+    setState(() {
+      addressCont.text = address;
+      lon = x;
+      lat = y;
+      showMap = true;
+      MapController.loadHtmlString(kakaoMap(lon!, lat!));
+    });
+    // 허용시 true
+    return Future.value(true);
+  }
 
   // KaKao api
   Future<String> getKakaomap(double lon , double lat) async{
@@ -67,41 +180,41 @@ class StateProfile extends State<Profile> {
            "${add['main_address_no']}" ; // 상세 주소
   } // get kakao map end
 
-  // 내위치
-  Future<bool> addressprint() async{
-    bool EnableStart = await Geolocator.isLocationServiceEnabled(); // 스마트폰 gps 기능 확인 여부
-    if(!EnableStart) {
-      print("GPS 기능 안켜져있음");
-      return Future.value(false); // 안켜져있으면 실패
-    };
-    // 권한 여부 확인
-    LocationPermission locationPermission = await Geolocator.checkPermission();
+  // // 내위치
+  // Future<bool> addressprint() async{
+  //   bool EnableStart = await Geolocator.isLocationServiceEnabled(); // 스마트폰 gps 기능 확인 여부
+  //   if(!EnableStart) {
+  //     print("GPS 기능 안켜져있음");
+  //     return Future.value(false); // 안켜져있으면 실패
+  //   };
+  //   // 권한 여부 확인
+  //   LocationPermission locationPermission = await Geolocator.checkPermission();
+  //
+  //     if(locationPermission == LocationPermission.denied) {
+  //       // 권한 요청 확인후 맞으면 팝업창 띄워줌 [ 허용 / 거부 ]
+  //       locationPermission = await Geolocator.requestPermission();
+  //       // 거부 누르면 false 로 반환
+  //       if (locationPermission == LocationPermission.denied) {
+  //         return Future.value(false);
+  //       }
+  //     } // 강력 팝업 : 거부 여러번 실행시 발동 { 다시는 묻지않기 }
+  //     if(locationPermission == LocationPermission.deniedForever){
+  //       return Future.value(false);
+  //     }
+  //     Position position = await Geolocator.getCurrentPosition();
+  //     dynamic x = position.longitude; // 경도
+  //     dynamic y = position.latitude; // 위도
+  //
+  //     String address = await getKakaomap(x, y);
+  //
+  //     setState(() {
+  //       addressCont.text = address;
+  //     });
+  //
+  //     // 허용시 true
+  //     return Future.value(true);
+  // }
 
-      if(locationPermission == LocationPermission.denied) {
-        // 권한 요청 확인후 맞으면 팝업창 띄워줌 [ 허용 / 거부 ]
-        locationPermission = await Geolocator.requestPermission();
-        // 거부 누르면 false 로 반환
-        if (locationPermission == LocationPermission.denied) {
-          return Future.value(false);
-        }
-      } // 강력 팝업 : 거부 여러번 실행시 발동 { 다시는 묻지않기 }
-      if(locationPermission == LocationPermission.deniedForever){
-        return Future.value(false);
-      }
-      Position position = await Geolocator.getCurrentPosition();
-      dynamic x = position.longitude; // 경도
-      dynamic y = position.latitude; // 위도
-
-      String address = await getKakaomap(x, y);
-
-      setState(() {
-        addressCont.text = address;
-      });
-
-      // 허용시 true
-      return Future.value(true);
-  }
-  
   void profileupdate() async{
     try{
       final address = addressCont.text.split(" ");
@@ -133,17 +246,49 @@ class StateProfile extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
-      appBar: AppBar( title: Text("프로필 수정"),),
-      body: Column( children: [
-        TextField(controller: mnameCont ,),
-        TextField(controller: mphoneCont , ),
-        TextField(controller: memailCont , ),
-        TextField(controller: addressCont , ),
-        OutlinedButton(onPressed: addressprint , child: Text("내위치 조회"),),
-        TextButton(onPressed: profileupdate , child: Text("변경"),),
-      ],),
+      appBar: AppBar(title: Text("프로필 수정")),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 이름/폰/메일
+            TextField(controller: mnameCont),
+            TextField(controller: mphoneCont),
+            TextField(controller: memailCont),
+
+            // 주소 1개만 표시 (readOnly)
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: TextField(
+                controller: addressCont,
+                readOnly: true,
+                decoration: InputDecoration(labelText: "선택한 주소"),
+              ),
+            ),
+
+            // 내 위치 버튼
+            OutlinedButton(
+              onPressed: addressprint,
+              child: Text("내위치 조회"),
+            ),
+
+            // 지도 출력 (WebView)
+            if (showMap && lon != null && lat != null)
+              Container(
+                height: 300,
+                margin: EdgeInsets.symmetric(vertical: 16),
+                child: WebViewWidget(controller: MapController),
+              ),
+
+            // 저장 버튼
+            TextButton(
+              onPressed: profileupdate,
+              child: Text("변경"),
+            ),
+          ],
+        ),
+      ),
     );
   }
-}
+  }

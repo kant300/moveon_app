@@ -31,7 +31,7 @@ class StateOnboardingStart extends State<OnboardingStart>{
         "mpwd": mpwdCont.text,
       };
       final response = await dio.post(
-        "http://10.164.103.46:8080/api/member/login", data: obj,
+        "http://10.95.125.46:8080/api/member/login", data: obj,
         options: Options(headers: {"Content-Type": "application/json"}),
       );
       final data = await response.data;
@@ -62,7 +62,7 @@ class StateOnboardingStart extends State<OnboardingStart>{
   
   void guest() async{
     try{
-      final response = await dio.post("http://10.164.103.46:8080/api/guest/save");
+      final response = await dio.post("http://10.95.125.46:8080/api/guest/save");
       final data = await response.data;
       final token = data["token"];
 

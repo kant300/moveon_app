@@ -88,10 +88,12 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
     }
   }
 
-  void guest() async {
+  Future<void> savewishlist() async {
+
     final localsave = await SharedPreferences.getInstance();
-    final token = localsave.getString("guestToken");
-    try {
+    final logintoken = localsave.getString("logintoken");
+    final guesttoken = localsave.getString("guestToken");
+
       List<String> selectgory = _categories
         .where((go) => _categorySelections[go.id] == true)
         .map((go) => go.id)
@@ -99,16 +101,28 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
 
       String wishstr = selectgory.join(",");
 
-      final obj = {
-        "wishlist": wishstr,
-      };
-      final response = await dio.post(
-        "http://10.164.103.46:8080/api/guest/wishlist",
-        data: obj,
-        options: Options(headers: {"Authorization": "Bearer $token"}),
-      );
-      final data = await response.data;
-      print(data);
+      final obj = { "wishlist": wishstr };
+
+    try {
+      if(logintoken != null){
+        final response = await dio.post("http://10.95.125.46:8080/api/member/wishlist" , data: obj ,
+        options: Options(headers: {"Authorization" : "Bearer $logintoken"}),
+        );
+        // 게스트 토큰 확실히 제거
+        await localsave.remove("guesttoken");
+        print("회원 관심내역 $logintoken");
+        return;
+      }
+
+      if(guesttoken != null){
+        final response = await dio.post(
+          "http://10.95.125.46:8080/api/guest/wishlist",
+          data: obj,
+          options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
+        );
+        print("게스트 $guesttoken");
+      }
+
     } catch (e) {
       print(e);
     }
@@ -260,18 +274,13 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _selectedCount > 0
-                              ? () {
-                                  guest();
+                              ? () async{
+                                  await savewishlist();
                                   // "다음" 버튼 클릭 시 다음 페이지로 이동
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          OnboardingComplete(), // 설정완료 페이지로 이동
+                                  Navigator.push( context, MaterialPageRoute(builder: (_) =>  OnboardingComplete(), // 설정완료 페이지로 이동
                                     ),
                                   );
-                                }
-                              : null, // 선택된 항목이 없으면 버튼 비활성화
+                                } : null, // 선택된 항목이 없으면 버튼 비활성화
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size(double.infinity, 50),
                             backgroundColor: _selectedCount > 0

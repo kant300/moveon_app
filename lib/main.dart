@@ -18,6 +18,7 @@ import 'package:moveon_app/screens/onboarding/OnboardingCategory.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingComplete.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingStart.dart';
 import 'package:moveon_app/safety/ambulance/Ambulance.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(App());
@@ -28,7 +29,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false, // debug 배너 숨기기
-      initialRoute: "/",
+      initialRoute: "/onboardingStart",
       routes: {
         "/onboardingStart" : (context) => OnboardingStart(),
         "/onboardingAddress" : (context) => OnboardingAddress(),
@@ -69,7 +70,7 @@ class Main extends StatefulWidget {
 }
 
 class MainState extends State<Main> {
-  int currentPage = 2;
+  int currentPage = 0;
   dynamic pages = [
     Menu(),
     KakaoMap(),
@@ -79,6 +80,40 @@ class MainState extends State<Main> {
   ];
 
   dynamic username;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserName();
+  }
+  void loadUserName() async {
+    final mem = await SharedPreferences.getInstance();
+
+    setState(() {
+      username = null;
+    });
+
+    final loginToken = mem.getString('logintoken');
+    final guestToken = mem.getString('guestToken');
+
+    // 1) 게스트 username 제거
+    if (guestToken != null && loginToken == null) {
+      await mem.remove('mname');
+      await mem.remove('logintoken');
+      return;
+    }
+
+    // 2) 회원 토큰 있는 경우만 username 활성화
+    if (loginToken != null) {
+      setState(() {
+        username = mem.getString('mname');
+      });
+    } else {
+      setState(() {
+        username = null;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

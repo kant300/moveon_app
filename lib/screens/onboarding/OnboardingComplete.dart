@@ -81,8 +81,12 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
   void guesttoken() async{
       final localsave = await SharedPreferences.getInstance();
       final token = localsave.getString("guestToken");
+      await localsave.remove('mname');
+      await localsave.remove('logintoken');
+
+      if(token == null) return;
     try{
-      final response = await dio.get("http://10.164.103.46:8080/api/guest/address",
+      final response = await dio.get("http://10.95.125.46:8080/api/guest/address",
       options: Options(headers: {"Authorization" : "Bearer $token"},) );
       final data = await response.data;
       print(data);
@@ -162,8 +166,7 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        address,
+                      Text( address.isEmpty ? "설정된 주소가 없음" : address,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

@@ -2,6 +2,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:moveon_app/screens/onboarding/OnboardingStart.dart';
 
 final dio = Dio();
 
@@ -15,10 +16,7 @@ class SignupState extends State<Signup> {
   TextEditingController newmpwd = TextEditingController(); // 비밀번호
   TextEditingController newmphone = TextEditingController(); // 폰
   TextEditingController newmname = TextEditingController(); // 이름
-  TextEditingController newmemail = TextEditingController(); // 이메일
-  TextEditingController newaddress1 = TextEditingController(); // 주소1 시
-  TextEditingController newaddress2 = TextEditingController(); // 동
-  TextEditingController newaddress3 = TextEditingController(); // 구
+  TextEditingController newmemail = TextEditingController(); // 이메일ㅂㅈ
 
   void signup() async{
     try{
@@ -28,15 +26,12 @@ class SignupState extends State<Signup> {
         "mphone" : newmphone.text,
         "mname" : newmname.text,
         "memail" : newmemail.text,
-        "maddress1" : newaddress1.text,
-        "maddress2" : newaddress2.text,
-        "maddress3" : newaddress3.text,
 
       };
-      final response = await dio.post("http://localhost:8080/api/member/signup" , data: obj);
+      final response = await dio.post("http://10.95.125.46:8080/api/member/signup" , data: obj);
       final data = await response.data;
       print(data);
-      if(data == true ) { Navigator.pop(context , true); }
+      if(data == true ) { Navigator.pushReplacement(context , MaterialPageRoute(builder: (_) => OnboardingStart()),); }
       print("성공");
     }catch(e) { print(e); }
   }
@@ -48,14 +43,12 @@ class SignupState extends State<Signup> {
       appBar: AppBar( title: Text("회원가입"),),
       body: Column(
         children: [
-          TextField( controller: newmid  ),
-          TextField( controller: newmpwd  ),
-          TextField( controller: newmname  ),
-          TextField( controller: newmphone  ),
-          TextField( controller: newmemail  ),
-          TextField( controller: newaddress1  ),
-          TextField( controller: newaddress2  ),
-          TextField( controller: newaddress3  ),
+          TextField( controller: newmid  , decoration: InputDecoration( labelText: "아이디"),),
+          TextField( controller: newmpwd , decoration: InputDecoration( labelText: "비밀번호"), ),
+          TextField( controller: newmname , decoration: InputDecoration( labelText: "이름"), ),
+          TextField( controller: newmphone , decoration: InputDecoration( labelText: "휴대폰"), ),
+          TextField( controller: newmemail , decoration: InputDecoration( labelText: "이메일"), ),
+
           Text("회원가입"),
           OutlinedButton(onPressed: signup, child: Text("회원가입") ),
         ],
