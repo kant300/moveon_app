@@ -120,7 +120,8 @@ class ChecklistTitle extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Row( // 상단 타이틀
+        Row(
+          // 상단 타이틀
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
@@ -340,7 +341,9 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                         children: [
                           Text(
                             items.isNotEmpty
-                                ? items.map((e) => e["isChecked"] ? "■" : "□").join()
+                                ? items
+                                      .map((e) => e["isChecked"] ? "■" : "□")
+                                      .join()
                                 : "목록 없음",
                             style: TextStyle(fontSize: 28),
                           ),
@@ -378,46 +381,60 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                               String subtitle;
 
                               showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: Text("Check-list 등록"),
-                                    content: Column(
-                                      children: [
-                                        TextField(
-                                          decoration: InputDecoration(
-                                            labelText: "제목",
-                                            hintText: "제목을 입력하세요",
-                                          ),
-                                          controller: titleController,
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text("Check-list 등록"),
+                                  content: Column(
+                                    children: [
+                                      TextField(
+                                        decoration: InputDecoration(
+                                          labelText: "제목",
+                                          hintText: "제목을 입력하세요",
                                         ),
-                                        TextField(
-                                          decoration: InputDecoration(
-                                            labelText: "내용",
-                                            hintText: "내용을 입력하세요",
-                                          ),
-                                          controller: subtitleController,
+                                        controller: titleController,
+                                      ),
+                                      TextField(
+                                        decoration: InputDecoration(
+                                          labelText: "내용",
+                                          hintText: "내용을 입력하세요",
                                         ),
-                                      ],
+                                        controller: subtitleController,
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, "취소"),
+                                      child: Text("취소"),
                                     ),
-                                    actions: [
-                                      TextButton(onPressed: () => Navigator.pop(context, "취소"), child: Text("취소")),
-                                      TextButton(onPressed: () {
+                                    TextButton(
+                                      onPressed: () {
                                         if (titleController.text.isNotEmpty) {
                                           title = titleController.text.trim();
-                                          subtitle = subtitleController.text.trim();
+                                          subtitle = subtitleController.text
+                                              .trim();
 
                                           setState(() {
-                                            items.add({"title": title, "subtitle": subtitle, "isChecked": false});
+                                            items.add({
+                                              "title": title,
+                                              "subtitle": subtitle,
+                                              "isChecked": false,
+                                            });
                                           });
                                           Navigator.pop(context, "등록");
                                         }
-                                      }, child: Text("등록"))
-                                    ],
-                                  ),
+                                      },
+                                      child: Text("등록"),
+                                    ),
+                                  ],
+                                ),
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text("최대 10개까지만 추가할 수 있습니다.")),
+                                SnackBar(
+                                  content: Text("최대 10개까지만 추가할 수 있습니다."),
+                                ),
                               );
                             }
                           }, // 새로 추가하기 버튼
@@ -425,46 +442,47 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                         ),
                       ],
                     ),
-                    ...List.generate(items.length, (index) {
-                      return ChecklistCard(
-                        title: "제목",
-                        subtitle: "내용",
-                        onEdit: () {
-                          print("수정: $index");
-                        },
-                        onDelete: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text("삭제 확인"),
-                                content: Text("정말로 삭제하시겠습니까?"),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Text("취소"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        items.removeAt(index);
-                                      });
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Text("삭제"),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        checkboxValue: items[index]["isChecked"],
-                        onCheckboxChanged: (value) =>
-                            updateCheckValue(index, value),
-                      );
-                    }),
+                    if (items.isNotEmpty)
+                      ...List.generate(items.length, (index) {
+                        return ChecklistCard(
+                          title: items[index]["title"],
+                          subtitle: items[index]["subtitle"],
+                          onEdit: () {
+                            print("수정: $index");
+                          },
+                          onDelete: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text("삭제 확인"),
+                                  content: Text("정말로 삭제하시겠습니까?"),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text("취소"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          items.removeAt(index);
+                                        });
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text("삭제"),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          checkboxValue: items[index]["isChecked"],
+                          onCheckboxChanged: (value) =>
+                              updateCheckValue(index, value),
+                        );
+                      }),
                   ],
                 ),
               ),
