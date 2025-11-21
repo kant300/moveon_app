@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'ExpandableCategoryList.dart';
 
 class KakaoMap extends StatefulWidget {
   const KakaoMap({super.key});
@@ -560,78 +561,12 @@ class KakaoMapState extends State<KakaoMap> {
           // 왼쪽 상단 카테고리 버튼
           Positioned(
             left: 10,
-            top: 100,
-
-
-
-            child: Column(
-              children: [
-                FloatingActionButton.small(
-                  heroTag: "clothingBin",
-                  onPressed: () async => { await _fetchAndShowMarkers("clothingBin") },
-                  child: Text("의류수거함"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "government",
-                  onPressed: () async => { await _fetchAndShowMarkers("government") },
-                  child: Text("관공서"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "night",
-                  onPressed: () async => { await _fetchAndShowMarkers("night") },
-                  child: Text("약국/병원"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "sexCrime",
-                  onPressed: () async => { await _fetchAndShowMarkers("sexCrime") },
-                  child: Text("성범죄자"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "shelter",
-                  onPressed: () async => { await _fetchAndShowMarkers("shelter") },
-                  child: Text("대피소"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "restroom",
-                  onPressed: () async => { await _fetchAndShowMarkers("restroom") },
-                  child: Text("공중화장실"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "subwayLift",
-                  onPressed: () async => { await _fetchAndShowMarkers("subwayLift") },
-                  child: Text("지하철/승강기"),
-                ),
-                FloatingActionButton.small(
-                  heroTag: "subwaySchedule",
-                  onPressed: () async => { await _fetchAndShowMarkers("subwaySchedule") },
-                  child: Text("지하철/배차"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "wheelchairCharger",
-                  onPressed: () async => { await _fetchAndShowMarkers("wheelchairCharger") },
-                  child: Text("전동휠체어"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "localParking",
-                  onPressed: () async => { await _fetchAndShowMarkers("localParking") },
-                  child: Text("공영주차장"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "gas",
-                  onPressed: () async => { await _fetchAndShowMarkers("gas") },
-                  child: Text("주유소"),
-                ),
-                const SizedBox(height: 10),
-              ],
+            top: 70,
+            child: VerticalHorizontalCategoryList( // 평 확장 위젯으로 변경
+              onCategorySelected: (categoryKey) async {
+                // 하위 카테고리 선택 시 마커 로드 함수 호출
+                await _fetchAndShowMarkers(categoryKey);
+              },
             ),
           ),
         ],
@@ -643,3 +578,6 @@ class KakaoMapState extends State<KakaoMap> {
     );
   }
 }
+
+
+
