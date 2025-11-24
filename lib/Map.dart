@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'ExpandableCategoryList.dart';
+import 'package:moveon_app/safety/sexcrime/SexCrimeFilterModal.dart';
 
 // ✅ 1. 파일 최상단에 BASE_URL 상수 정의
 const String BASE_URL = "http://192.168.40.61:8080";
@@ -100,6 +101,11 @@ class KakaoMapState extends State<KakaoMap> {
   final String kakaoJsKey = '9eb4f86b6155c2fa2f5dac204d2cdb35';
 
   dynamic args = null;
+
+  // ✅ 1. 성범죄자 필터링 상태 변수 추가
+  String _sexCrimeFilterSido = '';
+  String _sexCrimeFilterSigungu = '';
+  String _sexCrimeFilterDong = '';
 
   @override
   void didChangeDependencies() {
@@ -395,60 +401,83 @@ class KakaoMapState extends State<KakaoMap> {
     }
   }
 
+  // ============================================
+  // ⭐️ 성범죄자 통계 및 모달 관련 함수 수정 ⭐️
+  // ============================================
+
   // 서버 REST 호출해서 성범죄자 통계 가져오기
   Future<void> _loadCrimeInfo() async {
     if (lat == null || lng == null) return;
 
     try {
+      // 필터링 변수를 사용하여 URL에 쿼리 파라미터를 추가합니다.
+      String filterQuery = '';
+      if (_sexCrimeFilterSido.isNotEmpty) filterQuery += '&sido=$_sexCrimeFilterSido';
+      if (_sexCrimeFilterSigungu.isNotEmpty) filterQuery += '&sigungu=$_sexCrimeFilterSigungu';
+      if (_sexCrimeFilterDong.isNotEmpty) filterQuery += '&dong=$_sexCrimeFilterDong';
+
       final res = await Dio().get(
         "$BASE_URL/api/safety/sexcrime/near",
-        queryParameters: {"lat": lat, "lng": lng},
+        queryParameters: {
+          "lat": lat,
+          "lng": lng,
+          // 필터 파라미터는 이미 URL에 추가되었으므로 여기서는 lat/lng만 전달하거나
+          // 아니면 아래와 같이 queryParameters 맵에 모두 넣어 Dio가 처리하게 합니다.
+          "sido": _sexCrimeFilterSido,
+          "sigungu": _sexCrimeFilterSigungu,
+          "dong": _sexCrimeFilterDong,
+        },
       );
 
-      _showCrimeModal(res.data);
+      // 모달 표시 함수를 새 필터 모달로 변경
+      _showCrimeFilterModal(res.data);
 
     } catch (e) {
       print("성범죄자 통계 불러오기 오류: $e");
+      // 필요 시 사용자에게 알림
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('성범죄자 정보를 불러오는 데 실패했습니다.')),
+      );
     }
   }
-  // 모달로 표시
-  void _showCrimeModal(dynamic data) {
+  // ✅ 3. 필터링 기능을 가진 새 모달로 변경
+  void _showCrimeFilterModal(dynamic data) {
     final region = data["region"];
     final cnt = data["counts"];
+    final initialData = {
+      "${region['sido']} (현재 위치 기준)": cnt['sidoCount'] as int? ?? 0,
+      "${region['sigungu']}": cnt['sigunguCount'] as int? ?? 0,
+      "${region['dong']}": cnt['dongCount'] as int? ?? 0,
+    };
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true, // 내부 콘텐츠에 따라 높이가 유연하게 설정되도록
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("현재 위치 성범죄자 등록 현황",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              SizedBox(height: 20),
-
-              /// 시/도
-              Text("${region['sido']} : ${cnt['sidoCount']}명", style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 8),
-              /// 시군구
-              Text("${region['sigungu']} : ${cnt['sigunguCount']}명", style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 8),
-              /// 읍면동
-              Text("${region['dong']} : ${cnt['dongCount']}명", style: const TextStyle(fontSize: 16)),
-
-              SizedBox(height: 20),
-              Text("자료 출처: 여성가족부 성범죄자 알림e",
-                  style: TextStyle(color: Colors.grey, fontSize: 12)),
-            ],
-          ),
+        return SexCrimeFilterModal(
+          initialData: initialData,
+          onFilterApplied: _applyCrimeFilterAndLoadMarkers, // 👈 콜백 함수 연결
         );
       },
     );
   }
+
+  // ✅ 4. 모달에서 필터 적용 시 호출될 함수 (가장 중요)
+  Future<void> _applyCrimeFilterAndLoadMarkers(String sido, String sigungu, String dong) async {
+    // 4-1. 선택된 필터 값을 상태 변수에 저장
+    setState(() {
+      _sexCrimeFilterSido = sido;
+      _sexCrimeFilterSigungu = sigungu;
+      _sexCrimeFilterDong = dong;
+    });
+
+    // 4-2. 성범죄자 마커 로딩 함수 재호출
+    await _fetchAndShowMarkers("sexCrime");
+  }
+
 
 
 
@@ -467,7 +496,11 @@ class KakaoMapState extends State<KakaoMap> {
     }
   }
 
-  // ✅ 서버에서 마커 데이터 가져와 JS로 전달
+  // ============================================
+  // ⭐️ _fetchAndShowMarkers 함수 수정 ⭐️
+  // ============================================
+
+  // ✅ 서버에서 마커 데이터 가져와 JS로 전달 (sexCrime 카테고리 로직 변경)
   Future<void> _fetchAndShowMarkers(String category) async {
     try {
       String url = '';
@@ -482,7 +515,14 @@ class KakaoMapState extends State<KakaoMap> {
         url = "$BASE_URL/living/medical";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "sexCrime") { // 성범죄자
-        url = "$BASE_URL/api/sexcrime/near?lat=${lat}&lng=${lng}";
+        // ⭐️ lat/lng 외에 저장된 필터 변수도 쿼리 파라미터로 사용
+        String filterQuery = '';
+        if (_sexCrimeFilterSido.isNotEmpty) filterQuery += '&sido=$_sexCrimeFilterSido';
+        if (_sexCrimeFilterSigungu.isNotEmpty) filterQuery += '&sigungu=$_sexCrimeFilterSigungu';
+        if (_sexCrimeFilterDong.isNotEmpty) filterQuery += '&dong=$_sexCrimeFilterDong';
+
+        // 필터 변수가 비어 있으면 현재 위치 기준으로 호출됨
+        url = "$BASE_URL/api/sexcrime/near?lat=${lat}&lng=${lng}$filterQuery";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "shelter") { // 대피소
         url = "$BASE_URL/safety/shelter";
@@ -566,11 +606,27 @@ class KakaoMapState extends State<KakaoMap> {
       if (category == "clothingBin") {
         data = data["data"];
       }
+
+      // ✅ 6. sexCrime 처리 로직 변경: 마커 로딩 후 통계 모달을 띄우지 않습니다.
+      // 마커 로딩은 _fetchAndShowMarkers가 담당하고,
+      // 통계 모달은 '내 위치 마커 클릭' 시에만 _loadCrimeInfo()를 통해 띄웁니다.
+      // 마커 로딩만 실행하고, 모달은 _applyCrimeFilterAndLoadMarkers 함수에서 다시 띄우지 않습니다.
+      // 마커 로딩 후 모달을 바로 띄우고 싶다면 이 부분을 다시 활성화하고 필터 변수를 전달해야 합니다.
+      /*
+      if( category == "sexCrime" ){
+        // 마커 로딩 후, 업데이트된 통계 정보를 다시 불러와 모달에 표시할 수 있습니다.
+        await _loadCrimeInfo();
+      }
+      */
+
       // 최종 데이터 확인
       // print( data );
 
+      // sexCrime의 경우, data는 통계 정보가 아니라 마커 데이터 리스트여야 합니다.
+      // 서버 API가 성범죄자 리스트를 반환한다고 가정하고 코드를 이어갑니다.
+
       if( category == "sexCrime" ){
-        _showCrimeModal( data );
+        _showCrimeFilterModal(data);
         return;
       }
 

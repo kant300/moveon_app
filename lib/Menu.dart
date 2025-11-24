@@ -390,7 +390,13 @@ class MenuState extends State<Menu> {
                       Navigator.pushNamed(context, "/safety/ambulance"), Colors.black),
                   // 텍스트 축약
                   _buildMenuItem(Icons.water_drop, "비상급수시설", () =>
-                      Navigator.pushNamed(context, "/safety/water"), Colors.blue),
+                      Navigator.pushNamed(
+                          context,
+                          "map",
+                          arguments: "water"
+                      ),
+                      Colors.blue
+                  ),
                   // 텍스트 축약
                   _buildMenuItem(Icons.night_shelter, "대피소", () =>
                       Navigator.pushNamed(

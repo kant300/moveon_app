@@ -41,6 +41,7 @@ class _VerticalHorizontalCategoryListState extends State<VerticalHorizontalCateg
     MainCategory('안전', [
       CategoryItem("성범죄자", "sexCrime"),
       CategoryItem("CCTV", "cctv"),
+      CategoryItem("비상급수시설", "water"),
       CategoryItem("대피소", "shelter"),
       CategoryItem("공중화장실", "restroom"),
     ]),
