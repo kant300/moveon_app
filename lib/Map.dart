@@ -6,6 +6,81 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'ExpandableCategoryList.dart';
 
+
+
+class MapScreen extends StatefulWidget {
+  @override
+  _MapScreenState createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  String? _currentCategoryKey; // 현재 지도에 표시할 카테고리
+
+  // ⭐️ 마커를 로드하는 함수 (실제 구현 필요)
+  void _loadMarkersForCategory(String key) {
+    print("지도: $key 카테고리 마커 로딩 시작");
+    // 여기에 Dio를 사용하여 서버에서 해당 카테고리 마커 데이터를 가져오는 로직 구현
+  }
+
+  // ⭐️ ExpandableCategoryList의 콜백 함수
+  void _handleCategorySelected(String key) {
+    setState(() {
+      _currentCategoryKey = key;
+      _loadMarkersForCategory(key);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // ⭐️ (1) menu.dart에서 전달받은 인수를 확인합니다.
+    final args = ModalRoute.of(context)?.settings.arguments;
+
+    // ⭐️ (2) 초기 진입 시에만 처리합니다.
+    if (_currentCategoryKey == null && args is String) {
+      final initialKey = args;
+      print("지도 초기화: 메뉴에서 '$initialKey' 키를 받았습니다.");
+
+      // 상태를 설정하고 마커 로딩을 시작합니다.
+      _handleCategorySelected(initialKey);
+
+      // ⚠️ 중요: ModalRoute.of(context)?.settings.arguments = null;
+      // 인수를 한 번 사용한 후 null로 설정하여 뒤로가기 시 인수가 재사용되는 것을 방지할 수 있습니다.
+      // 하지만, 뒤로가기 시에도 인수가 필요 없다면 이 부분이 가장 안전합니다.
+    }
+
+    // 만약 ExpandableCategoryList가 MapScreen에 포함되어 있다면,
+    // _currentCategoryKey를 그 위젯에 전달하여 초기 상태를 표시하게 할 수도 있습니다.
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(_currentCategoryKey ?? '전체 지도')),
+      body: Stack(
+        children: [
+          // 맵 위젯 구현 부분
+          Center(
+            child: Text('지도 표시: $_currentCategoryKey 카테고리'),
+          ),
+
+          // ⭐️ ExpandableCategoryList 위젯 (map.dart 내에 위치)
+          Positioned(
+            top: 10,
+            left: 10,
+            child: VerticalHorizontalCategoryList(
+              onCategorySelected: _handleCategorySelected, // 콜백 연결
+              // 참고: ExpandableCategoryList 위젯의 초기 상태를
+              //       _currentCategoryKey로 설정하는 로직이 필요할 수 있습니다.
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class KakaoMap extends StatefulWidget {
   const KakaoMap({super.key});
 

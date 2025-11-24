@@ -283,16 +283,34 @@ class MenuState extends State<Menu> {
                   _buildMenuItem(Icons.person_pin_circle_rounded, "전입신고", () =>
                       _launchURL("https://www.gov.kr/portal/onestopSvc/transferReport"),Colors.green),
                   _buildMenuItem(Icons.checkroom, "의류수거함", () =>
-                      Navigator.pushNamed(context, "/living/clothingBin"), Colors.black),
+                      Navigator.pushNamed(
+                          context,
+                          "/map", // 지도 화면 라우트
+                          arguments: "clothingBin" // ⭐️ 카테고리 키 전달
+                      ),
+                      Colors.black
+                  ),
                   // 의류수거함 아이콘 변경
                   _buildMenuItem(Icons.recycling, "쓰레기 배출", () =>
                       Navigator.pushNamed(context, "/living/trashInfo"), Colors.green),
                   _buildMenuItem(Icons.energy_savings_leaf, "폐가전 수거", () =>
                       _launchURL("https://15990903.or.kr/portal/main/main.do"), Colors.green),
                   _buildMenuItem(Icons.local_police, "관공서", () =>
-                      Navigator.pushNamed(context, "/living/government"), Colors.black),
+                      Navigator.pushNamed(
+                          context,
+                          "/map",
+                          arguments: "government"
+                      ),
+                      Colors.black
+                  ),
                   _buildMenuItem(Icons.local_hospital, "심야약국/병원", () =>
-                      Navigator.pushNamed(context, "/living/night") ,Colors.red),
+                      Navigator.pushNamed(
+                          context,
+                          "/map",
+                          arguments: "night"
+                      ) ,
+                      Colors.red
+                  ),
                 ], crossAxisCount: 4), // 한 줄에 4개 배치
 
                 SizedBox(height: 20),
