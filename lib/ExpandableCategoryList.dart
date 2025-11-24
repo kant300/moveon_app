@@ -40,7 +40,7 @@ class _VerticalHorizontalCategoryListState extends State<VerticalHorizontalCateg
       ]),
     MainCategory('안전', [
       CategoryItem("성범죄자", "sexCrime"),
-      //CategoryItem("CCTV", " "),
+      CategoryItem("CCTV", "cctv"),
       CategoryItem("대피소", "shelter"),
       CategoryItem("공중화장실", "restroom"),
     ]),
@@ -62,6 +62,12 @@ class _VerticalHorizontalCategoryListState extends State<VerticalHorizontalCateg
           orElse: () => MainCategory('', []),
         )
         .subCategories;
+
+    // ✅ 3개씩 나열하기 위해 하위 카테고리 목록의 너비를 강제합니다. (3개 버튼 + 패딩)
+    // 버튼 하나의 너비를 약 80px로 가정하고 3개를 계산합니다.
+    // (100px * 3개) + 패딩 = 약 300~350px
+    // 하위 목록 컨테이너의 최대 너비
+    const double subCategoryListWidth = 350.0;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -122,7 +128,8 @@ class _VerticalHorizontalCategoryListState extends State<VerticalHorizontalCateg
             padding: const EdgeInsets.only(left: 8.0),// 주 카테고리와 간격
             child: Container(
               padding: const EdgeInsets.all(5),
-              constraints: const BoxConstraints(maxHeight: 50), // 높이 제한
+              // 가로 나열을 위해 최대 너비를 지정합니다.
+              width: subCategoryListWidth,
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.95),
                 borderRadius: BorderRadius.circular(8.0),
@@ -130,15 +137,12 @@ class _VerticalHorizontalCategoryListState extends State<VerticalHorizontalCateg
                   BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
                 ],
               ),
-              // 하위 카테고리를 수평으로 나열
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: selectedSubCategories.map((subCategory) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: ElevatedButton(
+              // 하위 카테고리를 Wrap을 사용하여 자동으로 다음 줄로 넘기도록 수정
+              child: Wrap(
+                spacing: 8.0, // 버튼 간 수평 간격
+                runSpacing: 8.0, // 버튼 행 간 수직 간격
+                children: selectedSubCategories.map((subCategory) {
+                    return ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Theme.of(context).primaryColor,
@@ -161,10 +165,8 @@ class _VerticalHorizontalCategoryListState extends State<VerticalHorizontalCateg
                           subCategory.label,
                           style: const TextStyle(fontSize: 13),
                         ),
-                      ),
                     );
-                  }).toList(),
-                ),
+                }).toList(),
               ),
             ),
           ),
