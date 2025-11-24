@@ -1,36 +1,13 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import 'package:moveon_app/weather/WeatherWidget.dart';
 
 class Home extends StatefulWidget {
   HomeState createState() => HomeState();
-}
-
-class WeatherWidget extends StatelessWidget {
-  const WeatherWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Card(
-        color: Color(0xFFE0F7FA), // Light Cyan background
-        elevation: 4,
-        child: ListTile(
-          leading: Icon(Icons.wb_sunny, color: Colors.amber, size: 32),
-          title: Text(
-            '현재 날씨 정보',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey),
-          ),
-          subtitle: Text(
-            '22°C, 맑음. 서울',
-            style: TextStyle(color: Colors.blueGrey),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class HomeState extends State<Home> {
@@ -39,6 +16,7 @@ class HomeState extends State<Home> {
   int serviceCenter = 0;
   int policeStation = 0;
   int fireDepartment = 0;
+  dynamic t1h, pty, hour, weatherIcon;
   List<List<bool>> checklistStatus = [
     [false, false, false, false, false, false, false],
     [false, false, false, false, false],
@@ -46,7 +24,7 @@ class HomeState extends State<Home> {
   ];
 
   // geolocator 로 현재 위치 구하기
-  void getCurrentLatLng() async {
+  Future<void> getCurrentLatLng() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -138,10 +116,92 @@ class HomeState extends State<Home> {
     return 0;
   }
 
+  // 날씨 정보 구하기
+  Future<void> getWeatherData() async {
+    try {
+      // 현재 시간 (HH시) 가져오기
+      DateTime now = DateTime.now();
+      String hour = DateFormat('HH').format(now);
+
+      final response = await Dio().get(
+        "http://192.168.40.28:8080/weather",
+        queryParameters: {"lat": latitude.toInt(), "lon": longitude.toInt()},
+      );
+      final data = jsonDecode(response.data);
+      final items = data['response']['body']['items']['item'];
+      print("data : $data");
+      print("items : $items");
+
+      // 필요한 데이터 가져오기
+      hour += '00';
+      dynamic t1h, reh, pty, sky, wsd;
+      for (dynamic obj in items) {
+        if (hour == obj['fcstTime'].toString()) {
+          if (obj['category'] == "T1H") {
+            t1h = obj['fcstValue']; // 기온
+          }
+          if (obj['category'] == "REH") {
+            reh = obj['fcstValue']; // 습도
+          }
+          if (obj['category'] == "PTY") {
+            pty = obj['fcstValue']; // 강수형태
+            if (pty == "0") pty = "맑음";
+            if (pty == "1") pty = "비";
+            if (pty == "2") pty = "비/눈";
+            if (pty == "3") pty = "눈";
+            if (pty == "4") pty = "소나기";
+            if (pty == "5") pty = "빗방울";
+            if (pty == "6") pty = "빗방울눈날림";
+            if (pty == "7") pty = "눈날림";
+          }
+          if (obj['category'] == "SKY") {
+            sky = obj['fcstValue']; // 하늘상태
+            if (sky == "1") sky = "맑음";
+            if (sky == "3") sky = "구름많음";
+            if (sky == "4") sky = "흐림";
+          }
+          if (obj['category'] == "WSD") {
+            wsd = obj['fcstValue']; // 풍속
+          }
+        }
+      }
+      hour = hour.substring(0, 2);
+
+      // 날씨에 따른 아이콘 그리기
+      dynamic icon;
+      if (pty == "맑음" && sky == "맑음") {
+        icon = const Icon(Icons.sunny);
+      } else if (sky == "구름많음") {
+        icon = const Icon(Icons.cloud);
+      } else if (sky == "흐림") {
+        icon = const Icon(Icons.foggy);
+      } else if (pty == "비" || pty == "비/눈" || pty == "소나기") {
+        icon = const Icon(Icons.water_drop);
+      } else if (pty == "눈") {
+        icon = const Icon(Icons.snowing);
+      }
+
+      setState(() {
+        this.t1h = t1h;
+        this.pty = pty;
+        this.hour = hour;
+        weatherIcon = icon;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    getCurrentLatLng();
+    _initData();
+  }
+
+  // 비동기 작업 순서를 보장하기 위한 함수
+  Future<void> _initData() async {
+    await getCurrentLatLng();   // 위치값을 먼저 가져옴
+    await getWeatherData();     // 위치값이 준비된 후 날씨 요청
   }
 
   @override
@@ -150,7 +210,27 @@ class HomeState extends State<Home> {
       body: Center(
         child: Column(
           children: [
-            const WeatherWidget(),
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Card(
+                color: Color(0xFFE0F7FA), // Light Cyan background
+                elevation: 4,
+                child: ListTile(
+                  leading: weatherIcon,
+                  title: Text(
+                    '현재 날씨 정보 ($hour시 기준)',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueGrey,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '$t1h°C, $pty',
+                    style: TextStyle(color: Colors.blueGrey),
+                  ),
+                ),
+              ),
+            ),
             //Text("가장 가까운 공공시설 거리"),
             Padding(
               padding: EdgeInsetsGeometry.all(10),
@@ -158,14 +238,14 @@ class HomeState extends State<Home> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      margin: EdgeInsets.all(10),
-                      height: 60,
-                      child: Center(
+                      child: Container(
+                        height: 60,
+                        alignment: Alignment.center,
                         child: Text(
                           "경찰서\n도보$policeStation분",
                           textAlign: TextAlign.center,
@@ -174,14 +254,14 @@ class HomeState extends State<Home> {
                     ),
                   ),
                   Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      margin: EdgeInsets.all(10),
-                      height: 60,
-                      child: Center(
+                      child: Container(
+                        height: 60,
+                        alignment: Alignment.center,
                         child: Text(
                           "소방서\n도보$fireDepartment분",
                           textAlign: TextAlign.center,
@@ -190,14 +270,14 @@ class HomeState extends State<Home> {
                     ),
                   ),
                   Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      margin: EdgeInsets.all(10),
-                      height: 60,
-                      child: Center(
+                      child: Container(
+                        height: 60,
+                        alignment: Alignment.center,
                         child: Text(
                           "주민센터\n도보$serviceCenter분",
                           textAlign: TextAlign.center,
@@ -208,41 +288,54 @@ class HomeState extends State<Home> {
                 ],
               ),
             ),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
+            Card(
+              elevation: 6, // 그림자 깊이
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
               ),
               margin: EdgeInsets.all(10),
-              width: 350,
-              height: 150,
-              child: Center(
-                child: Column(
-                  children: [
-                    Text("정착 Check-list 진행사항",
-                      style: TextStyle(fontSize: 16),),
-                    Text(
-                      ("3일차: ${checklistStatus[0].map((e) => e ? "■" : "□").join()}"),
-                      style: TextStyle(fontSize: 13),
-                    ),
-                    Text(
-                      ("3주차: ${checklistStatus[1].map((e) => e ? "■" : "□").join()}"),
-                      style: TextStyle(fontSize: 13),
-                    ),
-                    Text(
-                      ("3개월차: ${checklistStatus[2].map((e) => e ? "■" : "□").join()}"),
-                      style: TextStyle(fontSize: 13),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        dynamic result = await Navigator.pushNamed(context, "/checklist", arguments: checklistStatus);
-                        setState(() {
-                          checklistStatus = result;
-                        });
-                      },
-                      child: Text("정착지수 페이지로"),
-                    ),
-                  ],
+              child: Container(
+                alignment: Alignment.center,
+                width: 350,
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        "정착 Check-list 진행사항",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        ("3일차: ${checklistStatus[0].map((e) => e ? "■" : "□").join()}"),
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      Text(
+                        ("3주차: ${checklistStatus[1].map((e) => e ? "■" : "□").join()}"),
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      Text(
+                        ("3개월차: ${checklistStatus[2].map((e) => e ? "■" : "□").join()}"),
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          dynamic result = await Navigator.pushNamed(
+                            context,
+                            "/checklist",
+                            arguments: checklistStatus,
+                          );
+                          setState(() {
+                            checklistStatus = result;
+                          });
+                        },
+                        child: Text("정착지수 페이지로"),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

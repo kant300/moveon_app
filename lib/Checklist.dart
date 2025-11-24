@@ -283,9 +283,11 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args != null && args is List<Map<String, dynamic>>) {
-      items = List<Map<String, dynamic>>.from(args);
+    if (items.isEmpty) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args != null && args is List<Map<String, dynamic>>) {
+        items = args;
+      }
     }
   }
 
@@ -376,7 +378,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                       children: [
                         TextButton(
                           // 최대 10개까지만 생성 가능
-                          onPressed: () {
+                          onPressed: () { // 등록
                             if (items.length < 10) {
                               String title;
                               String subtitle;
@@ -413,8 +415,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                                       onPressed: () {
                                         if (titleController.text.isNotEmpty) {
                                           title = titleController.text.trim();
-                                          subtitle = subtitleController.text
-                                              .trim();
+                                          subtitle = subtitleController.text.trim();
 
                                           setState(() {
                                             items.add({
@@ -449,10 +450,63 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                         return ChecklistCard(
                           title: items[index]["title"],
                           subtitle: items[index]["subtitle"],
-                          onEdit: () {
-                            print("수정: $index");
+                          onEdit: () { // 수정
+                            String title;
+                            String subtitle;
+
+                            showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text("Check-list 수정"),
+                                  content: Column(
+                                    children: [
+                                      TextField(
+                                        decoration: InputDecoration(
+                                          labelText: "제목",
+                                          hintText: items[index]["title"],
+                                        ),
+                                        controller: titleController,
+                                      ),
+                                      TextField(
+                                        decoration: InputDecoration(
+                                          labelText: "내용",
+                                          hintText: items[index]["subtitle"],
+                                        ),
+                                        controller: subtitleController,
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, "취소"),
+                                      child: Text("취소"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        if (titleController.text.isNotEmpty) {
+                                          title = titleController.text.trim();
+                                          subtitle = subtitleController.text.trim();
+
+                                          setState(() {
+                                            items[index] = ({
+                                              "title": title,
+                                              "subtitle": subtitle,
+                                              "isChecked": items[index]["isChecked"],
+                                            });
+                                          });
+                                          titleController.clear();
+                                          subtitleController.clear();
+                                          Navigator.pop(context, "수정");
+                                        }
+                                      },
+                                      child: Text("수정"),
+                                    ),
+                                  ],
+                                ),
+                            );
                           },
-                          onDelete: () {
+                          onDelete: () { // 삭제
                             showDialog(
                               context: context,
                               builder: (BuildContext context) {
@@ -471,7 +525,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                                         setState(() {
                                           items.removeAt(index);
                                         });
-                                        Navigator.of(context).pop();
+                                        Navigator.pop(context, "삭제");
                                       },
                                       child: Text("삭제"),
                                     ),
