@@ -6,6 +6,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'ExpandableCategoryList.dart';
 
+// ✅ 1. 파일 최상단에 BASE_URL 상수 정의
+const String BASE_URL = "http://192.168.40.61:8080";
+// 🚨 서버 주소가 변경되면 이 상수의 값만 수정하면 됩니다.
 
 
 class MapScreen extends StatefulWidget {
@@ -96,6 +99,15 @@ class KakaoMapState extends State<KakaoMap> {
   final TextEditingController _searchController = TextEditingController();
 
   final String kakaoJsKey = '9eb4f86b6155c2fa2f5dac204d2cdb35';
+
+  dynamic args = null;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // ⭐️ (1) menu.dart에서 전달받은 인수를 확인합니다.
+    args = ModalRoute.of(context)?.settings.arguments;
+  }
 
   @override
   void initState() {
@@ -378,7 +390,7 @@ class KakaoMapState extends State<KakaoMap> {
       _moveToMyLocation();
 
       // ✅ 서버에서 마커 데이터 가져오기 (현재 의류수거함을 기본 데이터로 설정)
-      await _fetchAndShowMarkers("clothingBin");
+      await _fetchAndShowMarkers( args ?? "clothingBin" );
     } else {
       await openAppSettings();
     }
@@ -465,38 +477,41 @@ class KakaoMapState extends State<KakaoMap> {
         url = "https://api.odcloud.kr/api/15141554/v1/uddi:574fcc84-bcb8-4f09-9588-9b820731bf19?page=1&perPage=368&serviceKey=lxvZMQzViYP1QmBRI9MrdDw5ZmsblpCAd5iEKcTRES4ZcynJhQxzAuydpechK3TJCn43OJmweWMoYZ10aspdgQ%3D%3D";
         // key: 경도, 관리번호, 도로명 주소, 연번, 위도
       } else if (category == "government") { // 관공서
-        url = "http://192.168.40.61:8080/living/gov";
+        url = "$BASE_URL/living/gov";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "night") { // 심야약국/병원
-        url = "http://192.168.40.61:8080/living/medical";
+        url = "$BASE_URL/living/medical";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "sexCrime") { // 성범죄자
-        url = "http://192.168.40.61:8080/safety/api/sexcrime/near";
+        url = "$BASE_URL/api/sexcrime/near?lat=${lat}&lng=${lng}";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "shelter") { // 대피소
-        url = "http://192.168.40.61:8080/safety/shelter";
+        url = "$BASE_URL/safety/shelter";
         // key: 시설명, 위도, 경도
       } else if (category == "restroom") { // 공중화장실
-        url = "http://192.168.40.61:8080/safety/toilet";
+        url = "$BASE_URL/safety/toilet";
         // key: 화장실명, 소재지도로명주소, 관리기관명, 전화번호, 개방시간상세, 위도, 경도
       } else if (category == "subwayLift") { // 지하철/승강기
-        url = "http://192.168.40.61:8080/transport/lift";
+        url = "$BASE_URL/transport/lift";
         // key: 역사, 장비, 호기, 위도, 경도, 상태
       } else if (category == "subwaySchedule") { // 지하철/배차
-        url = "http://192.168.40.61:8080/transport/location";
+        url = "$BASE_URL/transport/location";
         // key: 역사명, 위도, 경도
       } else if (category == "wheelchairCharger") { // 전동휠체어
-        url = "http://192.168.40.61:8080/api/chargers/all";
+        url = "$BASE_URL/api/chargers/all";
         // key: 시설명, 소재지도로명주소, 위도, 경도, 평일운영시작시각, 평일운영종료시각, 관리기관명
       } else if (category == "localParking") { // 공영주차장
-        url = "http://192.168.40.61:8080/transport/parking";
+        url = "$BASE_URL/transport/parking";
         // key: name, long, lat (시설명, 경도, 위도)
       } else if (category == "gas") {
-        url = "http://192.168.40.61:8080/transport/gas";
+        url = "$BASE_URL/transport/gas";
         // key: 업소명, 소재지, 위도, 경도, 전화번호
       }
+
       final response = await Dio().get(url);
       data = response.data;
+
+      print( data );
 
       // 지하철/배차는 배차 시각 정보를 추가해야 함
       if (category == "subwaySchedule") {
@@ -527,7 +542,7 @@ class KakaoMapState extends State<KakaoMap> {
           data[i]["prevStation"] = i > 0 ? data[i-1]["역사명"] : "none";
           data[i]["nextStation"] = i < data.length-1 ? data[i+1]["역사명"] : "none";
 
-          final responseTime = await Dio().get("http://192.168.40.61:8080/transport/schedule", queryParameters: {"station_name": stationName});
+          final responseTime = await Dio().get("http://192.168.40.33:8080/transport/schedule", queryParameters: {"station_name": stationName});
           // [LocalTime, LocalTime]
 
           if (responseTime.statusCode == 200 && responseTime.data is List && responseTime.data.length >= 2) {
@@ -555,6 +570,11 @@ class KakaoMapState extends State<KakaoMap> {
       // 최종 데이터 확인
       // print( data );
 
+      if( category == "sexCrime" ){
+        _showCrimeModal( data );
+        return;
+      }
+
       //final data = response.data;
       final jsData = jsonEncode(data);
       final jsCategory = jsonEncode(category);
@@ -573,42 +593,42 @@ class KakaoMapState extends State<KakaoMap> {
         children: [
           WebViewWidget(controller: _controller),
 
-        // ✅ 1. 주소 검색창 UI 추가
-        Positioned(
-          top: 10,
-          left: 10,
-          right: 10,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8.0),
-              boxShadow: const [
-                BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: const InputDecoration(
-                      hintText: '장소, 주소 검색',
-                      border: InputBorder.none,
+          // ✅ 1. 주소 검색창 UI 추가
+          Positioned(
+            top: 10,
+            left: 10,
+            right: 10,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8.0),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: const InputDecoration(
+                        hintText: '장소, 주소 검색',
+                        border: InputBorder.none,
+                      ),
+                      // 엔터키 입력 시 검색 실행
+                      onSubmitted: (value) => _performSearch(value),
                     ),
-                    // 엔터키 입력 시 검색 실행
-                    onSubmitted: (value) => _performSearch(value),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  color: Theme.of(context).primaryColor,
-                  onPressed: () => _performSearch(_searchController.text),
-                ),
-              ],
+                  IconButton(
+                    icon: const Icon(Icons.search),
+                    color: Theme.of(context).primaryColor,
+                    onPressed: () => _performSearch(_searchController.text),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
 
 
 
