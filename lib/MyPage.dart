@@ -5,7 +5,24 @@ class MyPage extends StatefulWidget {
 }
 
 class MyPageState extends State<MyPage> {
-  List<Map<String, dynamic>> checklistStatus = [];
+  // 샘플 데이터
+  List<Map<String, dynamic>> checklistStatus = [
+    {
+      "title": "아침 운동하기",
+      "subtitle": "30분 조깅 또는 스트레칭",
+      "isChecked": false,
+    },
+    {
+      "title": "책 읽기",
+      "subtitle": "자기계발서 20쪽 읽기",
+      "isChecked": true,
+    },
+    {
+      "title": "집안일 하기",
+      "subtitle": "설거지와 빨래 정리",
+      "isChecked": false,
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
