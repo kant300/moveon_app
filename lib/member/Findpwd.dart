@@ -1,5 +1,7 @@
 // lib/member/Findpwd.dart
 
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:moveon_app/member/RequestPwdAuth.dart';
@@ -15,6 +17,37 @@ class FindpwdState extends State<Findpwd>{
   TextEditingController memailCont = TextEditingController();
   TextEditingController mcodeCont = TextEditingController();
 
+  // 타이머 변수
+  Timer? timer;
+  int seconds = 0; // 타이머 남은 시간
+
+  String get timerText {
+    int m = seconds ~/ 60; // 분
+    int s = seconds % 60; // 초
+    return "${m.toString().padLeft(2,'0')}:${s.toString().padLeft(2,'0')}";
+  }
+
+  // 타이머 시작
+  void starttime() {
+    seconds = 180; // 3분
+    timer?.cancel(); // 기존 실행 중 타이머 종료
+
+    // 타이머가 초마다 감소
+    timer = Timer.periodic(Duration(seconds : 1), (t) {
+      if (seconds > 0 ) {
+        setState(() {
+          seconds--;
+        });
+      }else { // 시간없으면 종료
+        t.cancel();
+      }
+    });
+  }
+
+  // 인증성공시 종료
+  void stoptime() {
+    timer?.cancel();
+  }
   bool mcode = false;
   dynamic midlist = '';
   void requestPwdAuth() async{
@@ -23,7 +56,7 @@ class FindpwdState extends State<Findpwd>{
         "mid" : midCont.text ,
         "memail" : memailCont.text ,
       };
-      final response = await dio.post("http://localhost:8080/api/member/requestPwdAuth" , data: obj);
+      final response = await dio.post("http://10.95.125.46:8080/api/member/requestPwdAuth" , data: obj);
       final data = await response.data;
       print(data);
       showDialog(context: context, builder: (context) {
@@ -40,7 +73,8 @@ class FindpwdState extends State<Findpwd>{
         setState(() {
           mcode = true;
         });
-      };
+        starttime();
+      }
 
     }catch(e) { print('비밀번호 찾기 에러 $e'); }
   }
@@ -51,8 +85,9 @@ class FindpwdState extends State<Findpwd>{
         "mid" : midCont.text ,
         "verifyCode" : mcodeCont.text ,
       };
-      final response = await dio.post("http://localhost:8080/api/member/verifyPwdCode" , data: obj );
+      final response = await dio.post("http://10.95.125.46:8080/api/member/verifyPwdCode" , data: obj );
       final data = await response.data;
+      stoptime(); // 성공시 멈춤
       print(data);
 
       // 팝업창
@@ -79,19 +114,36 @@ class FindpwdState extends State<Findpwd>{
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Scaffold(
-      appBar: AppBar( title: Text("비밀번호찾기"),),
-      body: Column( children: [
-        TextField( controller: midCont , decoration: InputDecoration(labelText: "아이디"), ),
-        TextField( controller: memailCont , decoration: InputDecoration(labelText: "이메일"), ),
-        OutlinedButton(onPressed: requestPwdAuth, child: Text("인증번호 발급"), ),
+    return WillPopScope(onWillPop: () async {
+      Navigator.pushReplacementNamed(context, "/onboardingStart");
+      return false;
+    },
 
-        if(mcode)...[ // ... 조건이 참일때
-          TextField( controller: mcodeCont, decoration: InputDecoration(labelText: "인증번호 입력"), ),
-          ElevatedButton(onPressed: mcodecheck  , child: Text("인증확인"), ),
-          ]
+        child: Scaffold(
+          appBar: AppBar(title: Text("비밀번호찾기"),),
+          body: Column(children: [
+            TextField(controller: midCont,
+              decoration: InputDecoration(labelText: "아이디"),),
+            TextField(controller: memailCont,
+              decoration: InputDecoration(labelText: "이메일"),),
+            OutlinedButton(onPressed: () {
+              requestPwdAuth();
+              starttime();
+            }, child: Text("인증번호 발급"),),
 
-      ],),
-    );
+            if(mcode)...[ // ... 조건이 참일때
+              SizedBox(height: 10),
+              TextField(controller: mcodeCont,
+                decoration: InputDecoration(labelText: "인증번호 입력"),),Text("남은시간 $timerText"),
+              ElevatedButton(onPressed: mcodecheck, child: Text("인증확인"),),
+            ]
+          ],
+          ),
+        ));
+  }
+    @override
+    void dispose() {
+      timer?.cancel();
+      super.dispose();
   }
 }

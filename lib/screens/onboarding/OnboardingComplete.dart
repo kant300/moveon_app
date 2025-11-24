@@ -81,8 +81,6 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
   void guesttoken() async{
       final localsave = await SharedPreferences.getInstance();
       final token = localsave.getString("guestToken");
-      await localsave.remove('mname');
-      await localsave.remove('logintoken');
 
       if(token == null) return;
     try{

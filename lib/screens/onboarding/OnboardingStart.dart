@@ -23,8 +23,8 @@ class StateOnboardingStart extends State<OnboardingStart>{
   TextEditingController midCont = TextEditingController(); // 아이디
   TextEditingController mpwdCont = TextEditingController(); // 비밀번호
 
-  // ✅ 수정: 비동기 함수이므로 반환 타입을 Future<void>로 변경했습니다.
-  Future<void> login() async{
+  //  수정: 비동기 함수이므로 반환 타입을 Future<void>로 변경했습니다.
+  Future<bool> login() async{
     try {
       final obj = {
         "mid": midCont.text,
@@ -36,30 +36,28 @@ class StateOnboardingStart extends State<OnboardingStart>{
       );
       final data = await response.data;
       print(data);
-      print(obj);
-      if (data != null) {
-        setState(() {
-          test = data['member'];
-        });
-
+      if (data != null && data['token'] != null) {
         final localsave = await SharedPreferences.getInstance();
-        if(data['token'] != null ){
           await localsave.setString('logintoken', data['token'] );
           print(localsave);
           print("토큰 저장 : ${data['token']}");
-        }
+
         await localsave.setString('mname', data['member']['mname']);
 
+        if(data['member'] != null && data['member']['wishlist'] != null){
+          await localsave.setString('wishlist' , data['member']['wishlist']);
+        }else{
+          await localsave.setString('wishlist', "");
+        }
+        await localsave.remove('guestToken');
+
         print("로그인 성공");
-
-        Navigator.pop(context, {
-          'mname': data['member']['mname'], // 이름 전달
-        });
-
+        return true;
       }
     }catch(e) { print("로그인 실패 $e") ; }
+    return false;
   }
-  
+
   void guest() async{
     try{
       final response = await dio.post("http://10.95.125.46:8080/api/guest/save");
@@ -114,10 +112,24 @@ class StateOnboardingStart extends State<OnboardingStart>{
                       OutlinedButton(
                           onPressed: () async {
                             // 1. login() 함수가 Future<void>를 반환하도록 정의되어야 합니다.
-                            await login();
+                            bool ok = await login();
+                            if (!mounted) return;
                             // 2. 비동기 작업 후, 위젯이 마운트된 상태(mounted)일 때만 화면 이동
-                            if (mounted) {
-                              Navigator.pushReplacementNamed(context, "/main");
+                            if (ok) {
+                              SharedPreferences spfn = await SharedPreferences
+                                  .getInstance();
+                              String? wishlist = spfn.getString('wishlist');
+                              if (wishlist == null || wishlist.isEmpty) {
+                                print("관심 정보 없음");
+                                Navigator.pushReplacementNamed( context, "/onboardingCategory");
+                              } else {
+                                print("관심 정보 있음");
+                                Navigator.pushReplacementNamed( context, "/");
+                              }
+                              } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(
+                                  "아이디또는 비밀번호를 다시 입력해주세요. ")),);
                             }
                           },
                           child: Text("로그인")

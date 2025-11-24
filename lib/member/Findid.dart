@@ -19,7 +19,7 @@ class FindidState extends State<Findid>{
         "memail" : memailCont.text ,
         "mphone" : mphoneCont.text ,
       };
-      final response = await dio.get("http://10.164.103.46:8080/api/member/findid" , queryParameters: obj);
+      final response = await dio.get("http://10.95.125.46:8080/api/member/findid" , queryParameters: obj);
       final data = await response.data;
       print(data);
       if(data != null && data['mid'] != null){
@@ -33,7 +33,13 @@ class FindidState extends State<Findid>{
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Scaffold(
+
+    return WillPopScope(
+      onWillPop: () async{
+        Navigator.pushReplacementNamed(context, "/onboardingStart");
+        return false;
+      },
+    child:  Scaffold(
       appBar: AppBar( title: Text("아이디찾기"),),
       body: Column( children: [
         Text("아이디찾기페이지"),
@@ -42,6 +48,7 @@ class FindidState extends State<Findid>{
         OutlinedButton(onPressed: findid, child: Text("아이디찾기") ),
 
       ],),
+    )
     );
   }
 }
