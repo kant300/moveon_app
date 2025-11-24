@@ -323,7 +323,13 @@ class MenuState extends State<Menu> {
                 _buildIconGrid([
                   // 안전 메뉴 아이템 목록
                   _buildMenuItem(Icons.crisis_alert, "성범죄자", () =>
-                      Navigator.pushNamed(context, "/safety/sexCrime") ,Colors.red),
+                      Navigator.pushNamed(
+                          context,
+                          "/map",
+                          arguments: "sexCrime"
+                      ),
+                      Colors.red
+                  ),
                   // 텍스트 축약
                   _buildMenuItem(Icons.medical_information, "민간구급차", () =>
                       Navigator.pushNamed(context, "/safety/ambulance"), Colors.black),
@@ -332,11 +338,29 @@ class MenuState extends State<Menu> {
                       Navigator.pushNamed(context, "/safety/water"), Colors.blue),
                   // 텍스트 축약
                   _buildMenuItem(Icons.night_shelter, "대피소", () =>
-                      Navigator.pushNamed(context, "/safety/shelter"), Colors.red),
+                      Navigator.pushNamed(
+                          context,
+                          "/map",
+                          arguments: "shelter"
+                      ),
+                      Colors.red
+                  ),
                   _buildMenuItem(Icons.wc, "공중화장실", () =>
-                      Navigator.pushNamed(context, "/safety/restroom"), Colors.black),
+                      Navigator.pushNamed(
+                          context,
+                          "/map",
+                          arguments: "restroom"
+                      ),
+                      Colors.black
+                  ),
                   _buildMenuItem(Icons.video_camera_back, "CCTV", () =>
-                      Navigator.pushNamed(context, "/safety/cctv"),Colors.red),
+                      Navigator.pushNamed(
+                          context,
+                          "/map",
+                          arguments:"cctv"
+                      ),
+                      Colors.red
+                  ),
                 ], crossAxisCount: 4),
 
                 SizedBox(height: 20),
@@ -350,15 +374,32 @@ class MenuState extends State<Menu> {
                 _buildIconGrid([
                   // 교통 메뉴 아이템 목록
                   _buildMenuItem(Icons.subway_outlined, "지하철", () =>
-                      Navigator.pushNamed(context, "/transport/subway"), Colors.blue),
+                      Navigator.pushNamed(
+                          context,
+                          "/map",
+                          arguments: "subway"
+                      ),
+                      Colors.blue
+                  ),
                   _buildMenuItem(Icons.directions_bus, "버스정류장", () =>
                       Navigator.pushNamed(context, "/transport/busStation") ,Colors.blue),
                   _buildMenuItem(Icons.ev_station, "전동휠체어 충전소", () =>
                       Navigator.pushNamed(
-                          context, "/transport/wheelchairCharger") , Colors.green),
+                          context,
+                          "/map",
+                          arguments: "wheelchairCharger"
+                      ) ,
+                      Colors.green
+                  ),
                   // 텍스트 축약
                   _buildMenuItem(Icons.local_parking, "공용주차장", () =>
-                      Navigator.pushNamed(context, "/transport/localParking") , Colors.black),
+                      Navigator.pushNamed(
+                          context,
+                          "/map",
+                          arguments: "localParking"
+                      ) ,
+                      Colors.black
+                  ),
                   // 기존코드의 주유소는 이미지에 없으므로 제외
                 ], crossAxisCount: 4),
 
