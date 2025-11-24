@@ -288,7 +288,7 @@ class MenuState extends State<Menu> {
                   _buildMenuItem(Icons.recycling, "쓰레기 배출", () =>
                       Navigator.pushNamed(context, "/living/trashInfo"), Colors.green),
                   _buildMenuItem(Icons.energy_savings_leaf, "폐가전 수거", () =>
-                      Navigator.pushNamed(context, "/living/eco"), Colors.green),
+                      _launchURL("https://15990903.or.kr/portal/main/main.do"), Colors.green),
                   _buildMenuItem(Icons.local_police, "관공서", () =>
                       Navigator.pushNamed(context, "/living/government"), Colors.black),
                   _buildMenuItem(Icons.local_hospital, "심야약국/병원", () =>
