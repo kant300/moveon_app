@@ -141,8 +141,8 @@ class MenuState extends State<Menu> {
           print(" 게스트 주소 데이터: $data");
 
           setState(() {
-            wishposi = wishlist.split(",");
             wishlist = data['wishlist'] ?? "";
+            wishposi = wishlist.split(",");
             address = "${data['gaddress1']} ${data['gaddress2']} ${data['gaddress3']}";
           });
 
@@ -152,7 +152,6 @@ class MenuState extends State<Menu> {
         // 2 회원 토큰 처리
         if (logintoken != null) {
           print(" 회원 토큰 감지");
-
           final response = await dio.get(
             "http://10.95.125.46:8080/api/member/info",
             options: Options(headers: {"Authorization": "Bearer $logintoken"}),
@@ -164,6 +163,8 @@ class MenuState extends State<Menu> {
 
           setState(() {
             address = "${data['maddress1']} ${data['maddress2']} ${data['maddress3']}";
+            wishlist = data['wishlist'] ?? "";
+            wishposi = wishlist.split(",");
           });
 
           return;
@@ -193,19 +194,73 @@ class MenuState extends State<Menu> {
     }
       // 문자열로 변경
     String Scategory = wishposi.join(",");
-    
+
     try{
       final response = await dio.put("http://10.95.125.46:8080/api/guest/wishlist" ,
       data: {"wishlist": Scategory},
       options: Options(headers: {"Authorization" : "Bearer $token"},
       ), );
-      
+
       print("즐겨찾기 확인 : ${response.data}");
 
       setState(() {
         wishlist = Scategory;
       });
     }catch(e) { print(e); }
+  }
+
+  Widget checkStart(
+      IconData icon,
+      String label,
+      VoidCallback on,
+      Color iconColor,
+      String categoryId,
+      )
+  {
+    bool starwish = wishposi.contains(categoryId); // 즐겨찾기 여부 확인
+
+    return InkWell(
+      onTap: on,
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              // 아이콘
+              Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 1,
+                      blurRadius: 3,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Icon(icon, size: 20, color: iconColor ),
+              ),
+              Positioned(right: 0, top: 0, child: InkWell(
+                onTap: () {
+                  togglewish(categoryId);
+                },
+                child: Icon(
+                  starwish ? Icons.star : Icons.star_border,
+                  color: starwish ? Colors.amber : Colors.grey,
+                  size: 20,
+                ),
+              ),
+              )
+            ],
+          ),
+          SizedBox(height: 3),
+          Text(label, style: TextStyle(fontSize: 12, color: Colors.black87),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -254,20 +309,20 @@ class MenuState extends State<Menu> {
                 _buildIconGrid([
                   // 생활 메뉴 아이템 목록 (이미지 순서 및 아이콘/텍스트 매칭)
                   _buildMenuItem(Icons.attach_money, "공과금 정산", () =>
-                      Navigator.pushNamed(context, "/living/bill"), Colors.green),
+                      Navigator.pushNamed(context, "/living/bill"), Colors.green , "bill"),
                   _buildMenuItem(Icons.person_pin_circle_rounded, "전입신고", () =>
-                      Navigator.pushNamed(context, "/living/moveIn"),Colors.green ),
+                      Navigator.pushNamed(context, "/living/moveIn"),Colors.green , "moveIn" ),
                   _buildMenuItem(Icons.clean_hands, "의류수거함", () =>
-                      Navigator.pushNamed(context, "/living/clothingBin"), Colors.green),
+                      Navigator.pushNamed(context, "/living/clothingBin"), Colors.green , "clothingBin"),
                   // 의류수거함 아이콘 변경
                   _buildMenuItem(Icons.recycling, "쓰레기 배출", () =>
-                      Navigator.pushNamed(context, "/living/trashInfo"), Colors.green),
+                      Navigator.pushNamed(context, "/living/trashInfo"), Colors.green , "trashInfo"),
                   _buildMenuItem(Icons.energy_savings_leaf, "폐가전 수거", () =>
-                      Navigator.pushNamed(context, "/living/eco"), Colors.green),
+                      Navigator.pushNamed(context, "/living/eco"), Colors.green , "eco"),
                   _buildMenuItem(Icons.local_police, "관공서", () =>
-                      Navigator.pushNamed(context, "/living/government"), Colors.green),
+                      Navigator.pushNamed(context, "/living/government"), Colors.green , "government"),
                   _buildMenuItem(Icons.local_hospital, "심야약국/병원", () =>
-                      Navigator.pushNamed(context, "/living/night") ,Colors.green),
+                      Navigator.pushNamed(context, "/living/night") ,Colors.green , "night"),
                 ], crossAxisCount: 4), // 한 줄에 4개 배치
 
                 SizedBox(height: 20),
@@ -280,20 +335,20 @@ class MenuState extends State<Menu> {
                 _buildIconGrid([
                   // 안전 메뉴 아이템 목록
                   _buildMenuItem(Icons.crisis_alert, "성범죄자", () =>
-                      Navigator.pushNamed(context, "/safety/sexCrime") ,Colors.red),
+                      Navigator.pushNamed(context, "/safety/sexCrime") ,Colors.red , "sexCrime"),
                   // 텍스트 축약
                   _buildMenuItem(Icons.emergency, "민간구급차", () =>
-                      Navigator.pushNamed(context, "/safety/ambulance"), Colors.red),
+                      Navigator.pushNamed(context, "/safety/ambulance"), Colors.red , "ambulance"),
                   // 텍스트 축약
                   _buildMenuItem(Icons.water_drop, "비상급수시설", () =>
-                      Navigator.pushNamed(context, "/safety/water"), Colors.red),
+                      Navigator.pushNamed(context, "/safety/water"), Colors.red , "water"),
                   // 텍스트 축약
                   _buildMenuItem(Icons.night_shelter, "대피소", () =>
-                      Navigator.pushNamed(context, "/safety/shelter"), Colors.red),
+                      Navigator.pushNamed(context, "/safety/shelter"), Colors.red , "shelter"),
                   _buildMenuItem(Icons.people, "공중화장실", () =>
-                      Navigator.pushNamed(context, "/safety/restroom"), Colors.red),
+                      Navigator.pushNamed(context, "/safety/restroom"), Colors.red , "restroom"),
                   _buildMenuItem(Icons.video_camera_back, "CCTV", () =>
-                      Navigator.pushNamed(context, "/safety/cctv"),Colors.red),
+                      Navigator.pushNamed(context, "/safety/cctv"),Colors.red , "cctv"),
                 ], crossAxisCount: 4),
 
                 SizedBox(height: 20),
@@ -307,15 +362,15 @@ class MenuState extends State<Menu> {
                 _buildIconGrid([
                   // 교통 메뉴 아이템 목록
                   _buildMenuItem(Icons.subway_outlined, "지하철", () =>
-                      Navigator.pushNamed(context, "/transport/subway"), Colors.blue),
+                      Navigator.pushNamed(context, "/transport/subway"), Colors.blue , "subway"),
                   _buildMenuItem(Icons.directions_bus, "버스정류장", () =>
-                      Navigator.pushNamed(context, "/transport/busStation") ,Colors.blue),
+                      Navigator.pushNamed(context, "/transport/busStation") ,Colors.blue , "busStation"),
                   _buildMenuItem(Icons.ev_station, "전동휠체어 충전소", () =>
                       Navigator.pushNamed(
-                          context, "/transport/wheelchairCharger") , Colors.blue),
+                          context, "/transport/wheelchairCharger") , Colors.blue , "wheelchairCharger"),
                   // 텍스트 축약
                   _buildMenuItem(Icons.local_parking, "공용주차장", () =>
-                      Navigator.pushNamed(context, "/transport/localParking") , Colors.blue),
+                      Navigator.pushNamed(context, "/transport/localParking") , Colors.blue , "localParking"),
                   // 기존코드의 주유소는 이미지에 없으므로 제외
                 ], crossAxisCount: 4),
 
@@ -330,15 +385,15 @@ class MenuState extends State<Menu> {
                 _buildIconGrid([
                   // 커뮤니티 메뉴 아이템 목록
                   _buildMenuItem(Icons.handshake, "소분모임", () =>
-                      Navigator.pushNamed(context, "/community/bulkBuy"),  Colors.yellow ),
+                      Navigator.pushNamed(context, "/community/bulkBuy"),  Colors.yellow , "bulkBuy"),
                   _buildMenuItem(Icons.event_note, "지역행사", () =>
-                      Navigator.pushNamed(context, "/community/localEvent"),Colors.yellow),
+                      Navigator.pushNamed(context, "/community/localEvent"),Colors.yellow , "localEvent"),
                   _buildMenuItem(Icons.shopping_bag, "중고장터", () =>
-                      Navigator.pushNamed(context, "/community/localStore"), Colors.yellow ),
+                      Navigator.pushNamed(context, "/community/localStore"), Colors.yellow , "localStore"),
                   _buildMenuItem(Icons.reviews, "동네후기", () =>
-                      Navigator.pushNamed(context, "/community/localActivity"), Colors.yellow),
+                      Navigator.pushNamed(context, "/community/localActivity"), Colors.yellow , "localActivity"),
                   _buildMenuItem(Icons.business_center, "구인/구직", () =>
-                      Navigator.pushNamed(context, "/community/business") , Colors.yellow),
+                      Navigator.pushNamed(context, "/community/business") , Colors.yellow , "business"),
                 ], crossAxisCount: 4),
 
                 SizedBox(height: 20),

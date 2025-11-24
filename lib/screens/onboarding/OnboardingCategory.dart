@@ -105,17 +105,17 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
 
     try {
       if(logintoken != null){
-        final response = await dio.post("http://10.95.125.46:8080/api/member/wishlist" , data: obj ,
+        final response = await dio.put("http://10.95.125.46:8080/api/member/wishlist" , data: obj ,
         options: Options(headers: {"Authorization" : "Bearer $logintoken"}),
         );
         // 게스트 토큰 확실히 제거
-        await localsave.remove("guesttoken");
+        await localsave.remove("guestToken");
         print("회원 관심내역 $logintoken");
         return;
       }
 
       if(guesttoken != null){
-        final response = await dio.post(
+        final response = await dio.put(
           "http://10.95.125.46:8080/api/guest/wishlist",
           data: obj,
           options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
@@ -249,26 +249,6 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      // 이전 버튼 (흰색/회색)
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            // TODO: 이전 페이지로 돌아가는 로직 (보통 Navigator.pop)
-                            Navigator.pop(context);
-                          },
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 50),
-                            side: const BorderSide(color: Colors.grey),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            "이전",
-                            style: TextStyle(color: Colors.grey, fontSize: 20),
-                          ),
-                        ),
-                      ),
                       const SizedBox(width: 16),
                       // 다음 버튼 (활성화/비활성화)
                       Expanded(

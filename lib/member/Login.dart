@@ -47,11 +47,17 @@ class LoginState extends State<Login> {
 
           if (wishlist == null || wishlist == "") {
             print("신규 사용자");
-            Navigator.pushReplacementNamed(context, "/onboardingCategory");
+            Navigator.pushAndRemoveUntil(context,
+                MaterialPageRoute(builder: (_) => OnboardingCategory()),
+                    (router) => false
+            );
           } else {
             print("그냥 사용자");
-            Navigator.pushReplacementNamed(context, "/menu" );
-            print("토큰 저장 : ${data['token']}");
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => Menu()),
+                  (route) => false,
+            );
           }
         }
         print("로그인 성공");
