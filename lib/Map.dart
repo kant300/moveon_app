@@ -10,7 +10,6 @@ import 'ExpandableCategoryList.dart';
 const String BASE_URL = "http://192.168.40.61:8080";
 // 🚨 서버 주소가 변경되면 이 상수의 값만 수정하면 됩니다.
 
-
 class MapScreen extends StatefulWidget {
   @override
   _MapScreenState createState() => _MapScreenState();
@@ -402,7 +401,7 @@ class KakaoMapState extends State<KakaoMap> {
 
     try {
       final res = await Dio().get(
-        "http://192.168.40.61:8080/api/safety/sexcrime/near",
+        "$BASE_URL/api/safety/sexcrime/near",
         queryParameters: {"lat": lat, "lng": lng},
       );
 
@@ -542,7 +541,7 @@ class KakaoMapState extends State<KakaoMap> {
           data[i]["prevStation"] = i > 0 ? data[i-1]["역사명"] : "none";
           data[i]["nextStation"] = i < data.length-1 ? data[i+1]["역사명"] : "none";
 
-          final responseTime = await Dio().get("http://192.168.40.33:8080/transport/schedule", queryParameters: {"station_name": stationName});
+          final responseTime = await Dio().get("http://192.168.40.61:8080/transport/schedule", queryParameters: {"station_name": stationName});
           // [LocalTime, LocalTime]
 
           if (responseTime.statusCode == 200 && responseTime.data is List && responseTime.data.length >= 2) {
