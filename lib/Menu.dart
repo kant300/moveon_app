@@ -52,11 +52,11 @@ class MenuState extends State<Menu> {
 
   // 단일 메뉴 아이템(아이콘과 텍스트)을 구성하는 위젯
   Widget _buildMenuItem(
-    IconData icon, // 표시할 아이콘
-    String label, // 아이콘 아래에 표시할 텍스트
-    VoidCallback onPressed, // 버튼 클릭 시 실행할 동작
-    Color iconColor, // 아이콘의 색상
-  ) {
+      IconData icon, // 표시할 아이콘
+      String label, // 아이콘 아래에 표시할 텍스트
+      VoidCallback onPressed, // 버튼 클릭 시 실행할 동작
+      Color iconColor,       // 아이콘의 색상
+      ) {
     // ⭐️ isWished 상태를 확인하여 아이콘의 테두리나 배경을 다르게 처리할 수 있습니다.
     final isWished = wishposi.contains(label);
 
@@ -66,7 +66,7 @@ class MenuState extends State<Menu> {
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(10), // 아이콘 주변 여백
+            padding:  EdgeInsets.all(8), // 아이콘 주변 여백
             // 아이콘 배경 (이미지에는 배경색이 있으므로 색상 적용)
             decoration: BoxDecoration(
               // 아이콘별로 색상 다르게 설정 가능 (여기서는 기본 색상으로 통일)
@@ -84,7 +84,7 @@ class MenuState extends State<Menu> {
             ),
             child: Icon(
               icon,
-              size: 38, // 아이콘 크기 조정 (이미지 크기에 맞춰)
+              size: 45, // 아이콘 크기 조정 (이미지 크기에 맞춰)
               color: iconColor, // 아이콘 색상
             ),
           ),
@@ -560,8 +560,8 @@ class MenuState extends State<Menu> {
 
                 // 4. 커뮤니티 섹션
                 Text(
-                  "커뮤니티",
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                    "커뮤니티",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
                 ),
                 SizedBox(height: 15),
                 _buildIconGrid([
