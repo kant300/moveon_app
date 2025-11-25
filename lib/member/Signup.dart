@@ -39,7 +39,13 @@ class SignupState extends State<Signup> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Scaffold(
+
+    return WillPopScope(
+      onWillPop: () async{
+        Navigator.pushReplacementNamed(context, "/onboardingStart");
+        return false;
+      },
+    child:  Scaffold(
       appBar: AppBar( title: Text("회원가입"),),
       body: Column(
         children: [
@@ -53,6 +59,7 @@ class SignupState extends State<Signup> {
           OutlinedButton(onPressed: signup, child: Text("회원가입") ),
         ],
       ),
+    ),
     );
   }
 

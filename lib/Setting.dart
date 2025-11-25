@@ -18,7 +18,7 @@ class SettingState extends State<Setting> {
     final loginho = await SharedPreferences.getInstance();
     final token = await loginho.getString("logintoken");
     try{
-      final response = await dio.get("http://10.164.103.46:8080/api/member/info" ,
+      final response = await dio.get("http://10.95.125.46:8080/api/member/info" ,
       options: Options(headers: { "Authorization" : "Bearer $token" ,}),
       );
       final data = await response.data;
@@ -34,7 +34,7 @@ class SettingState extends State<Setting> {
       // 로컬 저장소에 저장한 localsave를 token 에 받기
       final token = localsave.getString('logintoken');
       // 서버로부터 정보불러오는데 token 확인
-      final response = await dio.get("http://localhost:8080/api/member/logout",
+      final response = await dio.get("http://10.95.125.46:8080/api/member/logout",
         options: Options(headers: { "Authorization": "Bearer $token",}),
       );
       final data = await response.data;
@@ -48,7 +48,7 @@ class SettingState extends State<Setting> {
         await localsave.remove('logintoken');
         await localsave.remove('mname');
 
-        Navigator.pushReplacementNamed(context, '/login');
+        Navigator.pushReplacementNamed(context, '/onboardingStart');
       } catch (e) {
       print(e);
     }
@@ -58,7 +58,7 @@ class SettingState extends State<Setting> {
     try{
       final localsave = await SharedPreferences.getInstance();
       final token = localsave.getString('logintoken');
-      final response = await dio.delete("http://localhost:8080/api/member/signout" ,
+      final response = await dio.delete("http://10.95.125.46:8080/api/member/signout" ,
        options: Options(headers: {"Authorization": "Bearer $token",}),
       );
       final data = await response.data;
@@ -66,7 +66,7 @@ class SettingState extends State<Setting> {
         print("회원탈퇴 : $token");
         await localsave.clear();
         print("정보 삭제");
-        Navigator.pushReplacementNamed(context, "/login");
+        Navigator.pushReplacementNamed(context, "/onboardingStart");
       }
 
     }catch(e) { print("로그아웃 실패 $e"); }
@@ -86,8 +86,8 @@ class SettingState extends State<Setting> {
         OutlinedButton(onPressed: logout , child: Text("로그아웃"), ),
         OutlinedButton(onPressed: signout , child: Text("회원탈퇴"), ),
         Text(" 계정 관리"),
-        TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/profile");},  child: Text("프로필 수정"), ),
-        TextButton(onPressed: () { Navigator.pushReplacementNamed(context, "/updatepwd");} , child: Text("비밀번호 변경"), ),
+        TextButton(onPressed: (){ Navigator.pushNamed(context, "/profile");},  child: Text("프로필 수정"), ),
+        TextButton(onPressed: () { Navigator.pushNamed(context, "/updatepwd");} , child: Text("비밀번호 변경"), ),
         TextButton(onPressed: (){}, child: Text("개인정보 관리"), ),
       ],),
     );

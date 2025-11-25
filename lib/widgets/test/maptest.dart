@@ -1,10 +1,85 @@
-// 맵 -------- 카테고리 버튼
 // import 'dart:convert';
 // import 'package:dio/dio.dart';
 // import 'package:flutter/material.dart';
 // import 'package:geolocator/geolocator.dart';
 // import 'package:permission_handler/permission_handler.dart';
 // import 'package:webview_flutter/webview_flutter.dart';
+// import 'ExpandableCategoryList.dart';
+//
+//
+//
+// class MapScreen extends StatefulWidget {
+//   @override
+//   _MapScreenState createState() => _MapScreenState();
+// }
+//
+// class _MapScreenState extends State<MapScreen> {
+//   String? _currentCategoryKey; // 현재 지도에 표시할 카테고리
+//
+//   // ⭐️ 마커를 로드하는 함수 (실제 구현 필요)
+//   void _loadMarkersForCategory(String key) {
+//     print("지도: $key 카테고리 마커 로딩 시작");
+//     // 여기에 Dio를 사용하여 서버에서 해당 카테고리 마커 데이터를 가져오는 로직 구현
+//   }
+//
+//   // ⭐️ ExpandableCategoryList의 콜백 함수
+//   void _handleCategorySelected(String key) {
+//     setState(() {
+//       _currentCategoryKey = key;
+//       _loadMarkersForCategory(key);
+//     });
+//   }
+//
+//   @override
+//   void didChangeDependencies() {
+//     super.didChangeDependencies();
+//
+//     // ⭐️ (1) menu.dart에서 전달받은 인수를 확인합니다.
+//     final args = ModalRoute.of(context)?.settings.arguments;
+//
+//     // ⭐️ (2) 초기 진입 시에만 처리합니다.
+//     if (_currentCategoryKey == null && args is String) {
+//       final initialKey = args;
+//       print("지도 초기화: 메뉴에서 '$initialKey' 키를 받았습니다.");
+//
+//       // 상태를 설정하고 마커 로딩을 시작합니다.
+//       _handleCategorySelected(initialKey);
+//
+//       // ⚠️ 중요: ModalRoute.of(context)?.settings.arguments = null;
+//       // 인수를 한 번 사용한 후 null로 설정하여 뒤로가기 시 인수가 재사용되는 것을 방지할 수 있습니다.
+//       // 하지만, 뒤로가기 시에도 인수가 필요 없다면 이 부분이 가장 안전합니다.
+//     }
+//
+//     // 만약 ExpandableCategoryList가 MapScreen에 포함되어 있다면,
+//     // _currentCategoryKey를 그 위젯에 전달하여 초기 상태를 표시하게 할 수도 있습니다.
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: Text(_currentCategoryKey ?? '전체 지도')),
+//       body: Stack(
+//         children: [
+//           // 맵 위젯 구현 부분
+//           Center(
+//             child: Text('지도 표시: $_currentCategoryKey 카테고리'),
+//           ),
+//
+//           // ⭐️ ExpandableCategoryList 위젯 (map.dart 내에 위치)
+//           Positioned(
+//             top: 10,
+//             left: 10,
+//             child: VerticalHorizontalCategoryList(
+//               onCategorySelected: _handleCategorySelected, // 콜백 연결
+//               // 참고: ExpandableCategoryList 위젯의 초기 상태를
+//               //       _currentCategoryKey로 설정하는 로직이 필요할 수 있습니다.
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
 //
 // class KakaoMap extends StatefulWidget {
 //   const KakaoMap({super.key});
@@ -17,6 +92,8 @@
 //   late final WebViewController _controller;
 //   double? lat;
 //   double? lng;
+//   // ✅ 검색어 입력 컨트롤러 추가
+//   final TextEditingController _searchController = TextEditingController();
 //
 //   final String kakaoJsKey = '9eb4f86b6155c2fa2f5dac204d2cdb35';
 //
@@ -110,6 +187,9 @@
 //                   '<div>' + m["주소"] + '</div>' +
 //                   '<div>' + m["전화번호"] + '</div>' +
 //                 '</div>');
+//                 } else if (category == "sexcrime") { // 성범죄자
+//                   window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
+//                  '</div>');
 //               } else if (category == "shelter") { // 대피소
 //                 window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
 //                   m["시설명"] +
@@ -172,6 +252,44 @@
 //         clusterer.addMarkers(markers);
 //       }
 //
+//       // ============================================
+//       // ✅ 주소 검색 관련 JavaScript 추가 (핵심)
+//       // ============================================
+//       var geocoder = new kakao.maps.services.Geocoder();
+//       var serchMarker = null; // 검색 시 생성되는 마커
+//
+//       // Flutter에서 검색어를 받아 주소 검색을 실행하는 함수
+//       window.searchAddress = function(query) {
+//         if (searchMarker) {
+//           searchMarker.setMap(null); // 기존 검색 마커 제거
+//         }
+//
+//         geocoder.addressSearch(query, function(result, status) {
+//           if (status === kakao.maps.services.Status.OK) {
+//             var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+//
+//             // 지도 중심 이동 및 레벨 설정
+//             map.panTo(coords);
+//             map.setLevel(3); // 적절한 줌 레벨로 설정
+//
+//             // 검색 마커 생성 및 표시
+//             searchMarker = new kakao.maps.Marker({
+//               map: map,
+//               position: coords
+//             });
+//
+//             // 검색 결과를 Dart로 전달 (위도, 경도)
+//             if (window.flutterChannel) {
+//               window.flutterChannel.postMessage("searchDone," + result[0].y + "," + result[0].x);
+//             }
+//           } else {
+//             // 검색 실패 시 Dart로 알림
+//             if (window.flutterChannel) {
+//               window.flutterChannel.postMessage("searchFailed");
+//             }
+//           }
+//         });
+//       };
 //
 //       // ✅ 지도 확대 / 축소 함수 추가
 //       function zoomIn() {
@@ -186,12 +304,28 @@
 // </html>
 // ''';
 //
+//
+//
 //     _controller = WebViewController()
 //       ..addJavaScriptChannel(
 //         'flutterChannel',
 //         onMessageReceived: (msg) {
 //           if (msg.message == "myLocationClick") {
 //             _loadCrimeInfo();   // ← 내위치 마커 클릭 시 서버 호출
+//           }else if (msg.message.startsWith("searchDone,")) {
+//             // ✅ 검색 성공 결과 처리: "searchDone,위도,경도"
+//             final parts = msg.message.split(',');
+//             final lat = double.tryParse(parts[1]);
+//             final lng = double.tryParse(parts[2]);
+//             if (lat != null && lng != null) {
+//               // 검색된 좌표로 현재 Dart 변수를 업데이트하고 (필요하다면) 통계 로드
+//               _updateLocationAfterSearch(lat, lng);
+//             }
+//           }else if (msg.message == "searchFailed") {
+//             // ✅ 검색 실패 처리
+//             ScaffoldMessenger.of(context).showSnackBar(
+//               const SnackBar(content: Text('검색 결과를 찾을 수 없습니다.')),
+//             );
 //           }
 //         },
 //       )
@@ -207,6 +341,29 @@
 //     // 초기 위치 + 마커 로드
 //     _initLocation();
 //   }
+//
+//   // ✅ Dart에서 JS의 searchAddress 함수 호출
+//   void _performSearch(String query) {
+//     if (query.trim().isEmpty) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text('검색어를 입력해 주세요.')),
+//       );
+//       return;
+//     }
+//     // JS 함수를 호출하여 주소 검색 실행
+//     _controller.runJavaScript("searchAddress('${query.trim()}');");
+//   }
+//
+//   // ✅ 검색 후 Dart 위치 변수 업데이트
+//   void _updateLocationAfterSearch(double latitude, double longitude) {
+//     // 검색된 좌표로 현재 위치 변수를 업데이트
+//     setState(() {
+//       lat = latitude;
+//       lng = longitude;
+//     });
+//   }
+//
+//
 //
 //   // ✅ 위치 권한 요청 및 현재 위치 가져오기
 //   Future<void> _initLocation() async {
@@ -233,7 +390,7 @@
 //
 //     try {
 //       final res = await Dio().get(
-//         "http://192.168.40.28:8080/crime/near",
+//         "http://192.168.40.61:8080/api/safety/sexcrime/near",
 //         queryParameters: {"lat": lat, "lng": lng},
 //       );
 //
@@ -264,11 +421,13 @@
 //               SizedBox(height: 20),
 //
 //               /// 시/도
-//               Text("${region['sido']} : ${cnt['sidoCount']}명"),
+//               Text("${region['sido']} : ${cnt['sidoCount']}명", style: const TextStyle(fontSize: 16)),
+//               const SizedBox(height: 8),
 //               /// 시군구
-//               Text("${region['sigungu']} : ${cnt['sigunguCount']}명"),
+//               Text("${region['sigungu']} : ${cnt['sigunguCount']}명", style: const TextStyle(fontSize: 16)),
+//               const SizedBox(height: 8),
 //               /// 읍면동
-//               Text("${region['dong']} : ${cnt['dongCount']}명"),
+//               Text("${region['dong']} : ${cnt['dongCount']}명", style: const TextStyle(fontSize: 16)),
 //
 //               SizedBox(height: 20),
 //               Text("자료 출처: 여성가족부 성범죄자 알림e",
@@ -306,31 +465,34 @@
 //         url = "https://api.odcloud.kr/api/15141554/v1/uddi:574fcc84-bcb8-4f09-9588-9b820731bf19?page=1&perPage=368&serviceKey=lxvZMQzViYP1QmBRI9MrdDw5ZmsblpCAd5iEKcTRES4ZcynJhQxzAuydpechK3TJCn43OJmweWMoYZ10aspdgQ%3D%3D";
 //         // key: 경도, 관리번호, 도로명 주소, 연번, 위도
 //       } else if (category == "government") { // 관공서
-//         url = "http://192.168.40.28:8080/living/gov";
+//         url = "http://192.168.40.61:8080/living/gov";
 //         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
 //       } else if (category == "night") { // 심야약국/병원
-//         url = "http://192.168.40.28:8080/living/medical";
+//         url = "http://192.168.40.61:8080/living/medical";
+//         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
+//       } else if (category == "sexCrime") { // 성범죄자
+//         url = "http://192.168.40.61:8080/safety/api/sexcrime/near";
 //         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
 //       } else if (category == "shelter") { // 대피소
-//         url = "http://192.168.40.28:8080/safety/shelter";
+//         url = "http://192.168.40.61:8080/safety/shelter";
 //         // key: 시설명, 위도, 경도
 //       } else if (category == "restroom") { // 공중화장실
-//         url = "http://192.168.40.28:8080/safety/toilet";
+//         url = "http://192.168.40.61:8080/safety/toilet";
 //         // key: 화장실명, 소재지도로명주소, 관리기관명, 전화번호, 개방시간상세, 위도, 경도
 //       } else if (category == "subwayLift") { // 지하철/승강기
-//         url = "http://192.168.40.28:8080/transport/lift";
+//         url = "http://192.168.40.61:8080/transport/lift";
 //         // key: 역사, 장비, 호기, 위도, 경도, 상태
 //       } else if (category == "subwaySchedule") { // 지하철/배차
-//         url = "http://192.168.40.28:8080/transport/location";
+//         url = "http://192.168.40.61:8080/transport/location";
 //         // key: 역사명, 위도, 경도
 //       } else if (category == "wheelchairCharger") { // 전동휠체어
-//         url = "http://192.168.40.28:8080/api/chargers/all";
+//         url = "http://192.168.40.61:8080/api/chargers/all";
 //         // key: 시설명, 소재지도로명주소, 위도, 경도, 평일운영시작시각, 평일운영종료시각, 관리기관명
 //       } else if (category == "localParking") { // 공영주차장
-//         url = "http://192.168.40.28:8080/transport/parking";
+//         url = "http://192.168.40.61:8080/transport/parking";
 //         // key: name, long, lat (시설명, 경도, 위도)
 //       } else if (category == "gas") {
-//         url = "http://192.168.40.28:8080/transport/gas";
+//         url = "http://192.168.40.61:8080/transport/gas";
 //         // key: 업소명, 소재지, 위도, 경도, 전화번호
 //       }
 //       final response = await Dio().get(url);
@@ -365,7 +527,7 @@
 //           data[i]["prevStation"] = i > 0 ? data[i-1]["역사명"] : "none";
 //           data[i]["nextStation"] = i < data.length-1 ? data[i+1]["역사명"] : "none";
 //
-//           final responseTime = await Dio().get("http://192.168.40.28:8080/transport/schedule", queryParameters: {"station_name": stationName});
+//           final responseTime = await Dio().get("http://192.168.40.61:8080/transport/schedule", queryParameters: {"station_name": stationName});
 //           // [LocalTime, LocalTime]
 //
 //           if (responseTime.statusCode == 200 && responseTime.data is List && responseTime.data.length >= 2) {
@@ -411,6 +573,45 @@
 //         children: [
 //           WebViewWidget(controller: _controller),
 //
+//           // ✅ 1. 주소 검색창 UI 추가
+//           Positioned(
+//             top: 10,
+//             left: 10,
+//             right: 10,
+//             child: Container(
+//               padding: const EdgeInsets.symmetric(horizontal: 8.0),
+//               decoration: BoxDecoration(
+//                 color: Colors.white,
+//                 borderRadius: BorderRadius.circular(8.0),
+//                 boxShadow: const [
+//                   BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
+//                 ],
+//               ),
+//               child: Row(
+//                 children: [
+//                   Expanded(
+//                     child: TextField(
+//                       controller: _searchController,
+//                       decoration: const InputDecoration(
+//                         hintText: '장소, 주소 검색',
+//                         border: InputBorder.none,
+//                       ),
+//                       // 엔터키 입력 시 검색 실행
+//                       onSubmitted: (value) => _performSearch(value),
+//                     ),
+//                   ),
+//                   IconButton(
+//                     icon: const Icon(Icons.search),
+//                     color: Theme.of(context).primaryColor,
+//                     onPressed: () => _performSearch(_searchController.text),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//
+//
+//
 //           // 오른쪽 하단 확대/축소 버튼
 //           Positioned(
 //             right: 10,
@@ -435,69 +636,12 @@
 //           // 왼쪽 상단 카테고리 버튼
 //           Positioned(
 //             left: 10,
-//             top: 100,
-//             child: Column(
-//               children: [
-//                 FloatingActionButton.small(
-//                   heroTag: "clothingBin",
-//                   onPressed: () async => { await _fetchAndShowMarkers("clothingBin") },
-//                   child: Text("의류수거함"),
-//                 ),
-//                 const SizedBox(height: 10),
-//                 FloatingActionButton.small(
-//                   heroTag: "government",
-//                   onPressed: () async => { await _fetchAndShowMarkers("government") },
-//                   child: Text("관공서"),
-//                 ),
-//                 const SizedBox(height: 10),
-//                 FloatingActionButton.small(
-//                   heroTag: "night",
-//                   onPressed: () async => { await _fetchAndShowMarkers("night") },
-//                   child: Text("약국/병원"),
-//                 ),
-//                 const SizedBox(height: 10),
-//                 FloatingActionButton.small(
-//                   heroTag: "shelter",
-//                   onPressed: () async => { await _fetchAndShowMarkers("shelter") },
-//                   child: Text("대피소"),
-//                 ),
-//                 const SizedBox(height: 10),
-//                 FloatingActionButton.small(
-//                   heroTag: "restroom",
-//                   onPressed: () async => { await _fetchAndShowMarkers("restroom") },
-//                   child: Text("공중화장실"),
-//                 ),
-//                 const SizedBox(height: 10),
-//                 FloatingActionButton.small(
-//                   heroTag: "subwayLift",
-//                   onPressed: () async => { await _fetchAndShowMarkers("subwayLift") },
-//                   child: Text("지하철/승강기"),
-//                 ),
-//                 FloatingActionButton.small(
-//                   heroTag: "subwaySchedule",
-//                   onPressed: () async => { await _fetchAndShowMarkers("subwaySchedule") },
-//                   child: Text("지하철/배차"),
-//                 ),
-//                 const SizedBox(height: 10),
-//                 FloatingActionButton.small(
-//                   heroTag: "wheelchairCharger",
-//                   onPressed: () async => { await _fetchAndShowMarkers("wheelchairCharger") },
-//                   child: Text("전동휠체어"),
-//                 ),
-//                 const SizedBox(height: 10),
-//                 FloatingActionButton.small(
-//                   heroTag: "localParking",
-//                   onPressed: () async => { await _fetchAndShowMarkers("localParking") },
-//                   child: Text("공영주차장"),
-//                 ),
-//                 const SizedBox(height: 10),
-//                 FloatingActionButton.small(
-//                   heroTag: "gas",
-//                   onPressed: () async => { await _fetchAndShowMarkers("gas") },
-//                   child: Text("주유소"),
-//                 ),
-//                 const SizedBox(height: 10),
-//               ],
+//             top: 70,
+//             child: VerticalHorizontalCategoryList( // 평 확장 위젯으로 변경
+//               onCategorySelected: (categoryKey) async {
+//                 // 하위 카테고리 선택 시 마커 로드 함수 호출
+//                 await _fetchAndShowMarkers(categoryKey);
+//               },
 //             ),
 //           ),
 //         ],
@@ -509,3 +653,6 @@
 //     );
 //   }
 // }
+//
+//
+//

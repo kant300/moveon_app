@@ -4,6 +4,84 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'ExpandableCategoryList.dart';
+
+// ✅ 1. 파일 최상단에 BASE_URL 상수 정의
+const String BASE_URL = "http://192.168.40.61:8080";
+// 🚨 서버 주소가 변경되면 이 상수의 값만 수정하면 됩니다.
+
+class MapScreen extends StatefulWidget {
+  @override
+  _MapScreenState createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  String? _currentCategoryKey; // 현재 지도에 표시할 카테고리
+
+  // ⭐️ 마커를 로드하는 함수 (실제 구현 필요)
+  void _loadMarkersForCategory(String key) {
+    print("지도: $key 카테고리 마커 로딩 시작");
+    // 여기에 Dio를 사용하여 서버에서 해당 카테고리 마커 데이터를 가져오는 로직 구현
+  }
+
+  // ⭐️ ExpandableCategoryList의 콜백 함수
+  void _handleCategorySelected(String key) {
+    setState(() {
+      _currentCategoryKey = key;
+      _loadMarkersForCategory(key);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // ⭐️ (1) menu.dart에서 전달받은 인수를 확인합니다.
+    final args = ModalRoute.of(context)?.settings.arguments;
+
+    // ⭐️ (2) 초기 진입 시에만 처리합니다.
+    if (_currentCategoryKey == null && args is String) {
+      final initialKey = args;
+      print("지도 초기화: 메뉴에서 '$initialKey' 키를 받았습니다.");
+
+      // 상태를 설정하고 마커 로딩을 시작합니다.
+      _handleCategorySelected(initialKey);
+
+      // ⚠️ 중요: ModalRoute.of(context)?.settings.arguments = null;
+      // 인수를 한 번 사용한 후 null로 설정하여 뒤로가기 시 인수가 재사용되는 것을 방지할 수 있습니다.
+      // 하지만, 뒤로가기 시에도 인수가 필요 없다면 이 부분이 가장 안전합니다.
+    }
+
+    // 만약 ExpandableCategoryList가 MapScreen에 포함되어 있다면,
+    // _currentCategoryKey를 그 위젯에 전달하여 초기 상태를 표시하게 할 수도 있습니다.
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(_currentCategoryKey ?? '전체 지도')),
+      body: Stack(
+        children: [
+          // 맵 위젯 구현 부분
+          Center(
+            child: Text('지도 표시: $_currentCategoryKey 카테고리'),
+          ),
+
+          // ⭐️ ExpandableCategoryList 위젯 (map.dart 내에 위치)
+          Positioned(
+            top: 10,
+            left: 10,
+            child: VerticalHorizontalCategoryList(
+              onCategorySelected: _handleCategorySelected, // 콜백 연결
+              // 참고: ExpandableCategoryList 위젯의 초기 상태를
+              //       _currentCategoryKey로 설정하는 로직이 필요할 수 있습니다.
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class KakaoMap extends StatefulWidget {
   const KakaoMap({super.key});
@@ -20,6 +98,15 @@ class KakaoMapState extends State<KakaoMap> {
   final TextEditingController _searchController = TextEditingController();
 
   final String kakaoJsKey = '9eb4f86b6155c2fa2f5dac204d2cdb35';
+
+  dynamic args = null;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // ⭐️ (1) menu.dart에서 전달받은 인수를 확인합니다.
+    args = ModalRoute.of(context)?.settings.arguments;
+  }
 
   @override
   void initState() {
@@ -302,7 +389,7 @@ class KakaoMapState extends State<KakaoMap> {
       _moveToMyLocation();
 
       // ✅ 서버에서 마커 데이터 가져오기 (현재 의류수거함을 기본 데이터로 설정)
-      await _fetchAndShowMarkers("clothingBin");
+      await _fetchAndShowMarkers( args ?? "clothingBin" );
     } else {
       await openAppSettings();
     }
@@ -314,7 +401,7 @@ class KakaoMapState extends State<KakaoMap> {
 
     try {
       final res = await Dio().get(
-        "http://192.168.40.61:8080/api/safety/sexcrime/near",
+        "$BASE_URL/api/safety/sexcrime/near",
         queryParameters: {"lat": lat, "lng": lng},
       );
 
@@ -389,38 +476,41 @@ class KakaoMapState extends State<KakaoMap> {
         url = "https://api.odcloud.kr/api/15141554/v1/uddi:574fcc84-bcb8-4f09-9588-9b820731bf19?page=1&perPage=368&serviceKey=lxvZMQzViYP1QmBRI9MrdDw5ZmsblpCAd5iEKcTRES4ZcynJhQxzAuydpechK3TJCn43OJmweWMoYZ10aspdgQ%3D%3D";
         // key: 경도, 관리번호, 도로명 주소, 연번, 위도
       } else if (category == "government") { // 관공서
-        url = "http://192.168.40.61:8080/living/gov";
+        url = "$BASE_URL/living/gov";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "night") { // 심야약국/병원
-        url = "http://192.168.40.61:8080/living/medical";
+        url = "$BASE_URL/living/medical";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "sexCrime") { // 성범죄자
-        url = "http://192.168.40.61:8080/safety/api/sexcrime/near";
+        url = "$BASE_URL/api/sexcrime/near?lat=${lat}&lng=${lng}";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
       } else if (category == "shelter") { // 대피소
-        url = "http://192.168.40.61:8080/safety/shelter";
+        url = "$BASE_URL/safety/shelter";
         // key: 시설명, 위도, 경도
       } else if (category == "restroom") { // 공중화장실
-        url = "http://192.168.40.61:8080/safety/toilet";
+        url = "$BASE_URL/safety/toilet";
         // key: 화장실명, 소재지도로명주소, 관리기관명, 전화번호, 개방시간상세, 위도, 경도
       } else if (category == "subwayLift") { // 지하철/승강기
-        url = "http://192.168.40.61:8080/transport/lift";
+        url = "$BASE_URL/transport/lift";
         // key: 역사, 장비, 호기, 위도, 경도, 상태
       } else if (category == "subwaySchedule") { // 지하철/배차
-        url = "http://192.168.40.61:8080/transport/location";
+        url = "$BASE_URL/transport/location";
         // key: 역사명, 위도, 경도
       } else if (category == "wheelchairCharger") { // 전동휠체어
-        url = "http://192.168.40.61:8080/api/chargers/all";
+        url = "$BASE_URL/api/chargers/all";
         // key: 시설명, 소재지도로명주소, 위도, 경도, 평일운영시작시각, 평일운영종료시각, 관리기관명
       } else if (category == "localParking") { // 공영주차장
-        url = "http://192.168.40.61:8080/transport/parking";
+        url = "$BASE_URL/transport/parking";
         // key: name, long, lat (시설명, 경도, 위도)
       } else if (category == "gas") {
-        url = "http://192.168.40.61:8080/transport/gas";
+        url = "$BASE_URL/transport/gas";
         // key: 업소명, 소재지, 위도, 경도, 전화번호
       }
+
       final response = await Dio().get(url);
       data = response.data;
+
+      print( data );
 
       // 지하철/배차는 배차 시각 정보를 추가해야 함
       if (category == "subwaySchedule") {
@@ -479,6 +569,11 @@ class KakaoMapState extends State<KakaoMap> {
       // 최종 데이터 확인
       // print( data );
 
+      if( category == "sexCrime" ){
+        _showCrimeModal( data );
+        return;
+      }
+
       //final data = response.data;
       final jsData = jsonEncode(data);
       final jsCategory = jsonEncode(category);
@@ -497,42 +592,42 @@ class KakaoMapState extends State<KakaoMap> {
         children: [
           WebViewWidget(controller: _controller),
 
-        // ✅ 1. 주소 검색창 UI 추가
-        Positioned(
-          top: 10,
-          left: 10,
-          right: 10,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8.0),
-              boxShadow: const [
-                BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: const InputDecoration(
-                      hintText: '장소, 주소 검색',
-                      border: InputBorder.none,
+          // ✅ 1. 주소 검색창 UI 추가
+          Positioned(
+            top: 10,
+            left: 10,
+            right: 10,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8.0),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: const InputDecoration(
+                        hintText: '장소, 주소 검색',
+                        border: InputBorder.none,
+                      ),
+                      // 엔터키 입력 시 검색 실행
+                      onSubmitted: (value) => _performSearch(value),
                     ),
-                    // 엔터키 입력 시 검색 실행
-                    onSubmitted: (value) => _performSearch(value),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  color: Theme.of(context).primaryColor,
-                  onPressed: () => _performSearch(_searchController.text),
-                ),
-              ],
+                  IconButton(
+                    icon: const Icon(Icons.search),
+                    color: Theme.of(context).primaryColor,
+                    onPressed: () => _performSearch(_searchController.text),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
 
 
 
@@ -560,78 +655,12 @@ class KakaoMapState extends State<KakaoMap> {
           // 왼쪽 상단 카테고리 버튼
           Positioned(
             left: 10,
-            top: 100,
-
-
-
-            child: Column(
-              children: [
-                FloatingActionButton.small(
-                  heroTag: "clothingBin",
-                  onPressed: () async => { await _fetchAndShowMarkers("clothingBin") },
-                  child: Text("의류수거함"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "government",
-                  onPressed: () async => { await _fetchAndShowMarkers("government") },
-                  child: Text("관공서"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "night",
-                  onPressed: () async => { await _fetchAndShowMarkers("night") },
-                  child: Text("약국/병원"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "sexCrime",
-                  onPressed: () async => { await _fetchAndShowMarkers("sexCrime") },
-                  child: Text("성범죄자"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "shelter",
-                  onPressed: () async => { await _fetchAndShowMarkers("shelter") },
-                  child: Text("대피소"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "restroom",
-                  onPressed: () async => { await _fetchAndShowMarkers("restroom") },
-                  child: Text("공중화장실"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "subwayLift",
-                  onPressed: () async => { await _fetchAndShowMarkers("subwayLift") },
-                  child: Text("지하철/승강기"),
-                ),
-                FloatingActionButton.small(
-                  heroTag: "subwaySchedule",
-                  onPressed: () async => { await _fetchAndShowMarkers("subwaySchedule") },
-                  child: Text("지하철/배차"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "wheelchairCharger",
-                  onPressed: () async => { await _fetchAndShowMarkers("wheelchairCharger") },
-                  child: Text("전동휠체어"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "localParking",
-                  onPressed: () async => { await _fetchAndShowMarkers("localParking") },
-                  child: Text("공영주차장"),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton.small(
-                  heroTag: "gas",
-                  onPressed: () async => { await _fetchAndShowMarkers("gas") },
-                  child: Text("주유소"),
-                ),
-                const SizedBox(height: 10),
-              ],
+            top: 70,
+            child: VerticalHorizontalCategoryList( // 평 확장 위젯으로 변경
+              onCategorySelected: (categoryKey) async {
+                // 하위 카테고리 선택 시 마커 로드 함수 호출
+                await _fetchAndShowMarkers(categoryKey);
+              },
             ),
           ),
         ],
@@ -643,3 +672,6 @@ class KakaoMapState extends State<KakaoMap> {
     );
   }
 }
+
+
+

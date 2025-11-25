@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:moveon_app/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -52,7 +53,7 @@ class StateProfile extends State<Profile> {
       final localsave = await SharedPreferences.getInstance();
       final token = await localsave.getString("logintoken");
       try{
-      final response = await dio.get("http://10.164.103.46:8080/api/member/info",
+      final response = await dio.get("http://10.95.125.46:8080/api/member/info",
       options: Options(headers: { "Authorization" : "Bearer $token"},),
       );
       final data = await response.data;
@@ -227,7 +228,7 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
         "maddress2" : address[1],
         "maddress3" : address[2] + " " +address[3],
       };
-      final response = await dio.put("http://10.164.103.46:8080/api/member/update" , data: obj);
+      final response = await dio.put("http://10.95.125.46:8080/api/member/update" , data: obj);
       final data = await response.data;
       print(data);
 
@@ -235,7 +236,7 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
         return AlertDialog(
           content: Text("프로필 수정 완료"),
           actions: [
-            TextButton(onPressed: () { Navigator.pushReplacementNamed(context , "/setting"); },
+            TextButton(onPressed: () { Navigator.pop(context); Navigator.pop(context); },
             child: Text("확인"),
             ),
           ],
@@ -246,16 +247,29 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("프로필 수정")),
+
+    return WillPopScope(
+      onWillPop: () async{
+        Navigator.pop(context);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("프로필 수정"),
+          leading: IconButton( icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);},
+          ),
+      ),
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 이름/폰/메일
-            TextField(controller: mnameCont),
-            TextField(controller: mphoneCont),
-            TextField(controller: memailCont),
+            TextField(controller: mnameCont , decoration: InputDecoration(labelText: "이름 수정?"),),
+            TextField(controller: mphoneCont , decoration: InputDecoration(labelText: "폰?"),),
+            TextField(controller: memailCont , decoration: InputDecoration(labelText: " 이메일?"),),
 
             // 주소 1개만 표시 (readOnly)
             Padding(
@@ -289,6 +303,7 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
           ],
         ),
       ),
+      ),
     );
   }
-  }
+}
