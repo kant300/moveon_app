@@ -53,11 +53,8 @@ class LoginState extends State<Login> {
             );
           } else {
             print("그냥 사용자");
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => Menu()),
-                  (route) => false,
-            );
+            Navigator.pushNamed( context, "/" );
+
           }
         }
         print("로그인 성공");

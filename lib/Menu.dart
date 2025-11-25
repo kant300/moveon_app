@@ -43,6 +43,11 @@ class MenuState extends State<Menu> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final result = ModalRoute.of(context)?.settings.arguments;
+    if(result == true) {
+      tokencall();
+    }
   }
 
   // 단일 메뉴 아이템(아이콘과 텍스트)을 구성하는 위젯
@@ -236,10 +241,10 @@ class MenuState extends State<Menu> {
         );
             print("즐겨찾기 확인 게스트 : ${response.data}");
       }
-
       setState(() {
         wishlist = Scategory;
       });
+
     } catch (e) {
       print(e);
     }
@@ -283,7 +288,7 @@ class MenuState extends State<Menu> {
                 right: 0,
                 top: 0,
                 child: checkwishlist
-                  ? InkWell(
+                ? InkWell(
                   onTap: () =>
                     togglewish(categoryId),
                   child: Icon(

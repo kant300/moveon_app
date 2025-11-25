@@ -80,6 +80,8 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
 
   void guesttoken() async{
       final localsave = await SharedPreferences.getInstance();
+      print("📌 저장된 key 전체 = ${localsave.getKeys()}");
+      print("📌 guestToken = ${localsave.getString("guestToken")}");
       final token = localsave.getString("guestToken");
 
       if(token == null) return;
@@ -88,11 +90,17 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
       options: Options(headers: {"Authorization" : "Bearer $token"},) );
       final data = await response.data;
       print(data);
+      print("게스트 접속");
+      final addr1 = data['gaddress1'] ?? '';
+      final addr2 = data['gaddress2'] ?? '';
+      final addr3 = data['gaddress3'] ?? '';
+
 
       setState(() {
-        address = "${data['gaddress1']} ${data['gaddress2']} ${data['gaddress3']}";
+        address = "$addr1 $addr2 $addr3".trim();
       });
 
+      print("addres $address");
     }catch(e) { print(e); }
   }
 
@@ -218,11 +226,7 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
                     child: ElevatedButton(
                       onPressed: () {
                         // 메인 페이지로 이동
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => Main()), // Main()으로 가정
-                              (Route<dynamic> route) => false,
-                        );
+                        Navigator.pushReplacementNamed(context , "/" , arguments: true); // Main()으로 가정
                       },
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 50),

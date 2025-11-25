@@ -236,7 +236,7 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
         return AlertDialog(
           content: Text("프로필 수정 완료"),
           actions: [
-            TextButton(onPressed: () { Navigator.pop(context); Navigator.pop(context); },
+            TextButton(onPressed: () { Navigator.pop(context); Navigator.pop(context , true); },
             child: Text("확인"),
             ),
           ],
@@ -258,7 +258,7 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
           title: Text("프로필 수정"),
           leading: IconButton( icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context);},
+            Navigator.pop(context ,true);},
           ),
       ),
 

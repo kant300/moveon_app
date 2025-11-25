@@ -43,6 +43,13 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
     CategoryItem(id: 'community', title: '커뮤니티', subtitle: '소분모임,이웃소통'),
   ];
 
+  final Map<String, List<String>> cgorymap = {
+    "safety": ["성범죄자", "민간구급차", "비상급수시설", "대피소", "공중화장실", "CCTV"],
+    "transport": ["지하철", "버스정류장", "전동휠체어 충전소", "공용주차장"],
+    "life": ["공과금 정산", "전입신고", "의류수거함", "쓰레기 배출", "폐가전 수거", "관공서", "심야약국/병원"],
+    "community": ["소분모임", "지역행사", "중고장터", "동네후기", "구인/구직"],
+  };
+
   // 2. 선택 상태 관리 (Key: Category ID, Value: isSelected)
   // 'safety'는 필수로 선택된 상태로 시작합니다.
   Map<String, bool> _categorySelections = {
@@ -99,7 +106,12 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
         .map((go) => go.id)
         .toList();
 
-      String wishstr = selectgory.join(",");
+      List<String> cgory = [];
+      for(final id in selectgory) {
+        cgory.addAll(cgorymap[id] ?? []);
+      }
+
+      String wishstr = cgory.join(",");
 
       final obj = { "wishlist": wishstr };
 
@@ -109,7 +121,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
         options: Options(headers: {"Authorization" : "Bearer $logintoken"}),
         );
         // 게스트 토큰 확실히 제거
-        await localsave.remove("guestToken");
+
         print("회원 관심내역 $logintoken");
         return;
       }
@@ -125,6 +137,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
 
     } catch (e) {
       print(e);
+
     }
   }
 

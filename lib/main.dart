@@ -69,12 +69,15 @@ class Main extends StatefulWidget {
   MainState createState() => MainState();
 }
 
+final GlobalKey<HomeState> homekey = GlobalKey<HomeState>();
+
+
 class MainState extends State<Main> {
   int currentPage = 0;
   dynamic pages = [
     Menu(),
     KakaoMap(),
-    Home(),
+    Home(key : homekey),
     Center(child: Text("Community")),
     MyPage()
   ];
@@ -85,6 +88,7 @@ class MainState extends State<Main> {
   void initState() {
     super.initState();
     loadUserName();
+
   }
   void loadUserName() async {
     final mem = await SharedPreferences.getInstance();
@@ -155,9 +159,13 @@ class MainState extends State<Main> {
       body: IndexedStack(index: currentPage, children: pages),
       bottomNavigationBar: BottomNavigationBar(
           currentIndex: currentPage,
-          onTap: (index) { setState(() {
+          onTap: (index) async{ setState(() {
             currentPage = index;
-          });},
+          });
+            if(index == 2){
+              homekey.currentState?.wishlist();
+            }
+          },
 
           backgroundColor: Colors.white, // 바탕색을 밝게
           selectedItemColor: Colors.blueAccent, // 선택된 아이템 색상
