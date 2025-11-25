@@ -80,7 +80,7 @@ class MenuState extends State<Menu> {
             ),
             child: Icon(
               icon,
-              size: 42, // 아이콘 크기 조정 (이미지 크기에 맞춰)
+              size: 45, // 아이콘 크기 조정 (이미지 크기에 맞춰)
               color: iconColor, // 아이콘 색상
             ),
           ),
@@ -334,10 +334,15 @@ class MenuState extends State<Menu> {
                 _buildIconGrid([
                   // 생활 메뉴 아이템 목록 (이미지 순서 및 아이콘/텍스트 매칭)
                   _buildMenuItem(Icons.attach_money, "공과금 정산", () =>
-                      Navigator.pushNamed(context, "/living/bill"), Colors.black),
+                      Navigator.pushNamed(context, "/living/bill"), Colors.green.shade700),
                   _buildMenuItem(Icons.person_pin_circle_rounded, "전입신고", () =>
-                      _launchURL("https://www.gov.kr/portal/onestopSvc/transferReport"),Colors.green),
-                  _buildMenuItem(Icons.checkroom, "의류수거함", () =>
+                      _launchURL("https://www.gov.kr/portal/onestopSvc/transferReport"),Colors.green.shade700),
+                  _buildMenuItem(Icons.checkroom,
+                      // Image.asset(
+                      //   'assets/images/apparel_24dp_16A637_FILL0_wght400_GRAD0_opsz24.png',
+                      //   fit: BoxFit.contain,
+                      // ),
+                      "의류수거함", () =>
                       Navigator.pushNamed(
                           context,
                           "/map", // 지도 화면 라우트
@@ -347,16 +352,16 @@ class MenuState extends State<Menu> {
                   ),
                   // 의류수거함 아이콘 변경
                   _buildMenuItem(Icons.recycling, "쓰레기 배출", () =>
-                      Navigator.pushNamed(context, "/living/trashInfo"), Colors.green),
+                      Navigator.pushNamed(context, "/living/trashInfo"), Colors.green.shade700),
                   _buildMenuItem(Icons.energy_savings_leaf, "폐가전 수거", () =>
-                      _launchURL("https://15990903.or.kr/portal/main/main.do"), Colors.green),
+                      _launchURL("https://15990903.or.kr/portal/main/main.do"), Colors.green.shade700),
                   _buildMenuItem(Icons.local_police, "관공서", () =>
                       Navigator.pushNamed(
                           context,
                           "/map",
                           arguments: "government"
                       ),
-                      Colors.black
+                      Colors.green.shade700
                   ),
                   _buildMenuItem(Icons.local_hospital, "심야약국/병원", () =>
                       Navigator.pushNamed(
