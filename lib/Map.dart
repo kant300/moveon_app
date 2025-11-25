@@ -408,6 +408,8 @@ class KakaoMapState extends State<KakaoMap> {
     }
   }
 
+
+
   // ============================================
   // ⭐️ 성범죄자 통계 및 모달 관련 함수 수정 ⭐️
   // ============================================
@@ -442,9 +444,9 @@ class KakaoMapState extends State<KakaoMap> {
     } catch (e) {
       print("성범죄자 통계 불러오기 오류: $e");
       // 필요 시 사용자에게 알림
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('성범죄자 정보를 불러오는 데 실패했습니다.')),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //     const SnackBar(content: Text('성범죄자 정보를 불러오는 데 실패했습니다.')),
+      // );
     }
   }
   // ✅ 3. 필터링 기능을 가진 새 모달로 변경

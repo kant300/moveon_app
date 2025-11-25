@@ -148,6 +148,21 @@ class HomeState extends State<Home> {
     return 0;
   }
 
+  Future<int> fetchCctvCount(double lat, double lng) async {
+    final response = await dio.get(
+      'http://10.0.2.2:8080/api/cctv/count-by-dong',
+      queryParameters: {'lat': lat, 'lng': lng},
+    );
+
+    // JSON 응답에서 cctv_count 값을 추출
+    if (response.statusCode == 200) {
+      return response.data['cctv_count'];
+    } else {
+      // 오류 처리
+      throw Exception('Failed to load CCTV count');
+    }
+  }
+
   // 날씨 정보 구하기
   Future<void> getWeatherData() async {
     try {
@@ -400,6 +415,8 @@ class HomeState extends State<Home> {
     );
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -484,6 +501,99 @@ class HomeState extends State<Home> {
                 ],
               ),
             ),
+
+
+
+
+
+            Text(
+                "내 동네 안전정보",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 15),
+
+            Padding(
+              padding: EdgeInsets.only(bottom: 25), // 하단 여백
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Container(
+                        height: 60,
+                        alignment: Alignment.center,
+                        child: isLoadingCctv
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2)
+                            )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    currentDong,
+                                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                                  ),
+                                  Text(
+                                    "CCTV\n설치대수${cctvCount}대",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                            ),
+                      ),
+                    ),
+                  ),
+
+      // Padding(
+      //   padding: EdgeInsets.only(bottom: 25), // 하단 여백
+      //   child: Row(
+      //     mainAxisAlignment: MainAxisAlignment.center,
+      //     children: [
+      //       Expanded(
+      //         child: Card(
+      //           elevation: 4,
+      //           shape: RoundedRectangleBorder(
+      //             borderRadius: BorderRadius.circular(15),
+      //           ),
+      //           child: Container(
+      //             height: 60,
+      //             alignment: Alignment.center,
+      //             child: isLoadingCctv
+      //                 ? SizedBox(
+      //                 width: 20,
+      //                 height: 20,
+      //                 child: CircularProgressIndicator(strokeWidth: 2)
+      //             )
+      //                 : Column(
+      //               mainAxisAlignment: MainAxisAlignment.center,
+      //               children: [
+      //                 Text(
+      //                   currentDong,
+      //                   style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+      //                 ),
+      //                 Text(
+      //                   "등록된\n성범죄자수${dongCount}명",
+      //                   textAlign: TextAlign.center,
+      //                   style: TextStyle(
+      //                     fontSize: 15,
+      //                     fontWeight: FontWeight.bold,
+      //                   ),
+      //                 ),
+      //               ],
+      //             ),
+      //           ),
+      //         ),
+      //       ),
+
             Card(
               elevation: 6, // 그림자 깊이
               shape: RoundedRectangleBorder(

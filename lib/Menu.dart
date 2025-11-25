@@ -282,7 +282,7 @@ class MenuState extends State<Menu> {
                     ),
                   ],
                 ),
-                child: Icon(icon, size: 20, color: iconColor),
+                child: Icon(icon, size: 45, color: iconColor),
               ),
               Positioned(
                 right: 0,
@@ -532,7 +532,7 @@ class MenuState extends State<Menu> {
                   ),
                   checkStart(
                     Icons.ev_station,
-                    "전동휠체어 충전소",
+                    "전동휠체어",
                     () => Navigator.pushNamed(
                       context,
                       "/map",
