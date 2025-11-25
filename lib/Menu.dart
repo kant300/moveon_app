@@ -444,7 +444,7 @@ class MenuState extends State<Menu> {
                   ),
                   _buildMenuItem(Icons.directions_bus, "버스정류장", () =>
                       Navigator.pushNamed(context, "/transport/busStation") ,Colors.blue),
-                  _buildMenuItem(Icons.ev_station, "전동휠체어 충전소", () =>
+                  _buildMenuItem(Icons.ev_station, "전동휠체어", () =>
                       Navigator.pushNamed(
                           context,
                           "/map",
@@ -469,7 +469,7 @@ class MenuState extends State<Menu> {
                 // 4. 커뮤니티 섹션
                 Text(
                     "커뮤니티",
-                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
                 ),
                 SizedBox(height: 15),
                 _buildIconGrid([
