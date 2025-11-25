@@ -1,148 +1,212 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:moveon_app/main.dart';
 import 'package:moveon_app/screens/onboarding/OnboardingAddress.dart';
-import 'package:moveon_app/member/Login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final dio = Dio();
-// 온보딩 첫 화면 위젯 (앱 시작 시 가장 먼저 보이는 화면)
+
 class OnboardingStart extends StatefulWidget {
   const OnboardingStart({super.key});
 
   @override
   StateOnboardingStart createState() => StateOnboardingStart();
 }
-class StateOnboardingStart extends State<OnboardingStart>{
 
+class StateOnboardingStart extends State<OnboardingStart> {
+  TextEditingController midCont = TextEditingController();
+  TextEditingController mpwdCont = TextEditingController();
 
-  dynamic test = {};
-
-
-  // 로그인
-  TextEditingController midCont = TextEditingController(); // 아이디
-  TextEditingController mpwdCont = TextEditingController(); // 비밀번호
-
-  //  수정: 비동기 함수이므로 반환 타입을 Future<void>로 변경했습니다.
-  Future<bool> login() async{
+  Future<bool> login() async {
     try {
-      final obj = {
-        "mid": midCont.text,
-        "mpwd": mpwdCont.text,
-      };
+      final obj = {"mid": midCont.text, "mpwd": mpwdCont.text};
+
       final response = await dio.post(
-        "http://10.0.2.2:8080/api/member/login", data: obj,
+        "http://10.0.2.2:8080/api/member/login",
+        data: obj,
         options: Options(headers: {"Content-Type": "application/json"}),
       );
-      final data = await response.data;
-      print(data);
+
+      final data = response.data;
+
       if (data != null && data['token'] != null) {
-        final localsave = await SharedPreferences.getInstance();
-          await localsave.setString('logintoken', data['token'] );
-          print(localsave);
-          print("토큰 저장 : ${data['token']}");
+        final sp = await SharedPreferences.getInstance();
 
-        await localsave.setString('mname', data['member']['mname']);
+        await sp.setString('logintoken', data['token']);
+        await sp.remove('guestToken');
 
-        if(data['member'] != null && data['member']['wishlist'] != null){
-          await localsave.setString('wishlist' , data['member']['wishlist']);
-        }else{
-          await localsave.setString('wishlist', "");
-        }
-        await localsave.remove('guestToken');
+        await sp.setString('mname', data['member']['mname']);
+        await sp.setString('wishlist', data['member']['wishlist'] ?? "");
 
-        print("로그인 성공");
         return true;
       }
-    }catch(e) { print("로그인 실패 $e") ; }
+    } catch (e) {
+      print("로그인 실패 $e");
+    }
     return false;
   }
 
-  void guest() async{
-    try{
+  void guest() async {
+    try {
       final response = await dio.post("http://10.0.2.2:8080/api/guest/save");
-      final data = await response.data;
-      final token = data["token"];
+      final data = response.data;
 
-      final localsave = await SharedPreferences.getInstance();
-        await localsave.setString('guestToken', token );
-        print(localsave);
-        print("토큰 확인 : ${data['token'] }");
-        Navigator.push(context, MaterialPageRoute(builder: (_) => OnboardingAddress() ),
-        );
-      }catch(e) { print(e); }
+      final sp = await SharedPreferences.getInstance();
+      sp.setString("guestToken", data["token"]);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => OnboardingAddress()),
+      );
+    } catch (e) {
+      print("게스트 오류: $e");
     }
+  }
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryColor = Color(0xFF33C9C9); //  메인 테마색상 (민트/청록색)
+    const primaryColor = Color(0xFF33C9C9);
+
     return Scaffold(
-      body: Container(
-        color: primaryColor, // 전체 배경색 설정
-        child: SafeArea( // 노치/상단바 영역 침범 방지
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween, // 상단-하단 간격을 최대화
-            children: [
-              // 상단 로고 및 문구
-              Expanded(
-                child: Center( // 중앙정렬
+      backgroundColor: primaryColor,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // 로고
+                Text(
+                  "mOveOn",
+                  style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+                SizedBox(height: 6),
+                Text(
+                  "새로운 시작, 안전한 정착",
+                  style: TextStyle(fontSize: 17, color: Colors.white),
+                ),
+                SizedBox(height: 40),
+
+                // 카드 형태 로그인 입력 박스
+                Container(
+                  padding: EdgeInsets.all(22),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      )
+                    ],
+                  ),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center, // 세로 중앙 배치
                     children: [
-                      Text( // 앱 로고 텍스트
-                        'mOveOn',
-                        style: TextStyle(
-                          fontSize: 50,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      TextField(
+                        controller: midCont,
+                        decoration: InputDecoration(
+                          labelText: "아이디",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                       ),
-                      SizedBox(height: 8),
-                      Text(
-                        '새로운 시작, 안전한 정착',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
+                      SizedBox(height: 16),
+                      TextField(
+                        controller: mpwdCont,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: "비밀번호",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                       ),
+                      SizedBox(height: 20),
 
-                      TextField( controller: midCont  ),
-                      TextField( controller: mpwdCont  ),
-
-                      OutlinedButton(
+                      // 로그인 버튼
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
                           onPressed: () async {
-                            // 1. login() 함수가 Future<void>를 반환하도록 정의되어야 합니다.
                             bool ok = await login();
                             if (!mounted) return;
-                            // 2. 비동기 작업 후, 위젯이 마운트된 상태(mounted)일 때만 화면 이동
+
+                            final sp = await SharedPreferences.getInstance();
+                            String? wishlist = sp.getString('wishlist');
+
                             if (ok) {
-                              SharedPreferences spfn = await SharedPreferences
-                                  .getInstance();
-                              String? wishlist = spfn.getString('wishlist');
                               if (wishlist == null || wishlist.isEmpty) {
-                                print("관심 정보 없음");
-                                Navigator.pushReplacementNamed( context, "/onboardingCategory");
+                                Navigator.pushReplacementNamed(
+                                    context, "/onboardingCategory");
                               } else {
-                                print("관심 정보 있음");
-                                Navigator.pushReplacementNamed( context, "/");
+                                Navigator.pushReplacementNamed(context, "/");
                               }
-                              } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(
-                                  "아이디또는 비밀번호를 다시 입력해주세요. ")),);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text("로그인 정보를 확인해주세요.")));
                             }
                           },
-                          child: Text("로그인")
-                      ),
-                      TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findid"); } , child: Text("아이디찾기"), ),
-                      TextButton(onPressed: (){ Navigator.pushReplacementNamed(context, "/findpwd"); } , child: Text("비밀번호찾기"), ),
-                      TextButton(onPressed: (){Navigator.pushReplacementNamed(context, "/signup"); }, child: Text("회원가입 페이지로 이동"),),
-                      TextButton(onPressed: guest , child: Text("Guest"),),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            "로그인",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      )
                     ],
                   ),
                 ),
-              ),
-            ],
+
+                SizedBox(height: 25),
+
+                // 회원/비번 찾기 링크
+                TextButton(
+                    onPressed: () =>
+                        Navigator.pushReplacementNamed(context, "/findid"),
+                    child: Text("아이디 찾기",
+                        style: TextStyle(color: Colors.white70))),
+
+                TextButton(
+                    onPressed: () =>
+                        Navigator.pushReplacementNamed(context, "/findpwd"),
+                    child: Text("비밀번호 찾기",
+                        style: TextStyle(color: Colors.white70))),
+
+                TextButton(
+                    onPressed: () =>
+                        Navigator.pushReplacementNamed(context, "/signup"),
+                    child: Text("회원가입",
+                        style:
+                        TextStyle(color: Colors.white, fontSize: 16))),
+
+                SizedBox(height: 20),
+
+                // 게스트 버튼
+                OutlinedButton(
+                  onPressed: guest,
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.white, width: 1.5),
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 50),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text(
+                    "게스트로 시작하기",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

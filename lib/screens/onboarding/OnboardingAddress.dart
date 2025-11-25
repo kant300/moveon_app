@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -21,7 +20,6 @@ class OnboardingAddressState extends State<OnboardingAddress> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     MapController = WebViewController()
@@ -32,12 +30,11 @@ class OnboardingAddressState extends State<OnboardingAddress> {
           final gpsmap = jsonDecode(msg.message);
           double lat = gpsmap['lat'];
           double lon = gpsmap['lon'];
-          print("좌포 전달 ${msg.message}");
+
           String address = await getKakaomap(lon, lat);
 
           setState(() {
-            addressCont.text =
-                address; // lon , lat / 윋 ㅗ경도 주소 address 로 받아서  input text에 넣어줌
+            addressCont.text = address;
           });
         },
       );
@@ -46,13 +43,11 @@ class OnboardingAddressState extends State<OnboardingAddress> {
   TextEditingController addressCont = TextEditingController();
 
   bool showMap = false;
-  double? lat; // WebView 사용
-  double? lon; // WebView 사용
-  // KaKao api
+  double? lat;
+  double? lon;
+
   Future<String> getKakaomap(double lon, double lat) async {
-    dynamic addressKey =
-        "0b209f5c7458468469df5492074343bf"; // api kakao rest key
-    // KaKao 좌표로 주소 변환 Rest Key
+    dynamic addressKey = "0b209f5c7458468469df5492074343bf";
     final response = await dio.get(
       "https://dapi.kakao.com/v2/local/geo/coord2address.json",
       queryParameters: {"x": lon.toString(), "y": lat.toString()},
@@ -60,61 +55,47 @@ class OnboardingAddressState extends State<OnboardingAddress> {
     );
     final doc = response.data['documents'] as List;
     if (doc.isEmpty) return "불가";
+
     final add = doc[0]["address"] as Map<String, dynamic>;
-    return "${add['region_1depth_name']} " // 시
-        "${add['region_2depth_name']} " // 구
-        "${add['region_3depth_name']} " // 동
-        "${add['main_address_no']}"; // 상세 주소
-  } // get kakao map end
+    return "${add['region_1depth_name']} "
+        "${add['region_2depth_name']} "
+        "${add['region_3depth_name']} "
+        "${add['main_address_no']}";
+  }
 
-  // 내위치
   Future<bool> addressprint() async {
-    bool EnableStart =
-        await Geolocator.isLocationServiceEnabled(); // 스마트폰 gps 기능 확인 여부
-    if (!EnableStart) {
-      print("GPS 기능 안켜져있음");
-      return Future.value(false); // 안켜져있으면 실패
-    }
-    ;
-    // 권한 여부 확인
-    LocationPermission locationPermission = await Geolocator.checkPermission();
+    bool isEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!isEnabled) return false;
 
-    if (locationPermission == LocationPermission.denied) {
-      // 권한 요청 확인후 맞으면 팝업창 띄워줌 [ 허용 / 거부 ]
-      locationPermission = await Geolocator.requestPermission();
-      // 거부 누르면 false 로 반환
-      if (locationPermission == LocationPermission.denied) {
-        return Future.value(false);
-      }
-    } // 강력 팝업 : 거부 여러번 실행시 발동 { 다시는 묻지않기 }
-    if (locationPermission == LocationPermission.deniedForever) {
-      return Future.value(false);
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return false;
     }
+    if (permission == LocationPermission.deniedForever) return false;
+
     Position position = await Geolocator.getCurrentPosition();
-    dynamic x = position.longitude; // 경도
-    dynamic y = position.latitude; // 위도
+    double x = position.longitude;
+    double y = position.latitude;
 
-    String address = await getKakaomap(x, y);
+    String addr = await getKakaomap(x, y);
 
     setState(() {
-      addressCont.text = address;
+      addressCont.text = addr;
       lon = x;
       lat = y;
       showMap = true;
       MapController.loadHtmlString(kakaoMap(lon!, lat!));
     });
-    // 허용시 true
-    return Future.value(true);
+
+    return true;
   }
 
   String kakaoMap(double lon, double lat) {
     return '''
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8">
-<title>Kakao Map</title>
-</head>
+<head><meta charset="utf-8"><title>Kakao Map</title></head>
 <body>
 
 <div id="map" style="width:100%;height:350px;"></div>
@@ -122,24 +103,19 @@ class OnboardingAddressState extends State<OnboardingAddress> {
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=caa87b2038ca1bb96deba339a07a78d5"></script>
 <script>
 
-// 지도를 표시할 div
 var mapContainer = document.getElementById('map'),
     mapOption = {
-        center: new kakao.maps.LatLng(${lat}, ${lon}), // GPS 위치로 지도 중심 이동
+        center: new kakao.maps.LatLng(${lat}, ${lon}),
         level: 3
     };
 
 var map = new kakao.maps.Map(mapContainer, mapOption);
-
-// GPS 위치에 마커 표시
 var marker = new kakao.maps.Marker({
     position: new kakao.maps.LatLng(${lat}, ${lon})
 });
 marker.setMap(map);
 
-// 지도 클릭하면 마커 이동 + Flutter로 클릭 좌표 전달
 kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
-
     var latlng = mouseEvent.latLng;
     marker.setPosition(latlng);
 
@@ -156,16 +132,17 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
   }
 
   Future<void> guest() async {
-    final localsave = await SharedPreferences.getInstance();
-    final token = localsave.getString("guestToken");
+    final sp = await SharedPreferences.getInstance();
+    final token = sp.getString("guestToken");
     try {
-      final addressadd = addressCont.text.split(" ");
+      final address = addressCont.text.split(" ");
       final obj = {
-        "gaddress1": addressadd[0],
-        "gaddress2": addressadd[1],
-        "gaddress3": addressadd[2],
+        "gaddress1": address[0],
+        "gaddress2": address[1],
+        "gaddress3": address[2],
       };
-      final response = await dio.post(
+
+      await dio.post(
         "http://10.0.2.2:8080/api/guest/detail",
         data: obj,
         options: Options(
@@ -175,8 +152,6 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
           },
         ),
       );
-      final data = await response.data;
-      print(data);
     } catch (e) {
       print(e);
     }
@@ -184,90 +159,163 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
 
   @override
   Widget build(BuildContext context) {
+    const Color mainMint = Color(0xFF38D5C1);
+
     return Scaffold(
-      appBar: AppBar(title: const Text("주소 확인")),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // 🔹 상단 컬러바
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _colorBar(const Color(0xFF3DE0D2)),
-              const SizedBox(width: 24),
-              _colorBar(const Color(0xFF7FFFD4)),
-              const SizedBox(width: 24),
-              _colorBar(const Color(0xFFC5F6F6)),
-            ],
-          ),
-          // 🔹 상단 텍스트
-          SizedBox(height: 20),
-          Text("어디로 이사 오셨나요?", style: TextStyle(fontSize: 18)),
-          Text("새로운 동네 정보를 알려 드릴게요", style: TextStyle(fontSize: 14)),
-          SizedBox(height: 16),
+      backgroundColor: Color(0xFFF7FCFC),
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 15),
 
-          Expanded(
-            child: showMap && lon != null && lat != null
-                ? WebViewWidget(controller: MapController)
-                : Center(child: Text("내 위치 정보 조회하기")),
-          ),
+            // 🔹 진행바 (피그마 스타일)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                _StepBar(active: true),
+                SizedBox(width: 12),
+                _StepBar(active: true),
+                SizedBox(width: 12),
+                _StepBar(active: false),
+              ],
+            ),
 
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: TextField(
-                  controller: addressCont,
-                  readOnly: true,
-                  decoration: InputDecoration(labelText: "선택한 주소"),
+            const SizedBox(height: 25),
+
+            // 🔹 타이틀 문구
+            const Text(
+              "어디로 이사 오셨나요?",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              "맞춤 정보를 제공해드릴게요",
+              style: TextStyle(fontSize: 14, color: Colors.black54),
+            ),
+
+            const SizedBox(height: 20),
+
+            // 🔹 지도 선택 박스 (피그마처럼 큰 박스)
+            GestureDetector(
+              onTap: addressprint,
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 16),
+                height: 170,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Color(0xFFE6F2F2)),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.location_on,
+                          size: 36, color: Color(0xFF3AC7C3)),
+                      SizedBox(height: 8),
+                      Text(
+                        "지도에서 위치 선택",
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF3AC7C3),
+                            fontWeight: FontWeight.w600),
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ],
-          ),
-
-
-
-          // 🔹 내 위치 버튼 (상단 유지)
-          ElevatedButton(onPressed: addressprint, child: Text("내 위치 조회")),
-          SizedBox(height: 185),
-
-
-
-          // 🔹 하단 - 다음 버튼
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20.0),
-            child: ElevatedButton(
-              onPressed: () async {
-                if (addressCont.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("주소 입력바람"),
-                      duration: Duration(seconds: 2), // 알림 경과 시간창 2초
-                    ),
-                  );
-                  return;
-                }
-                await guest();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => OnboardingCategory()),
-                );
-              },
-              child: const Text("다음 단계"),
             ),
-          ),
-        ],
+
+            const SizedBox(height: 20),
+
+            // 🔹 주소 입력 박스
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Color(0xFFE6F2F2)),
+              ),
+              child: TextField(
+                controller: addressCont,
+                readOnly: true,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  prefixIcon: Icon(Icons.search, color: Colors.grey),
+                  hintText: "동네 이름이나 주소를 입력하세요",
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // 🔹 지도 영역
+            Expanded(
+              child: showMap && lon != null && lat != null
+                  ? WebViewWidget(controller: MapController)
+                  : Center(
+                child: Text(
+                  "지도에서 위치를 선택해주세요",
+                  style: TextStyle(color: Colors.black54),
+                ),
+              ),
+            ),
+
+            // 🔹 다음 버튼
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mainMint,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () async {
+                    if (addressCont.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("주소를 선택해주세요.")),
+                      );
+                      return;
+                    }
+                    await guest();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => OnboardingCategory()),
+                    );
+                  },
+                  child: const Text(
+                    "다음",
+                    style: TextStyle(fontSize: 17, color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _colorBar(Color color) {
+class _StepBar extends StatelessWidget {
+  final bool active;
+
+  const _StepBar({required this.active});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      width: 60,
-      height: 8,
+      width: 55,
+      height: 6,
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(4),
+        color: active ? Color(0xFF33D2C5) : Color(0xFFE2EEEE),
+        borderRadius: BorderRadius.circular(10),
       ),
     );
   }

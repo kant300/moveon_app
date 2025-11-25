@@ -171,9 +171,8 @@ class MenuState extends State<Menu> {
 
         setState(() {
           wishlist = data['wishlist'] ?? "";
-          wishposi = wishlist.split(",");
-          address =
-              "${data['gaddress1']} ${data['gaddress2']} ${data['gaddress3']}";
+          wishposi = (wishlist.isNotEmpty) ? wishlist.split(",") : [];
+          address = "${data['gaddress1']} ${data['gaddress2']} ${data['gaddress3']}";
         });
 
         return; //  회원 체크로 넘어가지 않도록 즉시 종료
@@ -212,6 +211,7 @@ class MenuState extends State<Menu> {
     final localsave = await SharedPreferences.getInstance();
     final logintoken = localsave.getString("logintoken");
     final guesttoken = localsave.getString("guestToken");
+    print("togglewish 확인용");
 
     String? token = logintoken ?? guesttoken;
     if (token == null) return; // 토큰 없으면 종료;
@@ -224,7 +224,7 @@ class MenuState extends State<Menu> {
     }
     // 문자열로 변경
     String Scategory = wishposi.join(",");
-
+      print("즐거찾기 전 확인1");
     try {
       if(logintoken != null) {
         final response = await dio.put(

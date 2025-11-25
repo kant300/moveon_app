@@ -96,29 +96,34 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
   }
 
   Future<void> savewishlist() async {
-
     final localsave = await SharedPreferences.getInstance();
     final logintoken = localsave.getString("logintoken");
     final guesttoken = localsave.getString("guestToken");
 
-      List<String> selectgory = _categories
+    List<String> selectgory = _categories
         .where((go) => _categorySelections[go.id] == true)
         .map((go) => go.id)
         .toList();
 
-      List<String> cgory = [];
-      for(final id in selectgory) {
-        cgory.addAll(cgorymap[id] ?? []);
-      }
+    List<String> cgory = [];
+    for (final id in selectgory) {
+      cgory.addAll(cgorymap[id] ?? []);
+    }
 
-      String wishstr = cgory.join(",");
+    String wishstr = cgory.join(",");
 
-      final obj = { "wishlist": wishstr };
+    final obj = {"wishlist": wishstr};
+
+    print("👉 최종 wishlist 문자열: $wishstr");
+    print("👉 서버로 보낼 obj: $obj");
 
     try {
-      if(logintoken != null){
-        final response = await dio.put("http://10.0.2.2:8080/api/member/wishlist" , data: obj ,
-        options: Options(headers: {"Authorization" : "Bearer $logintoken"}),
+      if (logintoken != null) {
+        print("👉 회원 토큰 존재: $logintoken, wishlist 전송 시작");
+        final response = await dio.put(
+          "http://10.0.2.2:8080/api/member/wishlist",
+          data: obj,
+          options: Options(headers: {"Authorization": "Bearer $logintoken"}),
         );
         // 게스트 토큰 확실히 제거
 
@@ -126,18 +131,19 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
         return;
       }
 
-      if(guesttoken != null){
+      if (guesttoken != null) {
+        print("👉 게스트 토큰 존재: $guesttoken, wishlist 전송 시작");
         final response = await dio.put(
           "http://10.0.2.2:8080/api/guest/wishlist",
           data: obj,
           options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
         );
-        print("게스트 $guesttoken");
+        print("✅ 서버 응답(게스트): ${response.data}");
       }
 
+      print("👉 페이지 이동 전 최종 wishlist: $wishstr");
     } catch (e) {
       print(e);
-
     }
   }
 
@@ -160,6 +166,8 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
         // AppBar의 기본 그림자 제거 (이미지와 일치시키기 위해)
         elevation: 0,
         backgroundColor: Colors.white,
+
+        leading: SizedBox.shrink(),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -267,13 +275,18 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _selectedCount > 0
-                              ? () async{
+                              ? () async {
                                   await savewishlist();
                                   // "다음" 버튼 클릭 시 다음 페이지로 이동
-                                  Navigator.push( context, MaterialPageRoute(builder: (_) =>  OnboardingComplete(), // 설정완료 페이지로 이동
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          OnboardingComplete(), // 설정완료 페이지로 이동
                                     ),
                                   );
-                                } : null, // 선택된 항목이 없으면 버튼 비활성화
+                                }
+                              : null, // 선택된 항목이 없으면 버튼 비활성화
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size(double.infinity, 50),
                             backgroundColor: _selectedCount > 0

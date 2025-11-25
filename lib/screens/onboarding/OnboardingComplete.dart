@@ -18,6 +18,7 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
 
 
   String address = "";
+  String wishlists = "";
 
   // 앱의 메인 청록색 정의
   final Color _mainTealColor = const Color(0xFF3DE0D2);
@@ -80,8 +81,8 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
 
   void guesttoken() async{
       final localsave = await SharedPreferences.getInstance();
-      print("📌 저장된 key 전체 = ${localsave.getKeys()}");
-      print("📌 guestToken = ${localsave.getString("guestToken")}");
+      print(" 저장된 key 전체 = ${localsave.getKeys()}");
+      print(" guestToken = ${localsave.getString("guestToken")}");
       final token = localsave.getString("guestToken");
 
       if(token == null) return;
@@ -91,16 +92,23 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
       final data = await response.data;
       print(data);
       print("게스트 접속");
+      print("게스트임 토큰 확인 : ${data['token'] }");
       final addr1 = data['gaddress1'] ?? '';
       final addr2 = data['gaddress2'] ?? '';
       final addr3 = data['gaddress3'] ?? '';
+      final addr4 = data['wishlist'] ?? '';
+
+      print("주소 확인 $addr1 $addr2 $addr3");
+      print("wishlist 확인 $addr4");
 
 
       setState(() {
         address = "$addr1 $addr2 $addr3".trim();
+        wishlists = "$addr4";
       });
 
       print("addres $address");
+      print("wishlist $wishlists");
     }catch(e) { print(e); }
   }
 
