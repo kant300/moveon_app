@@ -152,17 +152,18 @@ class HomeState extends State<Home> {
   Future<void> getWeatherData() async {
     try {
       // 현재 시간 (HH시) 가져오기
-      DateTime now = DateTime.now();
+      // UTC -> KST 시간으로 변경 (9시간 추가)
+      DateTime now = DateTime.now().add(Duration(hours: 9));
       String hour = DateFormat('HH').format(now);
+      int lat = latitude.toInt();
+      int lon = longitude.toInt();
 
       final response = await Dio().get(
         "http://10.0.2.2:8080/weather",
-        queryParameters: {"lat": latitude.toInt(), "lon": longitude.toInt()},
+        queryParameters: {"lat": lat, "lon": lon},
       );
       final data = jsonDecode(response.data);
       final items = data['response']['body']['items']['item'];
-      print("data : $data");
-      print("items : $items");
 
       // 필요한 데이터 가져오기
       hour += '00';
@@ -490,7 +491,6 @@ class HomeState extends State<Home> {
               ),
               margin: EdgeInsets.all(10),
               child: Container(
-                alignment: Alignment.center,
                 width: 350,
                 height: 150,
                 decoration: BoxDecoration(
@@ -499,6 +499,8 @@ class HomeState extends State<Home> {
                 ),
                 child: Center(
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
                         "정착 Check-list 진행사항",
