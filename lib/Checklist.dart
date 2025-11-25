@@ -64,7 +64,6 @@ class ChecklistState extends State<Checklist> {
                   width: 350,
                   height: 240,
                   decoration: BoxDecoration(
-                    color: Color(0xFFC8EFFF),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: ChecklistTitle(
@@ -117,47 +116,51 @@ class ChecklistTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          // 상단 타이틀
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "${checklistType + 1}. ${titles[checklistType]}",
-              style: TextStyle(fontSize: 24),
-            ),
-          ],
-        ),
-        SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              // back 버튼
-              icon: Icon(Icons.arrow_back_ios),
-              onPressed: checklistType > 0
-                  ? () => onTypeChanged(checklistType - 1)
-                  : null,
-            ),
-            Text(
-              // 상단 진행사항 표시
-              checkValues.map((e) => e ? "■" : "□").join(),
-              style: TextStyle(fontSize: 28),
-            ),
-            IconButton(
-              // forward 버튼
-              icon: Icon(Icons.arrow_forward_ios),
-              onPressed: checklistType < 2
-                  ? () => onTypeChanged(checklistType + 1)
-                  : null,
-            ),
-          ],
-        ),
-        SizedBox(height: 12),
-        Text("정착할 때 필요한 과정들을 정리해놨어요", style: TextStyle(fontSize: 16)),
-      ],
+    return Card(
+      elevation: 4,
+      color: Color(0xFFC8EFFF),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            // 상단 타이틀
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "${checklistType + 1}. ${titles[checklistType]}",
+                style: TextStyle(fontSize: 24),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                // back 버튼
+                icon: Icon(Icons.arrow_back_ios),
+                onPressed: checklistType > 0
+                    ? () => onTypeChanged(checklistType - 1)
+                    : null,
+              ),
+              Text(
+                // 상단 진행사항 표시
+                checkValues.map((e) => e ? "■" : "□").join(),
+                style: TextStyle(fontSize: 28),
+              ),
+              IconButton(
+                // forward 버튼
+                icon: Icon(Icons.arrow_forward_ios),
+                onPressed: checklistType < 2
+                    ? () => onTypeChanged(checklistType + 1)
+                    : null,
+              ),
+            ],
+          ),
+          SizedBox(height: 12),
+          Text("정착할 때 필요한 과정들을 정리해놨어요", style: TextStyle(fontSize: 16)),
+        ],
+      ),
     );
   }
 }
@@ -319,44 +322,47 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
               width: double.infinity,
               color: Color(0xFFEAEAEA),
               child: Center(
-                child: Container(
+                child: SizedBox(
                   // 상단 컨테이너
                   width: 350,
                   height: 240,
-                  decoration: BoxDecoration(
+                  child: Card(
+                    elevation: 4,
                     color: Color(0xFFC8EFFF),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Column(
-                    // 상단 컨테이너 내용
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("개인 Check-list", style: TextStyle(fontSize: 24)),
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            items.isNotEmpty
-                                ? items
-                                      .map((e) => e["isChecked"] ? "■" : "□")
-                                      .join()
-                                : "목록 없음",
-                            style: TextStyle(fontSize: 28),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12),
-                      Text(
-                        "직접 목록을 추가하고 관리할 수 있습니다",
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Column(
+                      // 상단 컨테이너 내용
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("개인 Check-list", style: TextStyle(fontSize: 24)),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              items.isNotEmpty
+                                  ? items
+                                  .map((e) => e["isChecked"] ? "■" : "□")
+                                  .join()
+                                  : "목록 없음",
+                              style: TextStyle(fontSize: 28),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          "직접 목록을 추가하고 관리할 수 있습니다",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -572,15 +578,11 @@ class ChecklistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Card(
       // 카드 컨테이너
-      width: 330,
-      height: 100,
-      margin: EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-      ),
+      elevation: 4, // 그림자 깊이
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Padding(
         padding: EdgeInsets.only(left: 12, right: 12),
         child: Column(
