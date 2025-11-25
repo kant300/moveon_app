@@ -1,6 +1,9 @@
 // sex_crime_filter_modal.dart
 
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+
+final dio = Dio();
 
 // 🚨 데이터 호출 로직을 위해 _fetchAndShowMarkers 함수가 있는 KakaoMapState 인스턴스가 필요합니다.
 // 여기서는 간소화를 위해 onFilterApplied 콜백 함수만 정의합니다.
@@ -75,9 +78,25 @@ class _SexCrimeFilterModalState extends State<SexCrimeFilterModal> {
     final dong = _selectedDong ?? '';
 
     // 2. 외부로 선택된 필터 값을 전달하여 마커를 다시 로드하도록 요청
-    widget.onFilterApplied(sido, sigungu, dong);
+    //widget.onFilterApplied(sido, sigungu, dong);
+
+    print( sido );
+    print( sigungu );
+    print( dong );
+
 
     // 3. (옵션) 모달 내에 필터링된 인원수를 보여주기 위해 API를 호출하고 결과를 업데이트
+
+    void entry() async{
+      try{
+        final response = await dio.get("http://192.168.40.61:8080/api/sexcrime/filter");
+        final data = await response.data;
+        print( data );
+        print('--------------------------------------------------');
+
+      }catch(e) { print(e); }
+    }
+
     // 여기서는 UI 예시를 위해 임시로 하드코딩된 값을 업데이트합니다.
     setState(() {
       if (sido.isNotEmpty && sigungu.isNotEmpty) {
@@ -88,7 +107,7 @@ class _SexCrimeFilterModalState extends State<SexCrimeFilterModal> {
     });
 
     // 모달 닫기
-    Navigator.of(context).pop();
+    //Navigator.of(context).pop();
   }
 
   @override
@@ -164,7 +183,7 @@ class _SexCrimeFilterModalState extends State<SexCrimeFilterModal> {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              child: const Text('필터 적용 및 지도 업데이트'),
+              child: const Text('검색 및 확인'),
             ),
           ),
         ],
