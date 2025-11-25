@@ -62,7 +62,7 @@ class MenuState extends State<Menu> {
       child: Column(
         children:[
           Container(
-            padding:  EdgeInsets.all(10), // 아이콘 주변 여백
+            padding:  EdgeInsets.all(8), // 아이콘 주변 여백
             // 아이콘 배경 (이미지에는 배경색이 있으므로 색상 적용)
             decoration: BoxDecoration(
               // 아이콘별로 색상 다르게 설정 가능 (여기서는 기본 색상으로 통일)
@@ -80,7 +80,7 @@ class MenuState extends State<Menu> {
             ),
             child: Icon(
               icon,
-              size: 38, // 아이콘 크기 조정 (이미지 크기에 맞춰)
+              size: 42, // 아이콘 크기 조정 (이미지 크기에 맞춰)
               color: iconColor, // 아이콘 색상
             ),
           ),
