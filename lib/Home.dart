@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:moveon_app/weather/WeatherWidget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+final dio=Dio();
 class Home extends StatefulWidget {
   HomeState createState() => HomeState();
 }
@@ -79,7 +81,7 @@ class HomeState extends State<Home> {
       if (latitude != 0.0 && longitude != 0.0) {
         // 분류 코드로 통신하여 데이터 가져오기
         final response = await Dio().get(
-          "http://192.168.40.28:8080/living/data?code=$code",
+          "http://10.0.2.2:8080/living/data?code=$code",
         );
         final data = response.data;
         // print(data);
@@ -124,7 +126,7 @@ class HomeState extends State<Home> {
       String hour = DateFormat('HH').format(now);
 
       final response = await Dio().get(
-        "http://192.168.40.28:8080/weather",
+        "http://10.0.2.2:8080/weather",
         queryParameters: {"lat": latitude.toInt(), "lon": longitude.toInt()},
       );
       final data = jsonDecode(response.data);
@@ -192,10 +194,80 @@ class HomeState extends State<Home> {
     }
   }
 
+  void tokencall() async {
+    final localsave = await SharedPreferences.getInstance();
+
+    final logintoken = localsave.getString("logintoken");
+    final guesttoken = localsave.getString("guestToken");
+
+    print(" logintoken = $logintoken");
+    print(" guestToken = $guesttoken");
+
+
+    try {
+      if (guesttoken != null) {
+        print(" 게스트 토큰 감지");
+
+        final response = await dio.get(
+          "http://10.0.2.2:8080/api/guest/address",
+          options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
+        );
+
+        final data = response.data;
+
+        print(" 게스트 주소 데이터: $data");
+      }
+
+      // 2 회원 토큰 처리
+      if (logintoken != null) {
+        print(" 회원 토큰 감지");
+        final response = await dio.get(
+          "http://10.0.2.2:8080/api/member/info",
+          options: Options(headers: {"Authorization": "Bearer $logintoken"}),
+        );
+
+        final data = response.data;
+
+        print(" 회원 주소 데이터: $data");
+      }
+    }
+    catch(e){ print("정보 불러오기 에러발생 $e"); }
+  }
+
   @override
   void initState() {
     super.initState();
     _initData();
+    tokencall();
+    print("회원정보 불러오기");
+  }
+  
+  void wishlist() async{
+    try{
+      final localsave = await SharedPreferences.getInstance();
+      final logintoken = localsave.getString('logintoken');
+      final guesttoken = localsave.getString("guestToken");
+      
+      String? token = logintoken ?? guesttoken;
+      if(token == null){
+        print("토큰 없음 $token");
+        return; 
+      }
+      if(logintoken != null) {
+        final response = await dio.get(
+          "http://10.0.2.2:8080/api/member/wishprint",
+          options: Options(headers: {"Authorization": "Bearer $logintoken"}),
+        );
+        print("회원 즐겨찾기 가져오기");
+      }else if(guesttoken != null){
+        final response = await dio.get(
+          "http://10.0.2.2:8080/api/guest/address",
+          options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
+        );
+        print("게스트 즐겨찾기 가져오기");
+      }
+      
+    }catch(e) {print("즐겨찾기 불러오기 에러 $e"); }
   }
 
   // 비동기 작업 순서를 보장하기 위한 함수
@@ -339,6 +411,12 @@ class HomeState extends State<Home> {
                 ),
               ),
             ),
+            Card(
+              elevation: 6,
+              shape: RoundedRectangleBorder(
+
+              ),
+            )
           ],
         ),
       ),

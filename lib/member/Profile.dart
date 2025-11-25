@@ -53,7 +53,7 @@ class StateProfile extends State<Profile> {
       final localsave = await SharedPreferences.getInstance();
       final token = await localsave.getString("logintoken");
       try{
-      final response = await dio.get("http://10.95.125.46:8080/api/member/info",
+      final response = await dio.get("http://10.0.2.2:8080/api/member/info",
       options: Options(headers: { "Authorization" : "Bearer $token"},),
       );
       final data = await response.data;
@@ -228,7 +228,7 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
         "maddress2" : address[1],
         "maddress3" : address[2] + " " +address[3],
       };
-      final response = await dio.put("http://10.95.125.46:8080/api/member/update" , data: obj);
+      final response = await dio.put("http://10.0.2.2:8080/api/member/update" , data: obj);
       final data = await response.data;
       print(data);
 

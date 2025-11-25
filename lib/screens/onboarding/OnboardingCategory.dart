@@ -105,7 +105,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
 
     try {
       if(logintoken != null){
-        final response = await dio.put("http://10.95.125.46:8080/api/member/wishlist" , data: obj ,
+        final response = await dio.put("http://10.0.2.2:8080/api/member/wishlist" , data: obj ,
         options: Options(headers: {"Authorization" : "Bearer $logintoken"}),
         );
         // 게스트 토큰 확실히 제거
@@ -116,7 +116,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
 
       if(guesttoken != null){
         final response = await dio.put(
-          "http://10.95.125.46:8080/api/guest/wishlist",
+          "http://10.0.2.2:8080/api/guest/wishlist",
           data: obj,
           options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
         );

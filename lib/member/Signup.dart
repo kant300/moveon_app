@@ -28,7 +28,7 @@ class SignupState extends State<Signup> {
         "memail" : newmemail.text,
 
       };
-      final response = await dio.post("http://10.95.125.46:8080/api/member/signup" , data: obj);
+      final response = await dio.post("http://10.0.2.2:8080/api/member/signup" , data: obj);
       final data = await response.data;
       print(data);
       if(data == true ) { Navigator.pushReplacement(context , MaterialPageRoute(builder: (_) => OnboardingStart()),); }

@@ -18,7 +18,7 @@ class SettingState extends State<Setting> {
     final loginho = await SharedPreferences.getInstance();
     final token = await loginho.getString("logintoken");
     try{
-      final response = await dio.get("http://10.95.125.46:8080/api/member/info" ,
+      final response = await dio.get("http://10.0.2.2:8080/api/member/info" ,
       options: Options(headers: { "Authorization" : "Bearer $token" ,}),
       );
       final data = await response.data;
@@ -34,7 +34,7 @@ class SettingState extends State<Setting> {
       // 로컬 저장소에 저장한 localsave를 token 에 받기
       final token = localsave.getString('logintoken');
       // 서버로부터 정보불러오는데 token 확인
-      final response = await dio.get("http://10.95.125.46:8080/api/member/logout",
+      final response = await dio.get("http://10.0.2.2:8080/api/member/logout",
         options: Options(headers: { "Authorization": "Bearer $token",}),
       );
       final data = await response.data;
@@ -58,7 +58,7 @@ class SettingState extends State<Setting> {
     try{
       final localsave = await SharedPreferences.getInstance();
       final token = localsave.getString('logintoken');
-      final response = await dio.delete("http://10.95.125.46:8080/api/member/signout" ,
+      final response = await dio.delete("http://10.0.2.2:8080/api/member/signout" ,
        options: Options(headers: {"Authorization": "Bearer $token",}),
       );
       final data = await response.data;

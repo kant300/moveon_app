@@ -56,7 +56,7 @@ class FindpwdState extends State<Findpwd>{
         "mid" : midCont.text ,
         "memail" : memailCont.text ,
       };
-      final response = await dio.post("http://10.95.125.46:8080/api/member/requestPwdAuth" , data: obj);
+      final response = await dio.post("http://10.0.2.2:8080/api/member/requestPwdAuth" , data: obj);
       final data = await response.data;
       print(data);
       showDialog(context: context, builder: (context) {
@@ -85,7 +85,7 @@ class FindpwdState extends State<Findpwd>{
         "mid" : midCont.text ,
         "verifyCode" : mcodeCont.text ,
       };
-      final response = await dio.post("http://10.95.125.46:8080/api/member/verifyPwdCode" , data: obj );
+      final response = await dio.post("http://10.0.2.2:8080/api/member/verifyPwdCode" , data: obj );
       final data = await response.data;
       stoptime(); // 성공시 멈춤
       print(data);

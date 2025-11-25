@@ -29,7 +29,7 @@ class StaterequestPwdAuth extends State<RequestPwdAuth> {
       }
       // State 직접적으로 호출 불가하니 widget으로 불러오기
       final obj = { "mid" : widget.mid , "mpwd" : mpwdCont.text };
-      final response = await dio.put("http://10.95.125.46:8080/api/member/findpwd" , data: obj);
+      final response = await dio.put("http://10.0.2.2:8080/api/member/findpwd" , data: obj);
       final data = await response.data;
       print(data);
 

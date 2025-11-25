@@ -24,7 +24,7 @@ class StateUpdatepwd extends State<Updatepwd> {
         "newPwd": upmpwdCont.text,
       };
       final response = await dio.put(
-        "http://10.95.125.46:8080/api/member/updatePwd", data: obj,
+        "http://10.0.2.2:8080/api/member/updatePwd", data: obj,
         options: Options(headers: { "Authorization": "Bearer $token",}),
       );
       final data = await response.data;

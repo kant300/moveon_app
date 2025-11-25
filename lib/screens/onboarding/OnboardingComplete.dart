@@ -84,7 +84,7 @@ class OnboardingCompleteState extends State<OnboardingComplete>with SingleTicker
 
       if(token == null) return;
     try{
-      final response = await dio.get("http://10.95.125.46:8080/api/guest/address",
+      final response = await dio.get("http://10.0.2.2:8080/api/guest/address",
       options: Options(headers: {"Authorization" : "Bearer $token"},) );
       final data = await response.data;
       print(data);
