@@ -259,7 +259,14 @@ class KakaoMapState extends State<KakaoMap> {
                   '<div>' + m["소재지"] + '</div>' +
                   '<div>' + m["전화번호"] + '</div>' +
                 '</div>');
+              }  else if (category == "cctv") {
+                window.infowindow.setContent('<div style="width:200px;text-align:left;padding:10px;">' +
+                  '<div> 카메라대수: ' + m["카메라대수"] + '</div>' +
+                  '<div> 촬영장면: ' + m["촬영장면정보"] + '</div>' +
+                  '<div> 설치목적: ' + m["설치목적구분"] + '</div>' +
+                '</div>');
               }
+ 	
 
               window.infowindow.open(map, marker);
             });
@@ -544,6 +551,10 @@ class KakaoMapState extends State<KakaoMap> {
         // key: name, long, lat (시설명, 경도, 위도)
       } else if (category == "gas") {
         url = "$BASE_URL/transport/gas";
+        // key: 업소명, 소재지, 위도, 경도, 전화번호
+      }
+      else if (category == "cctv") {
+        url = "$BASE_URL/api/cctv/all?lat=${lat}&lng=${lng}";
         // key: 업소명, 소재지, 위도, 경도, 전화번호
       }
 
