@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:moveon_app/weather/WeatherWidget.dart';
@@ -49,6 +50,7 @@ class HomeState extends State<Home> {
   int policeStation = 0;
   int fireDepartment = 0;
   dynamic t1h, pty, hour, weatherIcon;
+  dynamic administrativeArea, locality;
   List<List<bool>> checklistStatus = [
     [false, false, false, false, false, false, false],
     [false, false, false, false, false],
@@ -214,11 +216,17 @@ class HomeState extends State<Home> {
         icon = const Icon(Icons.snowing);
       }
 
+      // 현재 위치 정보
+      List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+      Placemark place = placemarks[0];
+
       setState(() {
         this.t1h = t1h;
         this.pty = pty;
         this.hour = hour;
         weatherIcon = icon;
+        administrativeArea = place.administrativeArea;
+        locality = place.locality;
       });
     } catch (e) {
       print(e);
@@ -414,7 +422,7 @@ class HomeState extends State<Home> {
                 child: ListTile(
                   leading: weatherIcon,
                   title: Text(
-                    '현재 날씨 정보 ($hour시 기준)',
+                    '$administrativeArea $locality 날씨 정보 ($hour시 기준)',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.blueGrey,
