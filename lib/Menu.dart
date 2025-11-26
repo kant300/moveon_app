@@ -368,7 +368,7 @@ class MenuState extends State<Menu> {
                     Icons.attach_money,
                     "공과금 정산",
                     () => Navigator.pushNamed(context, "/living/bill"),
-                    Colors.black,
+                    Colors.green,
                     "공과금 정산"
                   ),
                   checkStart(
@@ -388,7 +388,7 @@ class MenuState extends State<Menu> {
                       "/map", // 지도 화면 라우트
                       arguments: "clothingBin", // ⭐️ 카테고리 키 전달
                     ),
-                    Colors.black,
+                      Colors.green,
                     "의류수거함"
                   ),
                   // 의류수거함 아이콘 변경
@@ -416,7 +416,7 @@ class MenuState extends State<Menu> {
                       "/map",
                       arguments: "government",
                     ),
-                    Colors.black,
+                    Colors.green,
                     "관공서",
                   ),
                   checkStart(
@@ -427,7 +427,7 @@ class MenuState extends State<Menu> {
                       "/map",
                       arguments: "night",
                     ),
-                    Colors.red,
+                    Colors.green,
                     "심야약국/병원",
                   ),
                 ], crossAxisCount: 4), // 한 줄에 4개 배치
@@ -458,7 +458,7 @@ class MenuState extends State<Menu> {
                     Icons.medical_information,
                     "민간구급차",
                     () => Navigator.pushNamed(context, "/safety/ambulance"),
-                    Colors.black,
+                    Colors.red,
                     "민간구급차",
                   ),
                   // 텍스트 축약
@@ -466,7 +466,7 @@ class MenuState extends State<Menu> {
                     Icons.water_drop,
                     "비상급수시설",
                     () => Navigator.pushNamed(context, "/safety/water"),
-                    Colors.blue,
+                    Colors.red,
                     "비상급수시설",
                   ),
                   // 텍스트 축약
@@ -489,7 +489,7 @@ class MenuState extends State<Menu> {
                       "/map",
                       arguments: "restroom",
                     ),
-                    Colors.black,
+                    Colors.red,
                     "공중화장실",
                   ),
                   checkStart(
@@ -538,8 +538,8 @@ class MenuState extends State<Menu> {
                       "/map",
                       arguments: "wheelchairCharger",
                     ),
-                    Colors.green,
-                    "전동휠체어 충전소",
+                    Colors.blue,
+                    "전동휠체어충전소",
                   ),
                   // 텍스트 축약
                   checkStart(
@@ -550,7 +550,7 @@ class MenuState extends State<Menu> {
                       "/map",
                       arguments: "localParking",
                     ),
-                    Colors.black,
+                    Colors.blue,
                     "공용주차장",
                   ),
                   // 기존코드의 주유소는 이미지에 없으므로 제외
@@ -577,14 +577,14 @@ class MenuState extends State<Menu> {
                     Icons.event_note,
                     "지역행사",
                     () => Navigator.pushNamed(context, "/community/localEvent"),
-                    Colors.black,
+                    Colors.deepOrange,
                     "지역행사",
                   ),
                   checkStart(
                     Icons.shopping_bag,
                     "중고장터",
                     () => Navigator.pushNamed(context, "/community/localStore"),
-                    Colors.red,
+                    Colors.deepOrange,
                     "중고장터",
                   ),
                   checkStart(
@@ -601,7 +601,7 @@ class MenuState extends State<Menu> {
                     Icons.business_center,
                     "구인/구직",
                     () => Navigator.pushNamed(context, "/community/business"),
-                    Colors.black,
+                    Colors.deepOrange,
                     "구인/구직",
                   ),
                 ], crossAxisCount: 4),
