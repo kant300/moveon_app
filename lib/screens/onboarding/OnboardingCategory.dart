@@ -167,7 +167,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
         elevation: 0,
         backgroundColor: Colors.white,
 
-        leading: SizedBox.shrink(),
+        // leading: SizedBox.shrink(), // leading을 명시하지 않으면 자동으로 BackButton이 생깁니다.
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),

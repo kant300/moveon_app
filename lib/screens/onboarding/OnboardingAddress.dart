@@ -162,7 +162,7 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
     const Color mainMint = Color(0xFF38D5C1);
 
     return Scaffold(
-      backgroundColor: Color(0xFFF7FCFC),
+      backgroundColor: Color(0xFF83C8C8),
       body: SafeArea(
         child: Column(
           children: [
@@ -174,7 +174,7 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
               children: const [
                 _StepBar(active: true),
                 SizedBox(width: 12),
-                _StepBar(active: true),
+                _StepBar(active: false),
                 SizedBox(width: 12),
                 _StepBar(active: false),
               ],
@@ -217,7 +217,7 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
                         "지도에서 위치 선택",
                         style: TextStyle(
                             fontSize: 14,
-                            color: Color(0xFF7FFFD4),
+                            color: Color(0xFF3AC7C3),
                             fontWeight: FontWeight.w600),
                       )
                     ],
