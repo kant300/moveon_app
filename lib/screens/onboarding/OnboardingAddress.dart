@@ -174,7 +174,7 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
               children: const [
                 _StepBar(active: true),
                 SizedBox(width: 12),
-                _StepBar(active: true),
+                _StepBar(active: false),
                 SizedBox(width: 12),
                 _StepBar(active: false),
               ],
