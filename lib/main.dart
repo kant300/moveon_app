@@ -70,7 +70,7 @@ class Main extends StatefulWidget {
 }
 
 class MainState extends State<Main> {
-  int currentPage = 0;
+  int currentPage = 2;
   dynamic pages = [
     Menu(),
     KakaoMap(),

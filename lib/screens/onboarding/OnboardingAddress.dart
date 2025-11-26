@@ -217,7 +217,7 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
                         "지도에서 위치 선택",
                         style: TextStyle(
                             fontSize: 14,
-                            color: Color(0xFF3AC7C3),
+                            color: Color(0xFF7FFFD4),
                             fontWeight: FontWeight.w600),
                       )
                     ],
