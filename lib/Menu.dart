@@ -177,7 +177,7 @@ class MenuState extends State<Menu> {
 
         return; //  회원 체크로 넘어가지 않도록 즉시 종료
       }
-
+      // asd
       // 2 회원 토큰 처리
       if (logintoken != null) {
         print(" 회원 토큰 감지");
