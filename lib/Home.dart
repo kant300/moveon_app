@@ -1,7 +1,7 @@
 import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +16,9 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
+  // -----------------------------
+  // ROUTE MAP
+  // -----------------------------
   final Map<String, dynamic> routeMap = {
     "공과금 정산": () => launchUrl(Uri.parse("https://www.gov.kr/portal/onestopSvc/transferReport")),
     "전입신고": () => launchUrl(Uri.parse("https://www.gov.kr/portal/onestopSvc/transferReport")),
@@ -41,35 +44,79 @@ class HomeState extends State<Home> {
     "구인/구직": (context) => Navigator.pushNamed(context, "/community/business"),
   };
 
+  // -----------------------------
+  // VARIABLES
+  // -----------------------------
   double latitude = 0.0;
   double longitude = 0.0;
+
+  dynamic t1h, pty, hour, weatherIcon;
+  dynamic administrativeArea, locality;
+
   int serviceCenter = 0;
   int policeStation = 0;
   int fireDepartment = 0;
-  dynamic t1h, pty, hour, weatherIcon;
 
+  List<String> wishposi = [];
   List<List<bool>> checklistStatus = [
     [false, false, false, false, false, false, false],
     [false, false, false, false, false],
     [false, false, false, false, false],
   ];
 
-  // 위치 가져오기
+  // -----------------------------
+  // CCTV / 성범죄자
+  // -----------------------------
+  bool isLoadingCctv = false;
+  int cctvCount = 0;
+  String currentDong = "";
+
+  bool isLoadingCrime = false;
+  int dongCount = 0;
+
+  // -----------------------------
+  // INIT
+  // -----------------------------
+  @override
+  void initState() {
+    super.initState();
+    _initData();
+    tokencall();
+    wishlist();
+
+    Future.delayed(Duration(milliseconds: 500), () async {
+      await _loadCctv();
+      await _loadSexCrime();
+      await _loadAddressName();
+    });
+  }
+
+  // -----------------------------
+  // 위치 + 날씨
+  // -----------------------------
+  Future<void> _initData() async {
+    await getCurrentLatLng();
+    await getWeatherData();
+  }
+
+  // GPS
   Future<void> getCurrentLatLng() async {
     bool serviceEnabled;
     LocationPermission permission;
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return Future.error('위치 서비스를 사용할 수 없습니다.');
+    if (!serviceEnabled) return;
 
     permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) permission = await Geolocator.requestPermission();
-
-    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-      throw Exception('위치 권한이 거부되었습니다.');
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
     }
 
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    if (permission == LocationPermission.deniedForever) return;
+
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
       latitude = position.latitude;
@@ -79,141 +126,207 @@ class HomeState extends State<Home> {
     loadWalkTime();
   }
 
+  // -----------------------------
+  // 도보 거리
+  // -----------------------------
+  Future<int> getDistanceData(int code) async {
+    try {
+      if (latitude == 0 || longitude == 0) return 0;
+
+      final response = await Dio().get(
+        "http://10.0.2.2:8080/living/data?code=$code",
+      );
+      final data = response.data;
+
+      double minDistance = double.infinity;
+      for (var point in data) {
+        double dist = Geolocator.distanceBetween(
+          latitude,
+          longitude,
+          double.parse(point['위도']!),
+          double.parse(point['경도']!),
+        );
+        if (dist < minDistance) minDistance = dist;
+      }
+
+      double walkingSpeed = 1.4;
+      return Duration(seconds: (minDistance / walkingSpeed).round()).inMinutes;
+    } catch (e) {
+      return 0;
+    }
+  }
+
   void loadWalkTime() async {
-    int serviceCenterWalkTime = await getDistanceData(1003);
-    int policeStationWalkTime = await getDistanceData(1015);
-    int fireDepartmentWalkTime = await getDistanceData(4001);
+    int s = await getDistanceData(1003);
+    int p = await getDistanceData(1015);
+    int f = await getDistanceData(4001);
 
     setState(() {
-      serviceCenter = serviceCenterWalkTime;
-      policeStation = policeStationWalkTime;
-      fireDepartment = fireDepartmentWalkTime;
+      serviceCenter = s;
+      policeStation = p;
+      fireDepartment = f;
     });
   }
 
-  Future<int> getDistanceData(int code) async {
-    try {
-      if (latitude != 0.0 && longitude != 0.0) {
-        final response = await Dio().get("http://10.0.2.2:8080/living/data?code=$code");
-        final data = response.data;
-
-        double minDistance = double.infinity;
-        for (var point in data) {
-          double dist = Geolocator.distanceBetween(
-            latitude,
-            longitude,
-            double.parse(point['위도']!),
-            double.parse(point['경도']!),
-          );
-
-          if (dist < minDistance) minDistance = dist;
-        }
-
-        double walkingTimeSec = minDistance / 1.4;
-        return Duration(seconds: walkingTimeSec.round()).inMinutes;
-      }
-    } catch (e) {
-      print(e);
-    }
-    return 0;
-  }
-
+  // -----------------------------
+  // 날씨 API
+  // -----------------------------
   Future<void> getWeatherData() async {
     try {
       DateTime now = DateTime.now().add(Duration(hours: 9));
-      String hour = DateFormat('HH').format(now);
-      hour += '00';
+      String hourString = DateFormat('HH').format(now);
+      String fullHour = hourString + "00";
 
-      final response = await Dio().get("http://10.0.2.2:8080/weather", queryParameters: {
-        "lat": latitude.toInt(),
-        "lon": longitude.toInt(),
-      });
+      final response = await Dio().get(
+        "http://10.0.2.2:8080/weather",
+        queryParameters: {
+          "lat": latitude.toInt(),
+          "lon": longitude.toInt(),
+        },
+      );
 
       final data = jsonDecode(response.data);
       final items = data['response']['body']['items']['item'];
 
-      dynamic t1h, pty, sky;
+      dynamic t, p, sky;
 
-      for (dynamic obj in items) {
-        if (hour == obj['fcstTime'].toString()) {
-          if (obj['category'] == "T1H") t1h = obj['fcstValue'];
-          if (obj['category'] == "PTY") pty = obj['fcstValue'];
+      for (var obj in items) {
+        if (obj['fcstTime'].toString() == fullHour) {
+          if (obj['category'] == "T1H") t = obj['fcstValue'];
+          if (obj['category'] == "PTY") p = obj['fcstValue'];
           if (obj['category'] == "SKY") sky = obj['fcstValue'];
         }
       }
 
-      // 강수형태 변환
-      if (pty == "0") pty = "맑음";
-      if (pty == "1") pty = "비";
-      if (pty == "2") pty = "비/눈";
-      if (pty == "3") pty = "눈";
-      if (pty == "4") pty = "소나기";
-
-      // 아이콘 설정
       dynamic icon;
-      if (pty == "맑음") icon = const Icon(Icons.sunny);
-      else if (pty == "비" || pty == "소나기") icon = const Icon(Icons.water_drop);
-      else if (pty == "눈") icon = const Icon(Icons.snowing);
-      else icon = const Icon(Icons.cloud);
+      if (p == "1") icon = Icon(Icons.water_drop);
+      else if (p == "3") icon = Icon(Icons.snowing);
+      else if (sky == "3") icon = Icon(Icons.cloud);
+      else if (sky == "4") icon = Icon(Icons.foggy);
+      else icon = Icon(Icons.sunny);
+
+      List<Placemark> placemarks =
+      await placemarkFromCoordinates(latitude, longitude);
 
       setState(() {
-        this.t1h = t1h;
-        this.pty = pty;
-        this.hour = hour.substring(0, 2);
+        t1h = t;
+        pty = p;
+        hour = hourString;
         weatherIcon = icon;
+
+        administrativeArea = placemarks[0].administrativeArea;
+        locality = placemarks[0].locality;
+      });
+    } catch (e) {}
+  }
+
+  // -----------------------------
+  // CCTV 불러오기
+  // -----------------------------
+  Future<void> _loadCctv() async {
+    if (latitude == 0 || longitude == 0) return;
+
+    setState(() => isLoadingCctv = true);
+
+    try {
+      final response = await dio.get(
+        'http://10.0.2.2:8080/api/cctv/count-by-dong',
+        queryParameters: {
+          'lat': latitude,
+          'lng': longitude,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          cctvCount = response.data['cctv_count'];
+        });
+      }
+    } catch (e) {
+      print("CCTV error: $e");
+    } finally {
+      setState(() => isLoadingCctv = false);
+    }
+  }
+
+  // -----------------------------
+  // 성범죄자 수
+  // -----------------------------
+  Future<void> _loadSexCrime() async {
+    if (latitude == 0 || longitude == 0) return;
+
+    setState(() => isLoadingCrime = true);
+
+    try {
+      final response = await dio.get(
+        'http://10.0.2.2:8080/api/sex-crime/dong-count',
+        queryParameters: {
+          'lat': latitude,
+          'lng': longitude,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          dongCount = response.data["count"];
+        });
+      }
+    } catch (e) {
+      print("성범죄자 오류: $e");
+    } finally {
+      setState(() => isLoadingCrime = false);
+    }
+  }
+
+  // -----------------------------
+  // 현재 동 이름 가져오기
+  // -----------------------------
+  Future<void> _loadAddressName() async {
+    try {
+      final placemarks =
+      await placemarkFromCoordinates(latitude, longitude);
+      setState(() {
+        currentDong = placemarks[0].subLocality ?? "";
       });
     } catch (e) {
-      print(e);
+      print("동 이름 오류: $e");
     }
   }
 
+  // -----------------------------
+  // TOKEN CHECK
+  // -----------------------------
   void tokencall() async {
-    final localsave = await SharedPreferences.getInstance();
-    final logintoken = localsave.getString("logintoken");
-    final guesttoken = localsave.getString("guestToken");
+    final sp = await SharedPreferences.getInstance();
 
-    print(" logintoken = $logintoken");
-    print(" guestToken = $guesttoken");
+    final logintoken = sp.getString("logintoken");
+    final guesttoken = sp.getString("guestToken");
 
-    try {
-      if (guesttoken != null) {
-        await dio.get(
-          "http://10.0.2.2:8080/api/guest/address",
-          options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
-        );
-      }
+    if (guesttoken != null) {
+      final response = await dio.get(
+        "http://10.0.2.2:8080/api/guest/address",
+        options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
+      );
+      print(response.data);
+    }
 
-      if (logintoken != null) {
-        await dio.get(
-          "http://10.0.2.2:8080/api/member/info",
-          options: Options(headers: {"Authorization": "Bearer $logintoken"}),
-        );
-      }
-    } catch (e) {
-      print("정보 불러오기 에러발생 $e");
+    if (logintoken != null) {
+      final response = await dio.get(
+        "http://10.0.2.2:8080/api/member/info",
+        options: Options(headers: {"Authorization": "Bearer $logintoken"}),
+      );
+      print(response.data);
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _initData();
-    tokencall();
-    wishlist();
-  }
-
-  Future<void> _initData() async {
-    await getCurrentLatLng();
-    await getWeatherData();
-  }
-
-  List<String> wishposi = [];
-
+  // -----------------------------
+  // 즐겨찾기
+  // -----------------------------
   void wishlist() async {
     try {
-      final localsave = await SharedPreferences.getInstance();
-      final logintoken = localsave.getString('logintoken');
-      final guesttoken = localsave.getString("guestToken");
+      final sp = await SharedPreferences.getInstance();
+      final logintoken = sp.getString("logintoken");
+      final guesttoken = sp.getString("guestToken");
 
       if (logintoken != null) {
         final response = await dio.get(
@@ -221,7 +334,8 @@ class HomeState extends State<Home> {
           options: Options(headers: {"Authorization": "Bearer $logintoken"}),
         );
         setState(() {
-          wishposi = (response.data['success'] ?? "").toString().split(",");
+          wishposi =
+              (response.data['success'] ?? "").toString().split(",");
         });
       } else if (guesttoken != null) {
         final response = await dio.get(
@@ -229,14 +343,18 @@ class HomeState extends State<Home> {
           options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
         );
         setState(() {
-          wishposi = (response.data['wishlist'] ?? "").toString().split(",");
+          wishposi =
+              (response.data['wishlist'] ?? "").toString().split(",");
         });
       }
     } catch (e) {
-      print("즐겨찾기 불러오기 에러 $e");
+      print("위시리스트 오류");
     }
   }
 
+  // -----------------------------
+  // 즐겨찾기 아이콘 GRID
+  // -----------------------------
   final Map<String, IconData> iconMap = {
     "공과금 정산": Icons.attach_money,
     "전입신고": Icons.person_pin_circle_rounded,
@@ -262,20 +380,19 @@ class HomeState extends State<Home> {
     "구인/구직": Icons.business_center,
   };
 
-  // ⭐ 오버플로우 방지 적용된 즐겨찾기
   Widget iconGrid() {
     if (wishposi.isEmpty || wishposi[0].isEmpty) {
       return Text("즐겨찾기가 없습니다.");
     }
 
     return Wrap(
-      spacing: 14,
-      runSpacing: 14,
+      spacing: 15,
+      runSpacing: 10,
       children: wishposi.map((label) {
         final icon = iconMap[label];
         final route = routeMap[label];
 
-        if (icon == null) return const SizedBox.shrink();
+        if (icon == null) return SizedBox.shrink();
 
         return GestureDetector(
           onTap: () {
@@ -287,48 +404,44 @@ class HomeState extends State<Home> {
               }
             }
           },
-          child: SizedBox(
-            width: 70, // 고정 폭 → 절대 오버플로우 안남
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 4,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: Icon(icon, size: 30),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      blurRadius: 3,
+                    ),
+                  ],
                 ),
-                SizedBox(height: 5),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 11),
-                ),
-              ],
-            ),
+                child: Icon(icon, size: 30),
+              ),
+              SizedBox(height: 3),
+              Text(label, style: TextStyle(fontSize: 12)),
+            ],
           ),
         );
       }).toList(),
     );
   }
 
+  // -----------------------------
+  // UI
+  // -----------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+      body: SingleChildScrollView(   // 오버플로우 해결
         child: Column(
           children: [
+            SizedBox(height: 30),
+
+            // ------------------ 날씨 카드 ------------------
             Padding(
               padding: EdgeInsets.all(16.0),
               child: Card(
@@ -337,68 +450,150 @@ class HomeState extends State<Home> {
                 child: ListTile(
                   leading: weatherIcon,
                   title: Text(
-                    '현재 날씨 정보 ($hour시 기준)',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                    '$administrativeArea $locality 날씨 ($hour시)',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueGrey,
+                    ),
                   ),
-                  subtitle: Text('$t1h°C, $pty', style: TextStyle(color: Colors.blueGrey)),
+                  subtitle: Text(
+                    '$t1h°C / $pty',
+                    style: TextStyle(color: Colors.blueGrey),
+                  ),
                 ),
               ),
             ),
 
-            // 거리 카드 3개
+            // ------------------ 공공시설 거리 ------------------
             Padding(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.only(left: 12, right: 12),
               child: Row(
                 children: [
-                  Expanded(child: infoCard("경찰서", policeStation)),
-                  Expanded(child: infoCard("소방서", fireDepartment)),
-                  Expanded(child: infoCard("주민센터", serviceCenter)),
+                  Expanded(child: _distanceCard("경찰서", policeStation)),
+                  Expanded(child: _distanceCard("소방서", fireDepartment)),
+                  Expanded(child: _distanceCard("주민센터", serviceCenter)),
                 ],
               ),
             ),
 
-            // 체크리스트
-            checklistCard(),
+            SizedBox(height: 20),
 
-            // 즐겨찾기
-            favoriteCard(),
+            // ------------------ CCTV + 성범죄자 ------------------
+            Text("내 동네 안전정보",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            SizedBox(height: 10),
+
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  Expanded(child: _cctvCard()),
+                  SizedBox(width: 10),
+                  Expanded(child: _crimeCard()),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 20),
+
+            // ------------------ 체크리스트 ------------------
+            _checklistCard(),
+
+            // ------------------ 즐겨찾기 ------------------
+            _favoriteCard(),
+
+            SizedBox(height: 50),
           ],
         ),
       ),
     );
   }
 
-  Widget infoCard(String title, int time) {
+  // -----------------------------
+  // 카드 UI 컴포넌트
+  // -----------------------------
+  Widget _distanceCard(String title, int minute) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Container(
-        height: 60,
+        height: 70,
         alignment: Alignment.center,
-        child: Text("$title\n도보${time}분", textAlign: TextAlign.center),
+        child: Text("$title\n도보 ${minute}분",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
       ),
     );
   }
 
-  Widget checklistCard() {
+  Widget _cctvCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Container(
+        height: 70,
+        alignment: Alignment.center,
+        child: isLoadingCctv
+            ? CircularProgressIndicator(strokeWidth: 2)
+            : Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(currentDong, style: TextStyle(fontSize: 11)),
+            Text("CCTV ${cctvCount}대",
+                style:
+                TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _crimeCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Container(
+        height: 70,
+        alignment: Alignment.center,
+        child: isLoadingCrime
+            ? CircularProgressIndicator(strokeWidth: 2)
+            : Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(currentDong, style: TextStyle(fontSize: 11)),
+            Text("성범죄자 ${dongCount}명",
+                style:
+                TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _checklistCard() {
     return Card(
       elevation: 6,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       margin: EdgeInsets.all(10),
       child: Container(
         width: 350,
-        height: 150,
-        alignment: Alignment.center,
+        height: 160,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("정착 Check-list 진행사항", style: TextStyle(fontSize: 16)),
+            Text("정착 Check-list 진행사항",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            SizedBox(height: 5),
             Text("3일차: ${checklistStatus[0].map((e) => e ? "■" : "□").join()}"),
             Text("3주차: ${checklistStatus[1].map((e) => e ? "■" : "□").join()}"),
             Text("3개월차: ${checklistStatus[2].map((e) => e ? "■" : "□").join()}"),
             TextButton(
               onPressed: () async {
-                dynamic result = await Navigator.pushNamed(context, "/checklist", arguments: checklistStatus);
+                dynamic result = await Navigator.pushNamed(
+                  context,
+                  "/checklist",
+                  arguments: checklistStatus,
+                );
                 setState(() => checklistStatus = result);
               },
               child: Text("정착지수 페이지로"),
@@ -409,7 +604,7 @@ class HomeState extends State<Home> {
     );
   }
 
-  Widget favoriteCard() {
+  Widget _favoriteCard() {
     return Card(
       elevation: 6,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -419,8 +614,9 @@ class HomeState extends State<Home> {
         padding: EdgeInsets.symmetric(vertical: 15),
         child: Column(
           children: [
-            Text("즐겨찾기", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            SizedBox(height: 15),
+            Text("즐겨찾기",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            SizedBox(height: 18),
             iconGrid(),
           ],
         ),

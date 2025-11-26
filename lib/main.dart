@@ -68,10 +68,7 @@ class App extends StatelessWidget {
 class Main extends StatefulWidget {
   MainState createState() => MainState();
 }
-
 final GlobalKey<HomeState> homekey = GlobalKey<HomeState>();
-
-
 class MainState extends State<Main> {
   int currentPage = 0;
   dynamic pages = [
