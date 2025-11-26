@@ -282,7 +282,7 @@ class MenuState extends State<Menu> {
                     ),
                   ],
                 ),
-                child: Icon(icon, size: 20, color: iconColor),
+                child: Icon(icon, size: 45, color: iconColor),
               ),
               Positioned(
                 right: 0,
