@@ -656,8 +656,7 @@ class KakaoMapState extends State<KakaoMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Center(child: Text('통합 지도'),)),
-      body: Stack(
+        body: Stack(
         children: [
           WebViewWidget(controller: _controller),
 
