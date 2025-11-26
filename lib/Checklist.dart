@@ -193,8 +193,8 @@ class ChecklistContent extends StatelessWidget {
         ? [
             "지역 커뮤니티 가입",
             "주민센터 프로그램 확인",
-            "도서관 이용 등록",
-            "공원 산책 루트 파악",
+            "맛집 위치 확인",
+            "미용실 위치 확인",
             "지역 SNS 팔로우",
           ]
         : checklistType == 2
@@ -221,11 +221,11 @@ class ChecklistContent extends StatelessWidget {
           ]
         : checklistType == 2
         ? [
-            "커뮤니티 페이지로 이동하기 >",
-            "문화 프로그램 확인하러 가기 >",
-            "맛집 위치 확인하러 가기 >",
-            "미용실 위치 확인하러 가기 >",
-            "커뮤니티로 이동하기 >",
+            "지역의 축제 행사들을 확인해보세요",
+            "봉사 활동에 참여하면서 지역과 교류해보세요",
+            "취미에 맞는 소모임들을 찾아보세요",
+            "단골로 갈 만한 가게가 있는지 찾아보세요",
+            "동네 친구를 사귈 수 있는 커뮤니티를 살펴보세요",
           ]
         : [];
 
@@ -253,7 +253,7 @@ class ChecklistContent extends StatelessWidget {
             "봉사활동 정보 확인하러 가기 >",
             "소모임 커뮤니티로 이동하기 >",
             "가게 찾으러 가기 >",
-            "커뮤니티로 친구 사귀러 가기 >",
+            "커뮤니티 확인하기 >",
           ]
         : [];
 
@@ -394,6 +394,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                                 builder: (context) => AlertDialog(
                                   title: Text("Check-list 등록"),
                                   content: Column(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       TextField(
                                         decoration: InputDecoration(
@@ -465,6 +466,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                                 builder: (context) => AlertDialog(
                                   title: Text("Check-list 수정"),
                                   content: Column(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       TextField(
                                         decoration: InputDecoration(
