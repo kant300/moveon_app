@@ -427,7 +427,7 @@ class MenuState extends State<Menu> {
                       "/map",
                       arguments: "night",
                     ),
-                    Colors.red,
+                    Colors.green,
                     "심야약국/병원",
                   ),
                 ], crossAxisCount: 4), // 한 줄에 4개 배치
@@ -466,7 +466,7 @@ class MenuState extends State<Menu> {
                     Icons.water_drop,
                     "비상급수시설",
                     () => Navigator.pushNamed(context, "/safety/water"),
-                    Colors.blue,
+                    Colors.red,
                     "비상급수시설",
                   ),
                   // 텍스트 축약
@@ -538,7 +538,7 @@ class MenuState extends State<Menu> {
                       "/map",
                       arguments: "wheelchairCharger",
                     ),
-                    Colors.green,
+                    Colors.blue,
                     "전동휠체어 충전소",
                   ),
                   // 텍스트 축약
