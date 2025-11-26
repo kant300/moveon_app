@@ -545,23 +545,29 @@ class HomeState extends State<Home> {
               ),
               margin: EdgeInsets.all(10),
               child: Container(
+                alignment: Alignment.center,
                 width: 350,
-                padding: EdgeInsets.symmetric(vertical: 15),
+                height: 150,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: Column(
-                  children: [
-                    Text("즐겨찾기", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 15),
-                    iconGrid(),
-                  ],
-                ),
-              ),
-            )],
+                child: Center(
+                  child: Column(
+                    children: [
+                      SizedBox(height : 8),
+                      Text("즐겨찾기", style: TextStyle(fontSize: 16, fontWeight:  FontWeight.bold),
+                      ),
+                      SizedBox(height: 30),
+                      iconGrid(),
+                    ],
                   ),
                 ),
-              );
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
