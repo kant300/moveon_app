@@ -19,6 +19,11 @@ class OnboardingAddress extends StatefulWidget {
 class OnboardingAddressState extends State<OnboardingAddress> {
   late WebViewController MapController;
 
+  // ⭐️ 버튼 스타일링을 위해 색상 상수 정의
+  final Color _mainTealColor = const Color(0xFF3DE0D2);
+  final Color _nextButtonBgColor = const Color(0xFF3DE0D2); // 다음 버튼의 배경색 (참고 코드의 노란색)
+  final Color _nextButtonTextColor = Colors.white; // 다음 버튼의 텍스트 색상 (_mainTealColor)
+
   @override
   void initState() {
     // TODO: implement initState
@@ -32,7 +37,7 @@ class OnboardingAddressState extends State<OnboardingAddress> {
           final gpsmap = jsonDecode(msg.message);
           double lat = gpsmap['lat'];
           double lon = gpsmap['lon'];
-          print("좌포 전달 ${msg.message}");
+          print("좌표 전달 ${msg.message}");
           String address = await getKakaomap(lon, lat);
 
           setState(() {
@@ -185,7 +190,7 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("주소 확인")),
+      appBar: AppBar(title: const Text("")),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -201,16 +206,24 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
             ],
           ),
           // 🔹 상단 텍스트
-          SizedBox(height: 20),
-          Text("어디로 이사 오셨나요?", style: TextStyle(fontSize: 18)),
-          Text("새로운 동네 정보를 알려 드릴게요", style: TextStyle(fontSize: 14)),
           SizedBox(height: 16),
+          Text(
+              "어디로 이사 오셨나요?",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)
+          ),
+          const SizedBox(height: 8),
+          Text(
+              "새로운 동네 정보를 알려 드릴게요",
+              style: TextStyle(fontSize: 17, color: Colors.grey),
+          ),
+          SizedBox(height: 24),
 
           Expanded(
             child: showMap && lon != null && lat != null
                 ? WebViewWidget(controller: MapController)
                 : Center(child: Text("내 위치 정보 조회하기")),
           ),
+          SizedBox(height: 20),
 
           Column(
             children: [
@@ -228,38 +241,76 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
 
 
           // 🔹 내 위치 버튼 (상단 유지)
-          ElevatedButton(onPressed: addressprint, child: Text("내 위치 조회")),
-          SizedBox(height: 185),
-
-
-
-          // 🔹 하단 - 다음 버튼
           Padding(
-            padding: const EdgeInsets.only(bottom: 20.0),
-            child: ElevatedButton(
-              onPressed: () async {
-                if (addressCont.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("주소 입력바람"),
-                      duration: Duration(seconds: 2), // 알림 경과 시간창 2초
-                    ),
-                  );
-                  return;
-                }
-                await guest();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => OnboardingCategory()),
-                );
-              },
-              child: const Text("다음 단계"),
+            padding: const EdgeInsets.only(top: 12, bottom: 24) + const EdgeInsets.symmetric(horizontal: 24.0), // ⭐️ 좌우 패딩 추가,
+            child: SizedBox( // ⭐️ 버튼 전체 크기 제어를 위해 SizedBox 추가
+              width: double.infinity, // ⭐️ 너비를 최대로 확장
+              child: OutlinedButton.icon( // OutlinedButton 사용
+                onPressed: addressprint,
+                icon: Icon(Icons.gps_fixed, color: _mainTealColor), // GPS 아이콘, 글자색과 동일한 청록색
+                label: Text(
+                  "내 위치로 주소 조회",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: _mainTealColor, // ⭐️ 글자색: 다음 버튼의 배경색 (청록색)
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  backgroundColor: Colors.transparent, // ⭐️ 배경색: 투명
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  side: BorderSide(color: _mainTealColor, width: 1.5), // ⭐️ 테두리색: 글자색과 동일
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
             ),
           ),
+
+          const Spacer(), // ⭐️ 하단 버튼을 아래로 밀어내기 위해 Spacer 추가
+
+          // --- 🌟 하단 - 이전/다음 버튼 그룹 🌟 ---
+          Padding(
+            // ⭐️ 좌우 패딩과 하단 패딩 적용
+            padding: const EdgeInsets.only(bottom: 50, top: 20) + const EdgeInsets.symmetric(horizontal: 24.0),
+
+              // 🌟 "다음" 버튼 (Flex 3) 🌟
+              child: ElevatedButton(
+                onPressed: () async {
+                  // 기존 '다음 단계' 버튼의 로직 유지
+                  if (addressCont.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("주소 입력바람"),
+                        duration: Duration(seconds: 2), // 알림 경과 시간창 2초
+                      ),
+                    );
+                    return;
+                  }
+                  await guest();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => OnboardingCategory()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),// 버튼 너비를 최대로 확장
+                  // ⭐️ _nextButtonBgColor, _nextButtonTextColor 사용
+                  backgroundColor: _nextButtonBgColor,
+                  foregroundColor: _nextButtonTextColor,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text("다음", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              ),
+          ),
+
+          // --- 🌟 하단 버튼 그룹 종료 🌟 ---
         ],
       ),
     );
   }
+
 
   Widget _colorBar(Color color) {
     return Container(

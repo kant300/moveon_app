@@ -164,7 +164,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // --- 1. Progress Bar ---
             Row(

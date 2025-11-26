@@ -29,7 +29,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false, // debug 배너 숨기기
-      initialRoute: "/map",
+      initialRoute: "/onboardingStart",
       routes: {
         "/onboardingStart" : (context) => OnboardingStart(),
         "/onboardingAddress" : (context) => OnboardingAddress(),
@@ -69,15 +69,12 @@ class Main extends StatefulWidget {
   MainState createState() => MainState();
 }
 
-final GlobalKey<HomeState> homekey = GlobalKey<HomeState>();
-
-
 class MainState extends State<Main> {
   int currentPage = 0;
   dynamic pages = [
     Menu(),
     KakaoMap(),
-    Home(key : homekey),
+    Home(),
     Center(child: Text("Community")),
     MyPage()
   ];
@@ -88,7 +85,6 @@ class MainState extends State<Main> {
   void initState() {
     super.initState();
     loadUserName();
-
   }
   void loadUserName() async {
     final mem = await SharedPreferences.getInstance();
@@ -122,29 +118,29 @@ class MainState extends State<Main> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+        appBar: AppBar(
           backgroundColor: Colors.white,
           title: Column(
-            children: [
-              Text("mOveOn")
-            ]
+              children: [
+                Text("mOveOn")
+              ]
           ),
           actions: [
             IconButton(onPressed: () {}, icon: Icon(Icons.notifications_on)),
             IconButton(onPressed: () async{
               if(username == null){
-              final result = await Navigator.pushNamed(context, "/login");
-              if ( result != null && result is Map && result['mname'] != null) {
-                setState(() {
-                  username = result['mname'];
-                });
-              }
+                final result = await Navigator.pushNamed(context, "/login");
+                if ( result != null && result is Map && result['mname'] != null) {
+                  setState(() {
+                    username = result['mname'];
+                  });
+                }
               } else {
                 Navigator.pushNamed(context, "/setting");
               }
-              }, icon: username == null ? Icon(Icons.login) : CircleAvatar( child: Text(username![0],
-    ),)
-    ),
+            }, icon: username == null ? Icon(Icons.login) : CircleAvatar( child: Text(username![0],
+            ),)
+            ),
           ],
 
           bottom: PreferredSize(
@@ -155,55 +151,52 @@ class MainState extends State<Main> {
             ),
           ),
 
-      ),
-      body: IndexedStack(index: currentPage, children: pages),
-      bottomNavigationBar: BottomNavigationBar(
-          currentIndex: currentPage,
-          onTap: (index) async{ setState(() {
-            currentPage = index;
-          });
-            if(index == 2){
-              homekey.currentState?.wishlist();
-            }
-          },
+        ),
+        body: IndexedStack(index: currentPage, children: pages),
+        bottomNavigationBar: BottomNavigationBar(
+            currentIndex: currentPage,
+            onTap: (index) { setState(() {
+              currentPage = index;
+            });},
 
-          backgroundColor: Colors.white, // 바탕색을 밝게
-          selectedItemColor: Colors.blueAccent, // 선택된 아이템 색상
-          unselectedItemColor: Colors.grey.shade700, // 선택되지 않은 아이템 색상
-          selectedLabelStyle: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            color: Colors.blueAccent,
-          ),
-          unselectedLabelStyle: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade700,
-          ),
-          type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.white, // 바탕색을 밝게
+            selectedItemColor: Colors.blueAccent, // 선택된 아이템 색상
+            unselectedItemColor: Colors.grey.shade700, // 선택되지 않은 아이템 색상
+            selectedLabelStyle: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: Colors.blueAccent,
+            ),
+            unselectedLabelStyle: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade700,
+            ),
+            type: BottomNavigationBarType.fixed,
 
-          items: [
-            BottomNavigationBarItem(
-                icon: Icon(Icons.menu),
-                label: "전체메뉴"
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.my_location),
-                label: "내위치"
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: "홈"
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.question_answer),
-                label: "커뮤니티"
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: "마이페이지"
-            )
-          ]
-      )
+            items: [
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.menu),
+                  label: "전체메뉴"
+              ),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.my_location),
+                  label: "내위치"
+              ),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: "홈"
+              ),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.question_answer),
+                  label: "커뮤니티"
+              ),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.person),
+                  label: "마이페이지"
+              )
+            ]
+        )
     );
   }
 }
+
