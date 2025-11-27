@@ -394,6 +394,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                                 builder: (context) => AlertDialog(
                                   title: Text("Check-list 등록"),
                                   content: Column(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       TextField(
                                         decoration: InputDecoration(
@@ -465,6 +466,7 @@ class ChecklistPersonalState extends State<ChecklistPersonal> {
                                 builder: (context) => AlertDialog(
                                   title: Text("Check-list 수정"),
                                   content: Column(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       TextField(
                                         decoration: InputDecoration(

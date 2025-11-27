@@ -483,16 +483,16 @@ class HomeState extends State<Home> {
                 color: Color(0xFFE0F7FA),
                 elevation: 4,
                 child: ListTile(
-                  leading: weatherIcon,
+                  leading: Icon(Icons.water_drop),
                   title: Text(
-                    '$administrativeArea $locality 날씨 ($hour시)',
+                    '인천 부평구 날씨 (12시)',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.blueGrey,
                     ),
                   ),
                   subtitle: Text(
-                    '$t1h°C / $pty',
+                    '6°C / 비',
                     style: TextStyle(color: Colors.blueGrey),
                   ),
                 ),
