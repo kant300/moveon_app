@@ -129,22 +129,61 @@ class KakaoMapState extends State<KakaoMap> {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=$kakaoJsKey&libraries=services,clusterer"></script>
+    <style>
+      /* 인포윈도우 스타일 (선택사항) */
+      .infowindow-content {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding: 10px;
+        text-align: center;
+      }
+    </style>
   </head>
   <body style="margin:0;">
     <div id="map" style="width:100%;height:100vh;"></div>
     <script>
+      // ✅ BASE_URL 정의는 반드시 <script> 태그 내부의 맨 위에 위치해야 합니다.
+      const BASE_URL = "http://192.168.40.61:8080";
       var mapContainer = document.getElementById('map');
       var mapOption = {
         center: new kakao.maps.LatLng(37.5665, 126.9780),
         level: 3
       };
       var map = new kakao.maps.Map(mapContainer, mapOption);
+      
+      // ============================================
+      // 📌 1. 마커 이미지 정의 (사용하실 이미지 URL로 변경하세요)
+      // ============================================
+      
+      // 마커 이미지 기본 설정
+      var defaultImageSize = new kakao.maps.Size(40, 40); // 기본 마커 크기
+      var defaultImageOption = {offset: new kakao.maps.Point(20, 40)}; // 이미지 중심점
+      
+      // 카테고리별 마커 이미지 정의 (예시 URL)
+      var markerImages = {
+        "clothingBin": new kakao.maps.MarkerImage(BASE_URL + '/images/apparel.png', defaultImageSize, defaultImageOption),
+        "government": new kakao.maps.MarkerImage(BASE_URL + '/images/government.png', defaultImageSize, defaultImageOption),
+        "night": new kakao.maps.MarkerImage(BASE_URL + '/images/hospital.png', defaultImageSize, defaultImageOption),
+        //"sexcrime": new kakao.maps.MarkerImage(BASE_URL + '/images/crime_icon.png', defaultImageSize, defaultImageOption),
+        "shelter": new kakao.maps.MarkerImage(BASE_URL + '/images/shelter.png', defaultImageSize, defaultImageOption),
+        "restroom": new kakao.maps.MarkerImage(BASE_URL + '/images/wc.png', defaultImageSize, defaultImageOption),
+        "subwayLift": new kakao.maps.MarkerImage(BASE_URL + '/images/elevator.png', defaultImageSize, defaultImageOption),
+        "subwaySchedule": new kakao.maps.MarkerImage(BASE_URL + '/images/subway.png', defaultImageSize, defaultImageOption),
+        "wheelchairCharger": new kakao.maps.MarkerImage(BASE_URL + '/images/charger.png', defaultImageSize, defaultImageOption),
+        "localParking": new kakao.maps.MarkerImage(BASE_URL + '/images/parking.png', defaultImageSize, defaultImageOption),
+        //"gas": new kakao.maps.MarkerImage(BASE_URL + '/images/gas_icon.png', defaultImageSize, defaultImageOption),
+        "cctv": new kakao.maps.MarkerImage(BASE_URL + '/images/cctv.png', defaultImageSize, defaultImageOption),
+        // 기본 마커 (정의하지 않은 카테고리 대비)
+        "default": null 
+      };
 
       // 현재 본인 위치
       var marker = new kakao.maps.Marker({
         position: new kakao.maps.LatLng(37.5665, 126.9780)
       });
       marker.setMap(map);
+      
       // 내 위치 마커 클릭 → Flutter 전달
       kakao.maps.event.addListener(marker, 'click', function() {
         if (window.flutterChannel) {
@@ -170,6 +209,9 @@ class KakaoMapState extends State<KakaoMap> {
           window.infowindow.close();
         }
         window.infowindow = new kakao.maps.InfoWindow();
+        
+        // ✅ 현재 카테고리에 맞는 마커 이미지 선택
+        var selectedImage = markerImages[category] || markerImages["default"];
 
         for (var i = 0; i < markerList.length; i++) {
           (function(m) { // 클로저로 i값 고정
@@ -179,14 +221,16 @@ class KakaoMapState extends State<KakaoMap> {
               var markerPosition = new kakao.maps.LatLng(m["위도"], m["경도"]);
             }
 
-            // 마커 생성
+            // 마커 생성시 선택된 이미지 적용
             var marker = new kakao.maps.Marker({
-              position: markerPosition
+              position: markerPosition,
+              image: selectedImage // ✅ 카테고리별 마커 이미지 적용!
             });
             markers.push(marker);
 
             // ✅ 마커 클릭 시 인포윈도우 열기
             kakao.maps.event.addListener(marker, 'click', function() {
+              var content = '';
               // category 에 따라 infoWindow 데이터 삽입
               if (category == "clothingBin") { // 의류수거함
                 window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
@@ -205,8 +249,7 @@ class KakaoMapState extends State<KakaoMap> {
                   '<div>' + m["전화번호"] + '</div>' +
                 '</div>');
                 } else if (category == "sexcrime") { // 성범죄자
-                  window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
-                 '</div>');
+                  return;
               } else if (category == "shelter") { // 대피소
                 window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
                   m["시설명"] +
@@ -643,7 +686,7 @@ class KakaoMapState extends State<KakaoMap> {
         return;
       }
 
-      //final data = response.data;
+
       final jsData = jsonEncode(data);
       final jsCategory = jsonEncode(category);
       final js = "addMarkers($jsData, $jsCategory);";
@@ -726,8 +769,12 @@ class KakaoMapState extends State<KakaoMap> {
             top: 70,
             child: VerticalHorizontalCategoryList( // 평 확장 위젯으로 변경
               onCategorySelected: (categoryKey) async {
-                // 하위 카테고리 선택 시 마커 로드 함수 호출
-                await _fetchAndShowMarkers(categoryKey);
+                if (categoryKey == "sexCrime") {
+                  await _loadCrimeInfo();
+                } else {
+                  // 하위 카테고리 선택 시 마커 로드 함수 호출
+                  await _fetchAndShowMarkers(categoryKey);
+                }
               },
             ),
           ),

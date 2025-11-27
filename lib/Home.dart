@@ -561,16 +561,21 @@ class HomeState extends State<Home> {
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Center(
-                  child: Column(
-                    children: [
-                      SizedBox(height : 8),
-                      Text("즐겨찾기", style: TextStyle(fontSize: 16, fontWeight:  FontWeight.bold),
-                      ),
-                      SizedBox(height: 30),
-                      iconGrid(),
-                    ],
+                  child: SingleChildScrollView( // 이 부분을 추가합니다.
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,// Column이 내용물만큼만 높이를 차지하도록 설정 (SingleChildScrollView 사용 시 유용)
+                      children: [
+                        SizedBox(height : 8),
+                        Text(
+                          "즐겨찾기",
+                          style: TextStyle(fontSize: 16, fontWeight:  FontWeight.bold),
+                        ),
+                        SizedBox(height: 30),
+                        iconGrid(),
+                      ],
+                    ),
                   ),
-                ),
+                )
               ),
             ),
           ],
