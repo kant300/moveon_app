@@ -59,7 +59,7 @@ class _SexCrimeFilterModalState extends State<SexCrimeFilterModal> {
   };
 
   final String kakaoJsKey = '9eb4f86b6155c2fa2f5dac204d2cdb35';
-  final String serverBaseUrl = 'http://192.168.40.61:8080';
+  final String serverBaseUrl = 'http://10.95.125.46:8080';
 
   Map<String, int> _filteredResult = {}; // 필터링 결과 저장용 변수
 
@@ -89,7 +89,7 @@ class _SexCrimeFilterModalState extends State<SexCrimeFilterModal> {
 
     dynamic count = 0; // 검색된 인원수
     try{
-      final response = await dio.get("http://192.168.40.61:8080/api/sexcrime/filter?sido=${ sido }&sigungu=${ sigungu }&dong=${ dong }");
+      final response = await dio.get("http://10.95.125.46:8080/api/sexcrime/filter?sido=${ sido }&sigungu=${ sigungu }&dong=${ dong }");
       final data = await response.data;
       count = data;
       print( data );

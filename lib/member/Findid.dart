@@ -22,7 +22,7 @@ class FindidState extends State<Findid> {
         "mphone": mphoneCont.text,
       };
       final response = await dio.get(
-        "http://10.0.2.2:8080/api/member/findid",
+        "http://10.95.125.46:8080/api/member/findid",
         queryParameters: obj,
       );
 

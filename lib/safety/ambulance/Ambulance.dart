@@ -40,7 +40,7 @@ class _AmbulanceState extends State<Ambulance> {
     connectTimeout: const Duration(seconds: 5),// 연결 시간 초과를 5초로 설정
     receiveTimeout: const Duration(seconds: 3),// 데이터 수신 시간 초과 설정
   )); // 💡 닫는 괄호 수정
-  final String _apiUrl = "http://192.168.40.61:8080/api/ambulance/all";
+  final String _apiUrl = "http://10.95.125.46:8080/api/ambulance/all";
 
 
   @override

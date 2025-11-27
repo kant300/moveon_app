@@ -40,7 +40,7 @@ class MyPageState extends State<MyPage> {
         print(" 게스트 토큰 감지");
 
         final response = await dio.get(
-          "http://10.0.2.2:8080/api/guest/address",
+          "http://10.95.125.46:8080/api/guest/address",
           options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
         );
 
@@ -53,7 +53,7 @@ class MyPageState extends State<MyPage> {
       if (logintoken != null) {
         print(" 회원 토큰 감지");
         final response = await dio.get(
-          "http://10.0.2.2:8080/api/member/info",
+          "http://10.95.125.46:8080/api/member/info",
           options: Options(headers: {"Authorization": "Bearer $logintoken"}),
         );
 

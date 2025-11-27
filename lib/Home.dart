@@ -134,7 +134,7 @@ class HomeState extends State<Home> {
       if (latitude == 0 || longitude == 0) return 0;
 
       final response = await Dio().get(
-        "http://10.0.2.2:8080/living/data?code=$code",
+        "http://10.95.125.46:8080/living/data?code=$code",
       );
       final data = response.data;
 
@@ -171,53 +171,88 @@ class HomeState extends State<Home> {
   // -----------------------------
   // 날씨 API
   // -----------------------------
+  // 날씨 정보 구하기
   Future<void> getWeatherData() async {
     try {
+      // 현재 시간 (HH시) 가져오기
+      // UTC -> KST 시간으로 변경 (9시간 추가)
       DateTime now = DateTime.now().add(Duration(hours: 9));
-      String hourString = DateFormat('HH').format(now);
-      String fullHour = hourString + "00";
+      String hour = DateFormat('HH').format(now);
+      int lat = latitude.toInt();
+      int lon = longitude.toInt();
 
       final response = await Dio().get(
         "http://10.0.2.2:8080/weather",
-        queryParameters: {
-          "lat": latitude.toInt(),
-          "lon": longitude.toInt(),
-        },
+        queryParameters: {"lat": lat, "lon": lon},
       );
-
       final data = jsonDecode(response.data);
+      print("날씨 $data");
       final items = data['response']['body']['items']['item'];
 
-      dynamic t, p, sky;
-
-      for (var obj in items) {
-        if (obj['fcstTime'].toString() == fullHour) {
-          if (obj['category'] == "T1H") t = obj['fcstValue'];
-          if (obj['category'] == "PTY") p = obj['fcstValue'];
-          if (obj['category'] == "SKY") sky = obj['fcstValue'];
+      // 필요한 데이터 가져오기
+      hour += '00';
+      dynamic t1h, reh, pty, sky, wsd;
+      for (dynamic obj in items) {
+        if (hour == obj['fcstTime'].toString()) {
+          if (obj['category'] == "T1H") {
+            t1h = obj['fcstValue']; // 기온
+          }
+          if (obj['category'] == "REH") {
+            reh = obj['fcstValue']; // 습도
+          }
+          if (obj['category'] == "PTY") {
+            pty = obj['fcstValue']; // 강수형태
+            if (pty == "0") pty = "맑음";
+            if (pty == "1") pty = "비";
+            if (pty == "2") pty = "비/눈";
+            if (pty == "3") pty = "눈";
+            if (pty == "4") pty = "소나기";
+            if (pty == "5") pty = "빗방울";
+            if (pty == "6") pty = "빗방울눈날림";
+            if (pty == "7") pty = "눈날림";
+          }
+          if (obj['category'] == "SKY") {
+            sky = obj['fcstValue']; // 하늘상태
+            if (sky == "1") sky = "맑음";
+            if (sky == "3") sky = "구름많음";
+            if (sky == "4") sky = "흐림";
+          }
+          if (obj['category'] == "WSD") {
+            wsd = obj['fcstValue']; // 풍속
+          }
         }
       }
+      hour = hour.substring(0, 2);
 
+      // 날씨에 따른 아이콘 그리기
       dynamic icon;
-      if (p == "1") icon = Icon(Icons.water_drop);
-      else if (p == "3") icon = Icon(Icons.snowing);
-      else if (sky == "3") icon = Icon(Icons.cloud);
-      else if (sky == "4") icon = Icon(Icons.foggy);
-      else icon = Icon(Icons.sunny);
+      if (pty == "맑음" && sky == "맑음") {
+        icon = const Icon(Icons.sunny);
+      } else if (sky == "구름많음") {
+        icon = const Icon(Icons.cloud);
+      } else if (sky == "흐림") {
+        icon = const Icon(Icons.foggy);
+      } else if (pty == "비" || pty == "비/눈" || pty == "소나기") {
+        icon = const Icon(Icons.water_drop);
+      } else if (pty == "눈") {
+        icon = const Icon(Icons.snowing);
+      }
 
-      List<Placemark> placemarks =
-      await placemarkFromCoordinates(latitude, longitude);
+      // 현재 위치 정보
+      List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+      Placemark place = placemarks[0];
 
       setState(() {
-        t1h = t;
-        pty = p;
-        hour = hourString;
+        this.t1h = t1h;
+        this.pty = pty;
+        this.hour = hour;
         weatherIcon = icon;
-
-        administrativeArea = placemarks[0].administrativeArea;
-        locality = placemarks[0].locality;
+        administrativeArea = place.administrativeArea;
+        locality = place.locality;
       });
-    } catch (e) {}
+    } catch (e) {
+      print(e);
+    }
   }
 
   // -----------------------------
@@ -230,7 +265,7 @@ class HomeState extends State<Home> {
 
     try {
       final response = await dio.get(
-        'http://10.0.2.2:8080/api/cctv/count-by-dong',
+        'http://10.95.125.46:8080/api/cctv/count-by-dong',
         queryParameters: {
           'lat': latitude,
           'lng': longitude,
@@ -259,7 +294,7 @@ class HomeState extends State<Home> {
 
     try {
       final response = await dio.get(
-        'http://10.0.2.2:8080/api/sex-crime/dong-count',
+        'http://10.95.125.46:8080/api/sex-crime/dong-count',
         queryParameters: {
           'lat': latitude,
           'lng': longitude,
@@ -304,7 +339,7 @@ class HomeState extends State<Home> {
 
     if (guesttoken != null) {
       final response = await dio.get(
-        "http://10.0.2.2:8080/api/guest/address",
+        "http://10.95.125.46:8080/api/guest/address",
         options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
       );
       print(response.data);
@@ -312,7 +347,7 @@ class HomeState extends State<Home> {
 
     if (logintoken != null) {
       final response = await dio.get(
-        "http://10.0.2.2:8080/api/member/info",
+        "http://10.95.125.46:8080/api/member/info",
         options: Options(headers: {"Authorization": "Bearer $logintoken"}),
       );
       print(response.data);
@@ -330,7 +365,7 @@ class HomeState extends State<Home> {
 
       if (logintoken != null) {
         final response = await dio.get(
-          "http://10.0.2.2:8080/api/member/wishprint",
+          "http://10.95.125.46:8080/api/member/wishprint",
           options: Options(headers: {"Authorization": "Bearer $logintoken"}),
         );
         setState(() {
@@ -339,7 +374,7 @@ class HomeState extends State<Home> {
         });
       } else if (guesttoken != null) {
         final response = await dio.get(
-          "http://10.0.2.2:8080/api/guest/address",
+          "http://10.95.125.46:8080/api/guest/address",
           options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
         );
         setState(() {

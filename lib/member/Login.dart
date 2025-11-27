@@ -26,7 +26,7 @@ class LoginState extends State<Login> {
       };
 
       final response = await dio.post(
-        "http://10.0.2.2:8080/api/member/login",
+        "http://10.95.125.46:8080/api/member/login",
         data: obj,
         options: Options(headers: {"Content-Type": "application/json"}),
       );

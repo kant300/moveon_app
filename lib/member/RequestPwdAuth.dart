@@ -29,7 +29,7 @@ class StaterequestPwdAuth extends State<RequestPwdAuth> {
 
       final obj = {"mid": widget.mid, "mpwd": mpwdCont.text};
       final response = await dio.put(
-        "http://10.0.2.2:8080/api/member/findpwd",
+        "http://10.95.125.46:8080/api/member/findpwd",
         data: obj,
       );
 

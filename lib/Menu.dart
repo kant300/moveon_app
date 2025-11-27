@@ -161,7 +161,7 @@ class MenuState extends State<Menu> {
         print(" 게스트 토큰 감지");
 
         final response = await dio.get(
-          "http://10.0.2.2:8080/api/guest/address",
+          "http://10.95.125.46:8080/api/guest/address",
           options: Options(headers: {"Authorization": "Bearer $guesttoken"}),
         );
 
@@ -182,7 +182,7 @@ class MenuState extends State<Menu> {
       if (logintoken != null) {
         print(" 회원 토큰 감지");
         final response = await dio.get(
-          "http://10.0.2.2:8080/api/member/info",
+          "http://10.95.125.46:8080/api/member/info",
           options: Options(headers: {"Authorization": "Bearer $logintoken"}),
         );
 
@@ -228,14 +228,14 @@ class MenuState extends State<Menu> {
     try {
       if(logintoken != null) {
         final response = await dio.put(
-          "http://10.0.2.2:8080/api/member/wishlist",
+          "http://10.95.125.46:8080/api/member/wishlist",
           data: {"wishlist": Scategory},
           options: Options(headers: {"Authorization": "Bearer $token"}),
         );
         print("즐겨찾기 확인 회원 : ${response.data}");
       }else if(guesttoken != null ){
         final response = await dio.put(
-            "http://10.0.2.2:8080/api/guest/wishlist",
+            "http://10.95.125.46:8080/api/guest/wishlist",
             data: {"wishlist": Scategory},
             options: Options(headers: {"Authorization": "Bearer $token"}),
         );
@@ -532,14 +532,14 @@ class MenuState extends State<Menu> {
                   ),
                   checkStart(
                     Icons.ev_station,
-                    "전동휠체어 충전소",
+                    "전동휠체어",
                     () => Navigator.pushNamed(
                       context,
                       "/map",
                       arguments: "wheelchairCharger",
                     ),
                     Colors.blue,
-                    "전동휠체어충전소",
+                    "전동휠체어",
                   ),
                   // 텍스트 축약
                   checkStart(

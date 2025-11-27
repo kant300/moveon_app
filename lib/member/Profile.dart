@@ -57,7 +57,7 @@ class StateProfile extends State<Profile> {
 
     try {
       final response = await dio.get(
-        "http://10.0.2.2:8080/api/member/info",
+        "http://10.95.125.46:8080/api/member/info",
         options: Options(headers: {"Authorization": "Bearer $token"}),
       );
       final data = response.data;
@@ -139,7 +139,7 @@ class StateProfile extends State<Profile> {
 
     try {
       final response =
-      await dio.put("http://10.0.2.2:8080/api/member/update", data: obj);
+      await dio.put("http://10.95.125.46:8080/api/member/update", data: obj);
       final data = response.data;
 
       showDialog(

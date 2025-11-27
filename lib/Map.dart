@@ -8,7 +8,7 @@ import 'ExpandableCategoryList.dart';
 import 'package:moveon_app/safety/sexcrime/SexCrimeFilterModal.dart';
 
 // ✅ 1. 파일 최상단에 BASE_URL 상수 정의
-const String BASE_URL = "http://10.0.2.2:8080";
+const String BASE_URL = "http://10.95.125.46:8080";
 // 🚨 서버 주소가 변경되면 이 상수의 값만 수정하면 됩니다.
 
 class MapScreen extends StatefulWidget {
@@ -592,7 +592,7 @@ class KakaoMapState extends State<KakaoMap> {
           data[i]["prevStation"] = i > 0 ? data[i-1]["역사명"] : "none";
           data[i]["nextStation"] = i < data.length-1 ? data[i+1]["역사명"] : "none";
 
-          final responseTime = await Dio().get("http://10.0.2.2:8080/transport/schedule", queryParameters: {"station_name": stationName});
+          final responseTime = await Dio().get("http://10.95.125.46:8080/transport/schedule", queryParameters: {"station_name": stationName});
           // [LocalTime, LocalTime]
 
           if (responseTime.statusCode == 200 && responseTime.data is List && responseTime.data.length >= 2) {

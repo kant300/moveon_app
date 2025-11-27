@@ -32,7 +32,7 @@ class SignupState extends State<Signup> {
       };
 
       final response =
-      await dio.post("http://10.0.2.2:8080/api/member/signup", data: obj);
+      await dio.post("http://10.95.125.46:8080/api/member/signup", data: obj);
       final data = response.data;
       print(data);
 

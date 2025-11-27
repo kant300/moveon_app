@@ -16,7 +16,7 @@ class SettingState extends State<Setting> {
       final token = localsave.getString('logintoken');
 
       final response = await dio.get(
-        "http://10.0.2.2:8080/api/member/logout",
+        "http://10.95.125.46:8080/api/member/logout",
         options: Options(headers: {"Authorization": "Bearer $token"}),
       );
 
@@ -38,7 +38,7 @@ class SettingState extends State<Setting> {
       final token = localsave.getString('logintoken');
 
       final response = await dio.delete(
-        "http://10.0.2.2:8080/api/member/signout",
+        "http://10.95.125.46:8080/api/member/signout",
         options: Options(headers: {"Authorization": "Bearer $token"}),
       );
 
