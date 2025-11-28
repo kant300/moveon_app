@@ -166,6 +166,7 @@ class KakaoMapState extends State<KakaoMap> {
         "government": new kakao.maps.MarkerImage(BASE_URL + '/images/government.png', defaultImageSize, defaultImageOption),
         "night": new kakao.maps.MarkerImage(BASE_URL + '/images/hospital.png', defaultImageSize, defaultImageOption),
         //"sexcrime": new kakao.maps.MarkerImage(BASE_URL + '/images/crime_icon.png', defaultImageSize, defaultImageOption),
+        "water": new kakao.maps.MarkerImage(BASE_URL + '/images/water.png', defaultImageSize, defaultImageOption),
         "shelter": new kakao.maps.MarkerImage(BASE_URL + '/images/shelter.png', defaultImageSize, defaultImageOption),
         "restroom": new kakao.maps.MarkerImage(BASE_URL + '/images/wc.png', defaultImageSize, defaultImageOption),
         "subwayLift": new kakao.maps.MarkerImage(BASE_URL + '/images/elevator.png', defaultImageSize, defaultImageOption),
@@ -248,8 +249,16 @@ class KakaoMapState extends State<KakaoMap> {
                   '<div>' + m["주소"] + '</div>' +
                   '<div>' + m["전화번호"] + '</div>' +
                 '</div>');
-                } else if (category == "sexcrime") { // 성범죄자
-                  return;
+              } else if (category == "sexcrime") { // 성범죄자
+                return;
+              } else if (category == "water") { // 비상급수시설
+              window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
+                '<div> 시설관리번호: ' + m["id"] + '</div>' +
+                '<div> 시도: ' + m["city"] + '</div>' +
+                '<div> 시군구: ' + m["district"] + '</div>' +
+                '<div> 도로명: ' + m["roadName"] + '</div>' +
+                '<div> 읍면동: ' + m["emd"] + '</div>' +
+              '</div>');
               } else if (category == "shelter") { // 대피소
                 window.infowindow.setContent('<div style="width:400px;text-align:center;padding:10px;">' +
                   m["시설명"] +
@@ -421,6 +430,9 @@ class KakaoMapState extends State<KakaoMap> {
     _controller.runJavaScript("searchAddress('${query.trim()}');");
   }
 
+
+
+
   // ✅ 검색 후 Dart 위치 변수 업데이트
   void _updateLocationAfterSearch(double latitude, double longitude) {
     // 검색된 좌표로 현재 위치 변수를 업데이트
@@ -576,6 +588,9 @@ class KakaoMapState extends State<KakaoMap> {
         // 필터 변수가 비어 있으면 현재 위치 기준으로 호출됨
         url = "$BASE_URL/api/sexcrime/near?lat=${lat}&lng=${lng}$filterQuery";
         // key: 유형, 시설명, 주소, 전화번호, 경도, 위도
+      } else if (category == "water") { // 비상급수시설
+        url = "$BASE_URL/api/emergencywater";
+        // key: 시설명, 위도, 경도
       } else if (category == "shelter") { // 대피소
         url = "$BASE_URL/safety/shelter";
         // key: 시설명, 위도, 경도

@@ -64,16 +64,6 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/ambulance_price.PNG
-    - assets/images/apparel.png
-    - assets/images/government.png
-    - assets/images/hospital.png
-    - assets/images/cctv.png
-    - assets/images/shelter.png
-    - assets/images/wc.png
-    - assets/images/elevator.png
-    - assets/images/subway.png
-    - assets/images/charger.png
-    - assets/images/parking.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

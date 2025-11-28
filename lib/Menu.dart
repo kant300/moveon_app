@@ -465,7 +465,11 @@ class MenuState extends State<Menu> {
                   checkStart(
                     Icons.water_drop,
                     "비상급수시설",
-                    () => Navigator.pushNamed(context, "/safety/water"),
+                    () => Navigator.pushNamed(
+                        context,
+                        "/map",
+                        arguments: "water",
+                    ),
                     Colors.red,
                     "비상급수시설",
                   ),

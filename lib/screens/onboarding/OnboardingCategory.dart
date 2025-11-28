@@ -170,7 +170,7 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
         // leading: SizedBox.shrink(), // leading을 명시하지 않으면 자동으로 BackButton이 생깁니다.
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),// 오른쪽 여백
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -270,7 +270,6 @@ class OnboardingCategoryState extends State<OnboardingCategory> {
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      const SizedBox(width: 16),
                       // 다음 버튼 (활성화/비활성화)
                       Expanded(
                         child: ElevatedButton(

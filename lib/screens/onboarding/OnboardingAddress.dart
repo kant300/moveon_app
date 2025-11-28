@@ -189,125 +189,136 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
 
   @override
   Widget build(BuildContext context) {
+    // 화면의 높이를 가져와서 지도의 최대 높이를 계산
+    final screenHeight = MediaQuery.of(context).size.height;
+    // 전체 높이에서 AppBar, 상단 텍스트, TextField, 하단 버튼, 패딩 등을 제외한 적절한 지도 높이 지정
+    // 예: 화면 높이의 45% 정도
+    final double mapHeight = screenHeight * 0.45;
+
     return Scaffold(
       appBar: AppBar(title: const Text("")),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // 🔹 상단 컬러바
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _colorBar(const Color(0xFF3DE0D2)),
-              const SizedBox(width: 24),
-              _colorBar(const Color(0xFF7FFFD4)),
-              const SizedBox(width: 24),
-              _colorBar(const Color(0xFFC5F6F6)),
-            ],
-          ),
-          // 🔹 상단 텍스트
-          SizedBox(height: 16),
-          Text(
-              "어디로 이사 오셨나요?",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "새로운 동네 정보를 알려 드릴게요",
-            style: TextStyle(fontSize: 17, color: Colors.grey),
-          ),
-          SizedBox(height: 24),
+      body: SingleChildScrollView( // ⭐️ 지도를 키웠을 때 오버플로우 방지
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // 🔹 상단 컬러바
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _colorBar(const Color(0xFF3DE0D2)),
+                const SizedBox(width: 24),
+                _colorBar(const Color(0xFF7FFFD4)),
+                const SizedBox(width: 24),
+                _colorBar(const Color(0xFFC5F6F6)),
+              ],
+            ),
+            // 🔹 상단 텍스트
+            SizedBox(height: 16),
+            Text(
+                "어디로 이사 오셨나요?",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "새로운 동네 정보를 알려 드릴게요",
+              style: TextStyle(fontSize: 17, color: Colors.grey),
+            ),
+            SizedBox(height: 24),
 
-          Expanded(
-            child: showMap && lon != null && lat != null
-                ? WebViewWidget(controller: MapController)
-                : Center(child: Text("내 위치 정보 조회하기")),
-          ),
-          SizedBox(height: 20),
-
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: TextField(
-                  controller: addressCont,
-                  readOnly: true,
-                  decoration: InputDecoration(labelText: "선택한 주소"),
-                ),
-              ),
-            ],
-          ),
+            // 🌟 1. 지도 영역: Expanded 제거 후 SizedBox로 높이 명시 🌟
+            Container(
+              height: mapHeight, // 계산된 높이 적용
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),// 좌우 패딩 추가 (선택 사항)
+              child: showMap && lon != null && lat != null
+                  ? WebViewWidget(controller: MapController)
+                  : Center(child: Text("내 위치 정보 조회하기")),
+            ),
 
 
-
-          // 🔹 내 위치 버튼 (상단 유지)
-          Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 24) + const EdgeInsets.symmetric(horizontal: 24.0), // ⭐️ 좌우 패딩 추가,
-            child: SizedBox( // ⭐️ 버튼 전체 크기 제어를 위해 SizedBox 추가
-              width: double.infinity, // ⭐️ 너비를 최대로 확장
-              child: OutlinedButton.icon( // OutlinedButton 사용
-                onPressed: addressprint,
-                icon: Icon(Icons.gps_fixed, color: _mainTealColor), // GPS 아이콘, 글자색과 동일한 청록색
-                label: Text(
-                  "내 위치로 주소 조회",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: _mainTealColor, // ⭐️ 글자색: 다음 버튼의 배경색 (청록색)
+            // 🌟 2. 내 위치 버튼: 지도 바로 아래로 이동 🌟
+            Padding(
+              padding: const EdgeInsets.only(top: 0, bottom: 24) + const EdgeInsets.symmetric(horizontal: 24.0), // ⭐️ 좌우 패딩 추가,
+              child: SizedBox( // ⭐️ 버튼 전체 크기 제어를 위해 SizedBox 추가
+                width: double.infinity, // ⭐️ 너비를 최대로 확장
+                child: OutlinedButton.icon( // OutlinedButton 사용
+                  onPressed: addressprint,
+                  icon: Icon(Icons.gps_fixed, color: _mainTealColor), // GPS 아이콘, 글자색과 동일한 청록색
+                  label: Text(
+                    "내 위치로 주소 조회",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: _mainTealColor, // ⭐️ 글자색: 다음 버튼의 배경색 (청록색)
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                    backgroundColor: Colors.transparent, // ⭐️ 배경색: 투명
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    side: BorderSide(color: _mainTealColor, width: 1.5), // ⭐️ 테두리색: 글자색과 동일
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  backgroundColor: Colors.transparent, // ⭐️ 배경색: 투명
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  side: BorderSide(color: _mainTealColor, width: 1.5), // ⭐️ 테두리색: 글자색과 동일
+              ),
+            ),
+
+            // 3. 주소 입력 필드
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: TextField(
+                    controller: addressCont,
+                    readOnly: false,// 👈 false로 변경하여 직접 입력 허용
+                    decoration: InputDecoration(labelText: "선택한 주소"),
+                  ),
+                ),
+              ],
+            ),
+
+            // 4. 다음 버튼 상단 여백: 축소/복구
+            const SizedBox(height: 20),
+
+            // --- 🌟 하단 - 이전/다음 버튼 그룹 🌟 ---
+            Padding(
+              // ⭐️ 좌우 패딩과 하단 패딩 적용
+              padding: const EdgeInsets.only(bottom: 50, top: 20) + const EdgeInsets.symmetric(horizontal: 24.0),
+
+              // 🌟 "다음" 버튼 (Flex 3) 🌟
+              child: ElevatedButton(
+                onPressed: () async {
+                  // 기존 '다음 단계' 버튼의 로직 유지
+                  if (addressCont.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("주소 입력바람"),
+                        duration: Duration(seconds: 2), // 알림 경과 시간창 2초
+                      ),
+                    );
+                    return;
+                  }
+                  await guest();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => OnboardingCategory()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),// 버튼 너비를 최대로 확장
+                  // ⭐️ _nextButtonBgColor, _nextButtonTextColor 사용
+                  backgroundColor: _nextButtonBgColor,
+                  foregroundColor: _nextButtonTextColor,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
+                child: const Text("다음", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ),
             ),
-          ),
 
-          const Spacer(), // ⭐️ 하단 버튼을 아래로 밀어내기 위해 Spacer 추가
-
-          // --- 🌟 하단 - 이전/다음 버튼 그룹 🌟 ---
-          Padding(
-            // ⭐️ 좌우 패딩과 하단 패딩 적용
-            padding: const EdgeInsets.only(bottom: 50, top: 20) + const EdgeInsets.symmetric(horizontal: 24.0),
-
-            // 🌟 "다음" 버튼 (Flex 3) 🌟
-            child: ElevatedButton(
-              onPressed: () async {
-                // 기존 '다음 단계' 버튼의 로직 유지
-                if (addressCont.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("주소 입력바람"),
-                      duration: Duration(seconds: 2), // 알림 경과 시간창 2초
-                    ),
-                  );
-                  return;
-                }
-                await guest();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => OnboardingCategory()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),// 버튼 너비를 최대로 확장
-                // ⭐️ _nextButtonBgColor, _nextButtonTextColor 사용
-                backgroundColor: _nextButtonBgColor,
-                foregroundColor: _nextButtonTextColor,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text("다음", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            ),
-          ),
-
-          // --- 🌟 하단 버튼 그룹 종료 🌟 ---
-        ],
-      ),
+            // --- 🌟 하단 버튼 그룹 종료 🌟 ---
+          ],
+        ),
+      ),// ⭐️ SingleChildScrollView 종료
     );
   }
 
