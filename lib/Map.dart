@@ -8,7 +8,7 @@ import 'ExpandableCategoryList.dart';
 import 'package:moveon_app/safety/sexcrime/SexCrimeFilterModal.dart';
 
 // ✅ 1. 파일 최상단에 BASE_URL 상수 정의
-const String BASE_URL = "http://192.168.40.61:8080";
+const String BASE_URL = "http://192.168.219.90:8080"; // 192.168.219.90 여기에서 모든 코딩파일들을 찾아서 현재 pc의 주소로 변경해주셔야 해요.
 // 🚨 서버 주소가 변경되면 이 상수의 값만 수정하면 됩니다.
 
 class MapScreen extends StatefulWidget {
@@ -98,7 +98,7 @@ class KakaoMapState extends State<KakaoMap> {
   // ✅ 검색어 입력 컨트롤러 추가
   final TextEditingController _searchController = TextEditingController();
 
-  final String kakaoJsKey = '9eb4f86b6155c2fa2f5dac204d2cdb35';
+  final String kakaoJsKey = '9eb4f86b6155c2fa2f5dac204d2cdb35'; // 여기에 카카오 개발자 센터의 본인 계정의 자바스크립트 키를 넣어주셔야해요.
 
   dynamic args = null;
 
@@ -144,7 +144,7 @@ class KakaoMapState extends State<KakaoMap> {
     <div id="map" style="width:100%;height:100vh;"></div>
     <script>
       // ✅ BASE_URL 정의는 반드시 <script> 태그 내부의 맨 위에 위치해야 합니다.
-      const BASE_URL = "http://192.168.40.61:8080";
+      const BASE_URL = "http://192.168.219.90:8080";
       var mapContainer = document.getElementById('map');
       var mapOption = {
         center: new kakao.maps.LatLng(37.5665, 126.9780),
