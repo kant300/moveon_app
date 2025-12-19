@@ -1,9 +1,4 @@
-<!-- 로고 -->
-<p align="center">
-  <img src="https://github.com/kant300/moveon/blob/parkoaksun/src/main/resources/static/img/%EB%AC%B4%EB%B8%8C%EC%98%A8%EB%A1%9C%EA%B3%A0-crop.png?raw=true" width="120" />
-</p>
-
-
+# ![](https://github.com/kant300/moveon/blob/parkoaksun/src/main/resources/static/img/%EB%AC%B4%EB%B8%8C%EC%98%A8%EB%A1%9C%EA%B3%A0-crop.png?raw=true)
 # 🏙️ mOveOn
 
 
