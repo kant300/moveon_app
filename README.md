@@ -3,7 +3,8 @@
   <img src="https://github.com/kant300/moveon/blob/parkoaksun/src/main/resources/static/img/%EB%AC%B4%EB%B8%8C%EC%98%A8%EB%A1%9C%EA%B3%A0-crop.png?raw=true" width="180" alt="mOveOn logo" />
 </p>
 
-<h1 align="center">🏙️ mOveOn (MoveOn) - Flutter App</h1>
+# 🏙️ mOveOn
+
 
 <p align="center">
   이사 후 지역 정착을 위한 <b>공공데이터 기반 생활정보 통합 플랫폼</b><br/>
