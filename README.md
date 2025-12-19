@@ -46,17 +46,12 @@
 | **협업/도구** | GitHub, Android Studio, VS Code |
 
 ---
-![회원·게스트 온보딩](https://raw.githubusercontent.com/kant300/moveon/parkoaksun/img/member_guest.png)
-![메인 화면](https://raw.githubusercontent.com/kant300/moveon/parkoaksun/img/hoom.png)
-![메뉴 화면](https://raw.githubusercontent.com/kant300/moveon/parkoaksun/img/menu.png)
-![지도 화면](https://raw.githubusercontent.com/kant300/moveon/parkoaksun/img/map.png)
 
 ## 📱 주요 화면
 
 ### 🔐 회원 · 게스트 온보딩
-<p align="center">
-  <img src="img/member_guest.png" width="180"/>
-</p>
+
+<img width="1168" height="622" alt="member,guest" src="https://github.com/user-attachments/assets/c7be8911-b3c6-46d2-9b05-8e4b90e2b001" />
 
 - 회원 / 게스트 접속
 - 주소 입력
@@ -66,9 +61,8 @@
 ---
 
 ### 🏠 메인 화면
-<p align="center">
-  <img src="img/hoom.png" width="200"/>
-</p>
+
+<img width="282" height="605" alt="hoom" src="https://github.com/user-attachments/assets/9e6081d4-00f0-431c-82a6-1c430f345d95" />
 
 - 위치 기반 날씨 정보 제공
 - 안전 정보(CCTV, 성범죄자 등) 요약 표시
@@ -78,9 +72,8 @@
 ---
 
 ### 📂 메뉴 화면
-<p align="center">
-  <img src="img/menu.png" width="200"/>
-</p>
+
+<img width="279" height="604" alt="menu" src="https://github.com/user-attachments/assets/2b5a0c40-0e65-49be-8adb-2a0b5a1cffa2" />
 
 - 생활 / 안전 / 교통 카테고리 분류
 - 공공데이터 기반 정보 메뉴 제공
@@ -89,9 +82,9 @@
 ---
 
 ### 🗺️ 지도 기능 통합
-<p align="center">
-  <img src="img/map.png" width="220"/>
-</p>
+
+<img width="275" height="599" alt="map" src="https://github.com/user-attachments/assets/5a2cea36-8660-46ec-8cf4-2c3563e62018" />
+
 
 - 공공데이터를 활용한 지도 정보 표시
 - 주변 시설 위치 확인
