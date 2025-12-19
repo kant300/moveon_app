@@ -1,16 +1,90 @@
-# moveon_app
+<!-- 로고 -->
+<p align="center">
+  <img src="https://github.com/kant300/moveon/blob/parkoaksun/src/main/resources/static/img/%EB%AC%B4%EB%B8%8C%EC%98%A8%EB%A1%9C%EA%B3%A0-crop.png?raw=true" width="180" alt="mOveOn logo" />
+</p>
 
-moveon1.3 Flutter project.
+<h1 align="center">🏙️ mOveOn (MoveOn) - Flutter App</h1>
 
-## Getting Started
+<p align="center">
+  이사 후 지역 정착을 위한 <b>공공데이터 기반 생활정보 통합 플랫폼</b><br/>
+  1인가구 · 신혼부부 · 직장 발령자 등 “처음 사는 동네”에 필요한 정보를 한 곳에서 제공합니다.
+</p>
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## 👨‍💻 프로젝트 소개
+**무브온(MoveOn)** 은 사용자의 **주소 및 위치(GPS)** 를 기반으로  
+날씨, 생활 편의시설, 공공시설, 안전·교통 정보를 **공공데이터 API와 지도**로 통합 제공하는  
+지역 정착 지원 모바일 애플리케이션입니다.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🧩 기획 목표
+- 분산된 **지역 생활 정보를 하나의 플랫폼에서 통합 제공**
+- **공공데이터 API + 지도 연동**을 통해 신뢰성 있고 최신화된 정보 제공
+- 사용자가 직관적으로 활용할 수 있는 **간편한 UI/UX 설계로 접근성 강화**
+
+---
+
+## 🎯 기대 효과
+- **공공데이터와 GPS를 결합한 맞춤형 생활 서비스** 제공
+- 정보 탐색 시간 단축을 통한 **사용자 스트레스 감소**
+- **안전한 주거 환경 조성** 및 **교통 약자에 대한 지원 강화**
+- 사용자 위치 기반 공공데이터 활용으로 **새로운 정보 가치 창출**
+
+---
+
+## 🕰 개발 개요
+
+| 구분 | 내용 |
+|------|------|
+| **개발기간** | 2025.10.26 ~ 2025.11.27 |
+| **플랫폼** | Flutter (Android / iOS) |
+| **사용기술** | Flutter(Dart), 지도 SDK / WebView, 공공데이터 API, GPS(Geolocator), Dio, SharedPreferences |
+| **기획·협업** | Figma(UI/UX), GitHub |
+| **개발도구** | Android Studio, VS Code |
+
+---
+
+## ⚙️ 주요 기능
+
+### ✅ 온보딩 및 사용자 설정
+- 회원 / 게스트 접속 시 **주소 입력**
+- **관심(즐겨찾기) 선택 기능**
+  - 회원: 첫 가입 시 관심 정보 설정
+  - 게스트: 접속 시 주소 및 관심 정보 입력
+- 사용자 설정 기반 맞춤 정보 제공 구조 설계
+
+### 🗺️ 지도 기반 생활 정보
+- **공공데이터를 활용한 지도 기능 구현**
+- 주변 생활·공공 시설의 **이동 시간 계산 기능**
+- 지도 화면과 정보 화면 간 자연스러운 흐름 구성
+
+### ☀️ 생활 정보 제공
+- 위치 기반 **날씨 정보 제공**
+- 날씨 기능 기획 및 **Figma UI/UX 설계 후 Flutter 화면 구현**
+
+### 🧾 정착 지원 기능
+- 개인 사용자를 위한 **정착 체크리스트 기능 구현**
+- 기본 레이아웃 및 메인 화면 구조 설계
+
+### 🔧 협업 및 관리
+- **Git 기반 형상관리 및 통합**
+- 기능 단위 개발 및 병합 흐름 적용
+
+---
+
+## 🧭 프로젝트 구조 (예시)
+```bash
+moveon_app/
+├── lib/
+│   ├── screens/
+│   │   ├── onboarding/
+│   │   ├── home/
+│   │   ├── map/
+│   │   └── checklist/
+│   ├── api/
+│   ├── models/
+│   ├── widgets/
+│   └── main.dart
+└── pubspec.yaml
