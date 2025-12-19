@@ -51,8 +51,7 @@
 
 ### 🔐 회원 · 게스트 온보딩
 <p align="center">
-  <img src="images/onboarding_member.png" width="180"/>
-  <img src="images/onboarding_guest.png" width="180"/>
+  <img src="img/member_guest.png" width="180"/>
 </p>
 
 - 회원 / 게스트 접속
@@ -64,7 +63,7 @@
 
 ### 🏠 메인 화면
 <p align="center">
-  <img src="images/main.png" width="200"/>
+  <img src="img/hoom.png" width="200"/>
 </p>
 
 - 위치 기반 날씨 정보 제공
@@ -76,7 +75,7 @@
 
 ### 📂 메뉴 화면
 <p align="center">
-  <img src="images/menu.png" width="200"/>
+  <img src="img/menu.png" width="200"/>
 </p>
 
 - 생활 / 안전 / 교통 카테고리 분류
@@ -87,7 +86,7 @@
 
 ### 🗺️ 지도 기능 통합
 <p align="center">
-  <img src="images/map.png" width="220"/>
+  <img src="img/map.png" width="220"/>
 </p>
 
 - 공공데이터를 활용한 지도 정보 표시
@@ -108,8 +107,9 @@
 
 ---
 
-## 🧭 프로젝트 구조 (예시)
+## 🧭 프로젝트 구조
 
+```bash
 moveon_app/
 ├── android/
 ├── ios/
@@ -117,23 +117,28 @@ moveon_app/
 ├── macos/
 ├── assets/
 ├── lib/
-│   ├── living/                 # 생활 정보 관련 화면
-│   ├── safety/                 # 안전 정보 관련 화면
-│   ├── weather/                # 날씨 기능
-│   ├── member/                 # 회원 관련 기능
+│   ├── living/
+│   ├── safety/
+│   ├── weather/
+│   ├── member/
 │   ├── screens/
-│   │   └── onboarding/         # 온보딩(주소/관심 선택)
-│   ├── widgets/                # 공통 위젯
+│   │   └── onboarding/
+│   ├── widgets/
 │   │
-│   ├── Checklist.dart          # 정착 체크리스트
+│   ├── Checklist.dart
 │   ├── ExpandableCategoryList.dart
-│   ├── Home.dart               # 메인 화면
-│   ├── Map.dart                # 지도 기능 통합 화면
-│   ├── Menu.dart               # 카테고리 메뉴 화면
-│   ├── MyPage.dart             # 마이페이지
-│   ├── Setting.dart            # 설정 화면
-│   ├── NotFound.dart           # 예외/에러 화면
-│   └── main.dart               # 앱 엔트리 포인트
+│   ├── Home.dart
+│   ├── Map.dart
+│   ├── Menu.dart
+│   ├── MyPage.dart
+│   ├── Setting.dart
+│   ├── NotFound.dart
+│   └── main.dart
 │
+├── img/                # README용 이미지
+│   ├── hoom.png
+│   ├── menu.png
+│   ├── map.png
+│   └── member_guest.png
 ├── test/
 └── pubspec.yaml
